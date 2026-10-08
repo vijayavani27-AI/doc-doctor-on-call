@@ -1,0 +1,22 @@
+{
+  "symptoms": [
+    {"key": "tingling_feet", "label": "Tingling / numbness in feet"},
+    {"key": "ankle_swelling", "label": "Ankle or leg swelling"},
+    {"key": "dry_cough", "label": "Dry cough"},
+    {"key": "dizziness", "label": "Dizziness / light-headed"},
+    {"key": "muscle_pain", "label": "Muscle pain or weakness"},
+    {"key": "stomach_upset", "label": "Stomach upset / loose motions"},
+    {"key": "acidity", "label": "Acidity / heartburn"},
+    {"key": "low_sugar", "label": "Shaky, sweaty, hungry (low sugar)"},
+    {"key": "headache", "label": "Headache"},
+    {"key": "fatigue", "label": "Tiredness / low energy"},
+    {"key": "constipation", "label": "Constipation"},
+    {"key": "frequent_urination", "label": "Passing urine often"},
+    {"key": "palpitations", "label": "Fast heartbeat / palpitations"},
+    {"key": "rash", "label": "Skin rash / itching"},
+    {"key": "breathlessness", "label": "Breathlessness"},
+    {"key": "joint_pain", "label": "Joint / knee pain"},
+    {"key": "high_bp_reading", "label": "High BP readings at home"},
+    {"key": "black_stool", "label": "Black stools"}
+  ]
+}

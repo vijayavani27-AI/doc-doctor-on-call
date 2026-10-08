@@ -1,0 +1,850 @@
+{
+  "_about": "Synthetic demo data (fictional people and fictional labs). Values are written exactly as different Indian labs print them - mixed units (lakhs/cumm, x10^3/uL, /cumm, mmol/L, umol/L) - so the demo exercises the real unit-harmonisation pipeline. Designed so that every single report looks mostly 'normal' while the combined picture reveals hidden risks. Wellness readings are generated from the 'vitals_plan' (seeded random, reproducible).",
+  "profiles": [
+    {
+      "name": "Lakshmi Raman",
+      "relation": "mother",
+      "sex": "F",
+      "dob": "1968-03-12",
+      "height_cm": 156,
+      "weight_kg": 68,
+      "conditions": [
+        "diabetes",
+        "hypertension"
+      ],
+      "color": "teal",
+      "is_primary": true,
+      "reports": [
+        {
+          "kind": "lab",
+          "lab": "Sunrise Diagnostics, Chennai",
+          "date": "2023-09-14",
+          "results": [
+            [
+              "Haemoglobin",
+              "12.6",
+              "g/dL",
+              "12.0 - 15.5"
+            ],
+            [
+              "RBC Count",
+              "4.4",
+              "million/cumm",
+              "4.0 - 5.2"
+            ],
+            [
+              "MCV",
+              "86",
+              "fL",
+              "80 - 100"
+            ],
+            [
+              "Platelet Count",
+              "2.6",
+              "lakhs/cumm",
+              "1.5 - 4.1"
+            ],
+            [
+              "SGOT (AST)",
+              "34",
+              "U/L",
+              "0 - 40"
+            ],
+            [
+              "SGPT (ALT)",
+              "40",
+              "U/L",
+              "0 - 40"
+            ],
+            [
+              "Serum Albumin",
+              "4.3",
+              "g/dL",
+              "3.5 - 5.0"
+            ],
+            [
+              "Serum Creatinine",
+              "0.8",
+              "mg/dL",
+              "0.5 - 1.1"
+            ],
+            [
+              "Blood Urea",
+              "24",
+              "mg/dL",
+              "15 - 40"
+            ],
+            [
+              "Serum Potassium",
+              "4.3",
+              "mmol/L",
+              "3.5 - 5.1"
+            ],
+            [
+              "Serum Sodium",
+              "139",
+              "mmol/L",
+              "135 - 145"
+            ],
+            [
+              "Fasting Blood Sugar",
+              "142",
+              "mg/dL",
+              "70 - 99"
+            ],
+            [
+              "HbA1c",
+              "7.8",
+              "%",
+              "4.0 - 5.6"
+            ],
+            [
+              "Total Cholesterol",
+              "214",
+              "mg/dL",
+              "< 200"
+            ],
+            [
+              "HDL Cholesterol",
+              "44",
+              "mg/dL",
+              "> 50"
+            ],
+            [
+              "LDL Cholesterol",
+              "136",
+              "mg/dL",
+              "< 100"
+            ],
+            [
+              "Triglycerides",
+              "172",
+              "mg/dL",
+              "< 150"
+            ]
+          ]
+        },
+        {
+          "kind": "prescription",
+          "doctor": "Dr. S. Kumar (Diabetologist)",
+          "lab": "Kumar Diabetes Clinic",
+          "date": "2023-09-20",
+          "medicines": [
+            [
+              "Glycomet 500",
+              "500 mg",
+              "1-0-1",
+              "2019-06-01",
+              "Diabetes"
+            ],
+            [
+              "Telma 40",
+              "40 mg",
+              "1-0-0",
+              "2020-01-10",
+              "Blood pressure"
+            ],
+            [
+              "Atorva 10",
+              "10 mg",
+              "0-0-1",
+              "2023-10-01",
+              "Cholesterol"
+            ]
+          ]
+        },
+        {
+          "kind": "prescription",
+          "doctor": "Dr. S. Kumar (Diabetologist)",
+          "lab": "Kumar Diabetes Clinic",
+          "date": "2024-02-12",
+          "medicines": [
+            [
+              "Amlong 5",
+              "5 mg",
+              "1-0-0",
+              "2024-02-12",
+              "BP not controlled"
+            ]
+          ]
+        },
+        {
+          "kind": "prescription",
+          "doctor": "Dr. R. Menon (General Physician)",
+          "lab": "CityCare Clinic",
+          "date": "2024-05-06",
+          "medicines": [
+            [
+              "Lasix 20",
+              "20 mg",
+              "1-0-0",
+              "2024-05-06",
+              "Leg swelling"
+            ]
+          ]
+        },
+        {
+          "kind": "lab",
+          "lab": "GreenLeaf Labs, Bengaluru",
+          "date": "2024-08-20",
+          "results": [
+            [
+              "Hemoglobin",
+              "12.4",
+              "g/dL",
+              "12.0 - 15.5"
+            ],
+            [
+              "RBC",
+              "4.3",
+              "x10^6/uL",
+              "4.0 - 5.2"
+            ],
+            [
+              "MCV",
+              "85",
+              "fL",
+              "80 - 100"
+            ],
+            [
+              "Platelets",
+              "210",
+              "x10^3/uL",
+              "150 - 410"
+            ],
+            [
+              "AST",
+              "42",
+              "U/L",
+              "5 - 40"
+            ],
+            [
+              "ALT",
+              "46",
+              "U/L",
+              "7 - 56"
+            ],
+            [
+              "Creatinine",
+              "79.6",
+              "umol/L",
+              "45 - 90"
+            ],
+            [
+              "Glucose Fasting",
+              "7.4",
+              "mmol/L",
+              "3.9 - 5.5"
+            ],
+            [
+              "HbA1c",
+              "7.4",
+              "%",
+              "4.0 - 5.6"
+            ],
+            [
+              "Cholesterol Total",
+              "5.4",
+              "mmol/L",
+              "< 5.2"
+            ],
+            [
+              "HDL",
+              "1.1",
+              "mmol/L",
+              "> 1.3"
+            ],
+            [
+              "LDL",
+              "3.5",
+              "mmol/L",
+              "< 2.6"
+            ],
+            [
+              "Triglycerides",
+              "2.0",
+              "mmol/L",
+              "< 1.7"
+            ]
+          ]
+        },
+        {
+          "kind": "lab",
+          "lab": "Sunrise Diagnostics, Chennai",
+          "date": "2025-06-02",
+          "results": [
+            [
+              "SGOT (AST)",
+              "48",
+              "U/L",
+              "0 - 40"
+            ],
+            [
+              "SGPT (ALT)",
+              "49",
+              "U/L",
+              "0 - 40"
+            ],
+            [
+              "Serum Albumin",
+              "4.1",
+              "g/dL",
+              "3.5 - 5.0"
+            ]
+          ]
+        },
+        {
+          "kind": "lab",
+          "lab": "CityCare Pathology, Chennai",
+          "date": "2025-07-10",
+          "results": [
+            [
+              "Haemoglobin",
+              "12.2",
+              "gm/dL",
+              "12 - 16"
+            ],
+            [
+              "Total RBC Count",
+              "4.3",
+              "mill/cumm",
+              "4.0 - 5.2"
+            ],
+            [
+              "MCV",
+              "84",
+              "fL",
+              "80 - 100"
+            ],
+            [
+              "Platelet Count",
+              "180000",
+              "/cumm",
+              "150000 - 410000"
+            ],
+            [
+              "Serum Creatinine",
+              "1.0",
+              "mg/dL",
+              "0.6 - 1.1"
+            ],
+            [
+              "Serum Potassium",
+              "4.6",
+              "mEq/L",
+              "3.5 - 5.1"
+            ],
+            [
+              "HbA1c (Glycated Haemoglobin)",
+              "7.1",
+              "%",
+              "4.0 - 5.6"
+            ]
+          ]
+        },
+        {
+          "kind": "prescription",
+          "doctor": "Dr. S. Kumar (Diabetologist)",
+          "lab": "Kumar Diabetes Clinic",
+          "date": "2026-04-28",
+          "medicines": [
+            [
+              "Pregeb 75",
+              "75 mg",
+              "0-0-1",
+              "2026-04-28",
+              "Tingling in feet (neuropathy)"
+            ]
+          ]
+        },
+        {
+          "kind": "lab",
+          "lab": "Sunrise Diagnostics, Chennai",
+          "date": "2026-05-18",
+          "results": [
+            [
+              "SGOT (AST)",
+              "55",
+              "U/L",
+              "0 - 40"
+            ],
+            [
+              "SGPT (ALT)",
+              "50",
+              "U/L",
+              "0 - 40"
+            ],
+            [
+              "Serum Albumin",
+              "4.0",
+              "g/dL",
+              "3.5 - 5.0"
+            ],
+            [
+              "Serum Creatinine",
+              "1.1",
+              "mg/dL",
+              "0.5 - 1.1"
+            ],
+            [
+              "Blood Urea",
+              "32",
+              "mg/dL",
+              "15 - 40"
+            ],
+            [
+              "Serum Potassium",
+              "4.9",
+              "mmol/L",
+              "3.5 - 5.1"
+            ],
+            [
+              "Serum Sodium",
+              "137",
+              "mmol/L",
+              "135 - 145"
+            ],
+            [
+              "Fasting Blood Sugar",
+              "151",
+              "mg/dL",
+              "70 - 99"
+            ],
+            [
+              "HbA1c",
+              "7.6",
+              "%",
+              "4.0 - 5.6"
+            ],
+            [
+              "Total Cholesterol",
+              "188",
+              "mg/dL",
+              "< 200"
+            ],
+            [
+              "HDL Cholesterol",
+              "46",
+              "mg/dL",
+              "> 50"
+            ],
+            [
+              "LDL Cholesterol",
+              "116",
+              "mg/dL",
+              "< 100"
+            ],
+            [
+              "Triglycerides",
+              "132",
+              "mg/dL",
+              "< 150"
+            ]
+          ]
+        },
+        {
+          "kind": "prescription",
+          "doctor": "Dr. A. Prakash (Orthopaedics)",
+          "lab": "Joint Care Clinic",
+          "date": "2026-06-15",
+          "medicines": [
+            [
+              "Zerodol-P",
+              "100/325 mg",
+              "1-0-1",
+              "2026-06-15",
+              "Knee pain"
+            ]
+          ]
+        },
+        {
+          "kind": "lab",
+          "lab": "CityCare Pathology, Chennai",
+          "date": "2026-07-02",
+          "results": [
+            [
+              "Haemoglobin",
+              "12.0",
+              "gm/dL",
+              "12 - 16"
+            ],
+            [
+              "Total RBC Count",
+              "4.2",
+              "mill/cumm",
+              "4.0 - 5.2"
+            ],
+            [
+              "MCV",
+              "84",
+              "fL",
+              "80 - 100"
+            ],
+            [
+              "Platelet Count",
+              "1.55",
+              "lakhs/cumm",
+              "1.5 - 4.1"
+            ]
+          ]
+        }
+      ],
+      "symptoms": [
+        [
+          "ankle_swelling",
+          "2024-03-25",
+          2,
+          "Both ankles swollen by evening"
+        ],
+        [
+          "tingling_feet",
+          "2026-04-10",
+          2,
+          "Pins and needles in both feet, worse at night"
+        ],
+        [
+          "joint_pain",
+          "2026-06-10",
+          2,
+          "Right knee pain on climbing stairs"
+        ]
+      ],
+      "vitals_plan": [
+        {
+          "kind": "bp",
+          "from": "2026-04-01",
+          "to": "2026-10-06",
+          "every_days": 2,
+          "mean": [
+            131,
+            81
+          ],
+          "sd": [
+            5,
+            3
+          ],
+          "change_on": "2026-06-15",
+          "mean_after": [
+            147,
+            90
+          ]
+        },
+        {
+          "kind": "glucose",
+          "context": "fasting",
+          "from": "2026-04-01",
+          "to": "2026-10-06",
+          "every_days": 3,
+          "mean": [
+            146
+          ],
+          "sd": [
+            12
+          ]
+        },
+        {
+          "kind": "weight",
+          "from": "2026-03-15",
+          "to": "2026-10-06",
+          "every_days": 14,
+          "mean": [
+            68.5
+          ],
+          "sd": [
+            0.4
+          ],
+          "drift_per_30d": -0.25
+        },
+        {
+          "kind": "heart_rate",
+          "from": "2026-07-01",
+          "to": "2026-10-06",
+          "every_days": 2,
+          "mean": [
+            82
+          ],
+          "sd": [
+            4
+          ]
+        },
+        {
+          "kind": "steps",
+          "from": "2026-07-01",
+          "to": "2026-10-06",
+          "every_days": 1,
+          "mean": [
+            3900
+          ],
+          "sd": [
+            900
+          ]
+        },
+        {
+          "kind": "sleep",
+          "from": "2026-07-01",
+          "to": "2026-10-06",
+          "every_days": 1,
+          "mean": [
+            6.4
+          ],
+          "sd": [
+            0.6
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Priya Raman",
+      "relation": "daughter",
+      "sex": "F",
+      "dob": "1996-08-22",
+      "height_cm": 162,
+      "weight_kg": 61,
+      "conditions": [],
+      "color": "violet",
+      "is_primary": false,
+      "reports": [
+        {
+          "kind": "lab",
+          "lab": "CityCare Pathology, Chennai",
+          "date": "2025-11-05",
+          "results": [
+            [
+              "Haemoglobin",
+              "10.6",
+              "gm/dL",
+              "12 - 16"
+            ],
+            [
+              "Total RBC Count",
+              "5.6",
+              "mill/cumm",
+              "4.0 - 5.2"
+            ],
+            [
+              "MCV",
+              "66",
+              "fL",
+              "80 - 100"
+            ],
+            [
+              "MCH",
+              "20",
+              "pg",
+              "27 - 33"
+            ],
+            [
+              "RDW-CV",
+              "14.0",
+              "%",
+              "11.5 - 14.5"
+            ],
+            [
+              "Platelet Count",
+              "2.8",
+              "lakhs/cumm",
+              "1.5 - 4.1"
+            ],
+            [
+              "Total WBC Count",
+              "7200",
+              "/cumm",
+              "4000 - 11000"
+            ]
+          ]
+        },
+        {
+          "kind": "prescription",
+          "doctor": "Dr. R. Menon (General Physician)",
+          "lab": "CityCare Clinic",
+          "date": "2025-11-08",
+          "medicines": [
+            [
+              "Livogen",
+              "1 tab",
+              "0-1-0",
+              "2025-11-08",
+              "Low haemoglobin"
+            ]
+          ]
+        },
+        {
+          "kind": "lab",
+          "lab": "Sunrise Diagnostics, Chennai",
+          "date": "2026-03-15",
+          "results": [
+            [
+              "Haemoglobin",
+              "10.8",
+              "g/dL",
+              "12.0 - 15.5"
+            ],
+            [
+              "RBC Count",
+              "5.7",
+              "million/cumm",
+              "4.0 - 5.2"
+            ],
+            [
+              "MCV",
+              "67",
+              "fL",
+              "80 - 100"
+            ],
+            [
+              "MCH",
+              "21",
+              "pg",
+              "27 - 33"
+            ],
+            [
+              "Platelet Count",
+              "2.9",
+              "lakhs/cumm",
+              "1.5 - 4.1"
+            ],
+            [
+              "Fasting Blood Sugar",
+              "97",
+              "mg/dL",
+              "70 - 99"
+            ],
+            [
+              "Total Cholesterol",
+              "182",
+              "mg/dL",
+              "< 200"
+            ],
+            [
+              "HDL Cholesterol",
+              "48",
+              "mg/dL",
+              "> 50"
+            ],
+            [
+              "LDL Cholesterol",
+              "102",
+              "mg/dL",
+              "< 100"
+            ],
+            [
+              "Triglycerides",
+              "178",
+              "mg/dL",
+              "< 150"
+            ],
+            [
+              "TSH",
+              "2.1",
+              "uIU/mL",
+              "0.4 - 4.0"
+            ]
+          ]
+        },
+        {
+          "kind": "lab",
+          "lab": "GreenLeaf Labs, Bengaluru",
+          "date": "2026-04-02",
+          "results": [
+            [
+              "Hemoglobin",
+              "10.7",
+              "g/dL",
+              "12.0 - 15.5"
+            ],
+            [
+              "RBC",
+              "5.6",
+              "x10^6/uL",
+              "4.0 - 5.2"
+            ],
+            [
+              "MCV",
+              "66",
+              "fL",
+              "80 - 100"
+            ],
+            [
+              "Platelets",
+              "275",
+              "x10^3/uL",
+              "150 - 410"
+            ]
+          ]
+        }
+      ],
+      "symptoms": [
+        [
+          "fatigue",
+          "2025-10-20",
+          2,
+          "Tired by afternoon"
+        ]
+      ],
+      "vitals_plan": [
+        {
+          "kind": "bp",
+          "from": "2026-08-01",
+          "to": "2026-10-06",
+          "every_days": 7,
+          "mean": [
+            112,
+            72
+          ],
+          "sd": [
+            4,
+            3
+          ]
+        },
+        {
+          "kind": "weight",
+          "from": "2026-04-01",
+          "to": "2026-10-06",
+          "every_days": 30,
+          "mean": [
+            61
+          ],
+          "sd": [
+            0.3
+          ]
+        },
+        {
+          "kind": "steps",
+          "from": "2026-07-01",
+          "to": "2026-10-06",
+          "every_days": 1,
+          "mean": [
+            7400
+          ],
+          "sd": [
+            1500
+          ]
+        },
+        {
+          "kind": "sleep",
+          "from": "2026-07-01",
+          "to": "2026-10-06",
+          "every_days": 1,
+          "mean": [
+            6.1
+          ],
+          "sd": [
+            0.7
+          ]
+        },
+        {
+          "kind": "spo2",
+          "from": "2026-09-01",
+          "to": "2026-10-06",
+          "every_days": 5,
+          "mean": [
+            98
+          ],
+          "sd": [
+            0.6
+          ]
+        }
+      ]
+    }
+  ]
+}

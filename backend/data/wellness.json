@@ -1,0 +1,23 @@
+{
+  "_about": "Home / wearable wellness readings. Thresholds are for HOME measurements and cite their guideline. They trigger 'tell your doctor' prompts, never a diagnosis.",
+  "kinds": {
+    "bp": {"label": "Blood pressure", "unit": "mmHg", "two_values": true, "value_label": "Systolic (top)", "value2_label": "Diastolic (bottom)",
+           "plausible": [60, 260], "plausible2": [30, 160],
+           "target": "below 135/85 at home",
+           "citation": "ISH 2020 Global Hypertension Practice Guidelines (home BP hypertension threshold 135/85 mmHg)"},
+    "glucose": {"label": "Blood sugar (home meter)", "unit": "mg/dL", "contexts": ["fasting", "after_meal", "random"], "plausible": [20, 600],
+                "target": "80–130 before meals (if diabetic)",
+                "citation": "ADA Standards of Care: pre-meal capillary glucose target 80–130 mg/dL; below 70 mg/dL is hypoglycaemia"},
+    "weight": {"label": "Weight", "unit": "kg", "plausible": [2, 400],
+               "target": "steady; BMI 18.5–22.9 for Asian adults",
+               "citation": "WHO Asia-Pacific BMI cut-offs (overweight ≥23, obese ≥25); ≥5% unplanned weight loss in 6–12 months warrants review"},
+    "heart_rate": {"label": "Resting heart rate", "unit": "bpm", "plausible": [25, 220], "target": "50–100 at rest",
+                   "citation": "AHA: normal resting heart rate 60–100 bpm (well-trained adults may be lower)"},
+    "spo2": {"label": "Oxygen (SpO₂)", "unit": "%", "plausible": [50, 100], "target": "95% or more",
+             "citation": "Below 94% needs medical advice; below 90% is urgent (NHS / WHO pulse-oximetry guidance)"},
+    "steps": {"label": "Daily steps", "unit": "steps", "plausible": [0, 100000], "target": "7,000+ a day",
+              "citation": "Paluch AE et al. Lancet Public Health 2022: mortality benefit plateaus around 6,000–8,000 steps/day for adults over 60"},
+    "sleep": {"label": "Sleep", "unit": "hours", "plausible": [0, 24], "target": "7–9 hours",
+              "citation": "AASM/SRS consensus: adults need 7 or more hours of sleep per night"}
+  }
+}

@@ -1,0 +1,19 @@
+# One-click deploy on Render (https://render.com): New > Blueprint > pick this repo.
+services:
+  - type: web
+    name: doc-doctor-on-call
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false        # paste your key in the Render dashboard; never commit it
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: AI_PROVIDER
+        value: auto
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DOC_ENCRYPTION_KEY
+        sync: false        # optional: set a Fernet key to keep uploads readable across restarts

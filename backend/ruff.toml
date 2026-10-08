@@ -1,0 +1,16 @@
+line-length = 140
+target-version = "py311"
+
+[lint]
+select = ["E", "F", "W", "I", "B", "UP", "S"]
+ignore = [
+  "E501",   # long lines are fine for readable data/strings
+  "S101",   # assert is used in tests
+  "S311",   # random is only used for demo data, not security
+  "B008",   # FastAPI Depends() in defaults is the framework idiom
+  "S105", "S106",  # demo password constant is intentional and documented
+]
+
+[lint.per-file-ignores]
+"tests/*" = ["S"]
+"scripts/*" = ["S"]

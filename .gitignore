@@ -1,0 +1,39 @@
+# ---------- Secrets: never commit ----------
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+*.key
+*.pem
+*.secret
+# database, encrypted uploads and auto-generated JWT/Fernet secrets
+backend/instance/
+
+# ---------- Python ----------
+__pycache__/
+*.pyc
+.venv/
+.deps/
+.pytest_cache/
+.ruff_cache/
+
+# ---------- Node / build ----------
+frontend/node_modules/
+frontend/dist/
+frontend/dev-dist/
+
+# ---------- Logs & local data ----------
+*.log
+tunnel-*.log
+server.log
+*.db
+*.sqlite*
+
+# ---------- OS / editor / tools ----------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.claude/

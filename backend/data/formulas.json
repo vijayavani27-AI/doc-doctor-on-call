@@ -1,0 +1,125 @@
+{
+  "_about": "Metadata for the Hidden Disease Finder. The maths lives in app/services/formulas.py; this file holds the human text, cut-offs and citations so every result can be explained and audited.",
+  "formulas": [
+    {
+      "id": "fib4", "name": "FIB-4 Index", "hidden_condition": "Liver scarring (fibrosis)", "organ": "Liver",
+      "inputs": ["AGE", "AST", "ALT", "PLT"], "window_days": 120,
+      "equation": "(Age × AST) ÷ (Platelets × √ALT)",
+      "bands": [
+        {"max": 1.30, "status": "green", "label": "Low risk", "text": "Advanced liver scarring is unlikely."},
+        {"max": 2.67, "status": "yellow", "label": "Grey zone", "text": "Liver scarring cannot be ruled out. Doctors usually suggest a FibroScan."},
+        {"max": null, "status": "red", "label": "High risk", "text": "This pattern is linked with advanced liver scarring. Ask your doctor about a FibroScan or a liver specialist."}
+      ],
+      "notes": "For age 65 and over, the low-risk cut-off is 2.0 instead of 1.30 (McPherson 2017). Not validated below age 35.",
+      "next_step": "Ask your doctor whether a FibroScan (liver elastography) is needed.",
+      "why_hidden": "AST, ALT and platelets come from two different tests (liver test and blood count), often from different labs and dates, so nobody combines them.",
+      "citation": "Sterling RK et al. Development of a simple noninvasive index to predict significant fibrosis in patients with HIV/HCV coinfection. Hepatology 2006;43:1317-1325. McPherson S et al. Am J Gastroenterol 2017;112:740-751.",
+      "simple": "FIB-4 combines your age, two liver enzymes and your platelet count to estimate scarring in the liver. Fatty liver is very common in India and often silent for years."
+    },
+    {
+      "id": "apri", "name": "APRI Score", "hidden_condition": "Liver scarring (fibrosis)", "organ": "Liver",
+      "inputs": ["AST", "PLT"], "window_days": 120,
+      "equation": "((AST ÷ 40) × 100) ÷ Platelets",
+      "bands": [
+        {"max": 0.5, "status": "green", "label": "Low", "text": "Significant liver scarring is unlikely."},
+        {"max": 1.0, "status": "yellow", "label": "Watch", "text": "Some liver scarring is possible."},
+        {"max": null, "status": "red", "label": "High", "text": "This is linked with significant liver scarring. Discuss it with your doctor."}
+      ],
+      "notes": "Uses an AST upper limit of normal of 40 U/L.",
+      "next_step": "Discuss with your doctor alongside FIB-4.",
+      "why_hidden": "Needs AST from the liver test and platelets from the blood count.",
+      "citation": "Wai CT et al. A simple noninvasive index can predict both significant fibrosis and cirrhosis in patients with chronic hepatitis C. Hepatology 2003;38:518-526.",
+      "simple": "APRI is a second, simpler liver-scarring score that uses AST and platelets."
+    },
+    {
+      "id": "mentzer", "name": "Mentzer Index", "hidden_condition": "Thalassaemia trait vs iron deficiency", "organ": "Blood",
+      "inputs": ["MCV", "RBC"], "window_days": 0,
+      "equation": "MCV ÷ RBC count",
+      "bands": [
+        {"max": 13.0, "status": "red", "label": "Thalassaemia trait likely", "text": "Small red cells with a normal-to-high red cell count point to thalassaemia trait, not iron deficiency. Iron tablets will not fix this."},
+        {"max": null, "status": "yellow", "label": "Iron deficiency likely", "text": "Small red cells with a low red cell count point to iron deficiency. A ferritin test can confirm it."}
+      ],
+      "applies_when": "MCV below 80 fL (small red cells)",
+      "notes": "A screening index only. Confirm with Hb electrophoresis (HbA2) and ferritin. Important before pregnancy and for family screening.",
+      "next_step": "Ask your doctor about Hb electrophoresis (HbA2) and serum ferritin.",
+      "why_hidden": "Labs print MCV and RBC count separately; the ratio is almost never printed.",
+      "citation": "Mentzer WC Jr. Differentiation of iron deficiency from thalassaemia trait. Lancet 1973;1(7808):882.",
+      "simple": "When red blood cells are small, the Mentzer index helps tell apart two common causes: iron deficiency and thalassaemia trait (an inherited condition). India has an estimated 3 to 4% carriers."
+    },
+    {
+      "id": "tyg", "name": "TyG Index", "hidden_condition": "Insulin resistance (early diabetes risk)", "organ": "Metabolism",
+      "inputs": ["TG", "FBG"], "window_days": 14,
+      "equation": "ln(Triglycerides × Fasting glucose ÷ 2)",
+      "bands": [
+        {"max": 8.5, "status": "green", "label": "Low", "text": "No sign of insulin resistance."},
+        {"max": 8.8, "status": "yellow", "label": "Borderline", "text": "Early signs of insulin resistance."},
+        {"max": null, "status": "red", "label": "High", "text": "This suggests insulin resistance, which often comes years before diabetes, even when fasting sugar looks normal."}
+      ],
+      "applies_when": "No diagnosis of diabetes yet",
+      "notes": "Cut-offs vary between studies and populations; 8.5 and 8.8 are commonly used. Both values should come from the same fasting sample.",
+      "next_step": "Ask your doctor about HbA1c and lifestyle steps to prevent diabetes.",
+      "why_hidden": "Triglycerides are in the lipid profile and fasting sugar is a separate test.",
+      "citation": "Simental-Mendía LE et al. The product of fasting glucose and triglycerides as surrogate for identifying insulin resistance in apparently healthy subjects. Metab Syndr Relat Disord 2008;6:299-304.",
+      "simple": "TyG uses your triglycerides and fasting sugar to spot insulin resistance, when the body has to work harder to control sugar. It can show up years before diabetes."
+    },
+    {
+      "id": "tg_hdl", "name": "TG/HDL Ratio", "hidden_condition": "Insulin resistance & heart risk", "organ": "Heart",
+      "inputs": ["TG", "HDL"], "window_days": 14,
+      "equation": "Triglycerides ÷ HDL",
+      "bands": [
+        {"max": 2.0, "status": "green", "label": "Good", "text": "Healthy balance of blood fats."},
+        {"max": 3.0, "status": "yellow", "label": "Borderline", "text": "Blood fat balance is drifting the wrong way."},
+        {"max": null, "status": "red", "label": "High", "text": "A ratio of 3 or more is linked with insulin resistance and small, dense LDL particles."}
+      ],
+      "notes": "Uses mg/dL values.",
+      "next_step": "Discuss your lipid profile and diet with your doctor.",
+      "why_hidden": "The ratio is rarely printed on lipid reports.",
+      "citation": "McLaughlin T et al. Use of metabolic markers to identify overweight individuals who are insulin resistant. Ann Intern Med 2003;139:802-809.",
+      "simple": "Compares 'bad' triglycerides to 'good' HDL cholesterol."
+    },
+    {
+      "id": "egfr", "name": "eGFR (CKD-EPI 2021)", "hidden_condition": "Silent kidney damage", "organ": "Kidney",
+      "inputs": ["CREAT", "AGE", "SEX"], "window_days": 0,
+      "equation": "142 × min(Scr/κ,1)^α × max(Scr/κ,1)^-1.200 × 0.9938^Age × 1.012 [female]",
+      "bands": [
+        {"min": 60, "status": "green", "label": "Normal or mildly reduced", "text": "Kidney filtering is in a safe range."},
+        {"min": 45, "status": "yellow", "label": "Stage G3a", "text": "Kidney filtering is mildly to moderately reduced. If it stays below 60 for 3 months, this is chronic kidney disease."},
+        {"min": null, "status": "red", "label": "Stage G3b or worse", "text": "Kidney filtering is moderately to severely reduced. Please discuss this with your doctor soon."}
+      ],
+      "notes": "Race-free 2021 equation. A drop of more than 5 per year is called rapid decline (KDIGO), even if creatinine still looks 'normal'.",
+      "next_step": "Ask your doctor about a urine albumin/creatinine ratio (UACR) test and a kidney-safe review of your medicines.",
+      "why_hidden": "Many Indian lab reports print creatinine but not eGFR, and no report shows the trend across years.",
+      "citation": "Inker LA et al. New creatinine- and cystatin C-based equations to estimate GFR without race. N Engl J Med 2021;385:1737-1749. KDIGO 2012 CKD guideline.",
+      "simple": "eGFR is your kidney filtering score, worked out from creatinine, age and sex. A normal-looking creatinine can still mean a falling eGFR."
+    },
+    {
+      "id": "non_hdl", "name": "Non-HDL Cholesterol", "hidden_condition": "Heart and artery risk", "organ": "Heart",
+      "inputs": ["TC", "HDL"], "window_days": 14,
+      "equation": "Total cholesterol − HDL",
+      "bands": [
+        {"max": 130, "status": "green", "label": "Desirable", "text": "Within the usual target."},
+        {"max": 160, "status": "yellow", "label": "Above target", "text": "Slightly above the usual target."},
+        {"max": null, "status": "red", "label": "High", "text": "High non-HDL cholesterol raises heart attack and stroke risk."}
+      ],
+      "notes": "People with diabetes or heart disease often have lower targets (below 100).",
+      "next_step": "Discuss your cholesterol targets with your doctor.",
+      "why_hidden": "Not always printed; it captures all the 'bad' cholesterol particles.",
+      "citation": "NCEP ATP III (2002); Lipid Association of India expert consensus (2016, updated 2020).",
+      "simple": "All the cholesterol that can clog arteries, in one number."
+    },
+    {
+      "id": "corr_ca", "name": "Corrected Calcium", "hidden_condition": "Hidden calcium imbalance", "organ": "Bones & hormones",
+      "inputs": ["CA", "ALB"], "window_days": 7,
+      "equation": "Calcium + 0.8 × (4 − Albumin)",
+      "bands": [
+        {"range": [8.5, 10.5], "status": "green", "label": "Normal", "text": "Calcium is normal after adjusting for albumin."},
+        {"range": null, "status": "yellow", "label": "Abnormal", "text": "After adjusting for albumin, calcium is outside the normal range. A 'normal' calcium on the report may be misleading."}
+      ],
+      "notes": "Low albumin makes measured calcium look falsely low (and the reverse).",
+      "next_step": "Mention it to your doctor; they may order ionised calcium.",
+      "why_hidden": "Calcium and albumin are often in different panels.",
+      "citation": "Payne RB et al. Interpretation of serum calcium in patients with abnormal serum proteins. Br Med J 1973;4:643-646.",
+      "simple": "Adjusts your calcium for your albumin level, because low albumin can hide a calcium problem."
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "_about": "Rules for prescribing-cascade detection and care-gap reminders. Each rule cites its source. These rules raise questions for the doctor; they never change treatment.",
+  "cascades": [
+    {"id": "ccb_edema_diuretic", "first_class": "ccb", "symptom": "ankle_swelling", "second_class": "loop_diuretic", "max_gap_days": 365,
+     "title": "Was the water pill added for swelling caused by a BP medicine?",
+     "text": "Amlodipine-type BP medicines often cause ankle swelling. Water pills do not treat this kind of swelling well, and they can cause dizziness and low potassium. Changing the dose or the BP medicine may work better.",
+     "question": "My ankle swelling started after the BP tablet. Could we adjust the BP tablet instead of adding a water pill?",
+     "citation": "Savage RD et al. Evaluation of a common prescribing cascade of calcium channel blockers and diuretics in older adults with hypertension. JAMA Intern Med 2020;180(5):643-651."},
+    {"id": "acei_cough_antitussive", "first_class": "acei", "symptom": "dry_cough", "second_class": "antitussive", "max_gap_days": 365,
+     "title": "Is the cough syrup treating a side effect of a BP medicine?",
+     "text": "ACE-inhibitor BP medicines (like ramipril or enalapril) cause a dry cough in about 1 in 10 people. Cough syrup will not stop it; switching to another BP medicine usually does.",
+     "question": "Could my cough be from the BP tablet? Can we try a different one?",
+     "citation": "Dicpinigaitis PV. Angiotensin-converting enzyme inhibitor-induced cough: ACCP evidence-based clinical practice guidelines. Chest 2006;129(1 Suppl):169S-173S."},
+    {"id": "metformin_b12_neuropathy", "first_class": "biguanide", "symptom": "tingling_feet", "second_class": "gabapentinoid", "max_gap_days": 3650,
+     "title": "Was nerve-pain medicine started before checking vitamin B12?",
+     "text": "Long-term metformin can lower vitamin B12, and low B12 causes tingling feet that looks like diabetic nerve damage. Low B12 is easy to fix.",
+     "question": "I have been on metformin for years. Should we check my vitamin B12 before more nerve-pain medicine?",
+     "citation": "ADA Standards of Care in Diabetes, section on metformin and B12 monitoring; Aroda VR et al. J Clin Endocrinol Metab 2016;101:1754-1761."},
+    {"id": "nsaid_bp_antihypertensive", "first_class": "nsaid", "symptom": "high_bp_reading", "second_class": "ccb", "max_gap_days": 180,
+     "title": "Did a painkiller push the BP up before a new BP medicine was added?",
+     "text": "NSAID painkillers (like aceclofenac, ibuprofen or diclofenac) can raise blood pressure. If they are stopped, the extra BP medicine may not be needed.",
+     "question": "My BP rose after I started painkillers. Could the painkiller be the cause?",
+     "citation": "Rochon PA, Gurwitz JH. The prescribing cascade revisited. Lancet 2017;389:1778-1780."}
+  ],
+  "care_gaps": [
+    {"condition": "diabetes", "test": "HBA1C", "panel": "HBA1C", "every_months": 6, "text": "HbA1c is due. People with diabetes should check it at least twice a year.", "citation": "ADA Standards of Care in Diabetes"},
+    {"condition": "diabetes", "test": "UACR", "panel": "UACR", "every_months": 12, "text": "Urine albumin test (UACR) is due. It is the earliest sign of diabetes-related kidney damage and should be done every year.", "citation": "ADA Standards of Care in Diabetes; KDIGO 2022 Diabetes in CKD"},
+    {"condition": "diabetes", "test": "CREAT", "panel": "KFT", "every_months": 12, "text": "Kidney function (creatinine/eGFR) is due once a year for people with diabetes.", "citation": "ADA Standards of Care in Diabetes"},
+    {"condition": "diabetes", "test": "LDL", "panel": "LIPID", "every_months": 12, "text": "Lipid profile is due once a year for people with diabetes.", "citation": "ADA Standards of Care in Diabetes"},
+    {"condition": "hypertension", "test": "CREAT", "panel": "KFT", "every_months": 12, "text": "Kidney function test is due once a year with high blood pressure.", "citation": "ISH 2020 Global Hypertension Practice Guidelines"},
+    {"condition": "hypertension", "test": "K", "panel": "KFT", "every_months": 12, "text": "Potassium check is due once a year with high blood pressure.", "citation": "ISH 2020 Global Hypertension Practice Guidelines"},
+    {"condition": "hypertension", "test": "LDL", "panel": "LIPID", "every_months": 12, "text": "Lipid profile is due once a year with high blood pressure.", "citation": "ISH 2020 Global Hypertension Practice Guidelines"},
+    {"condition": "hypothyroidism", "test": "TSH", "panel": "TSH", "every_months": 12, "text": "TSH is due. Check every 6 to 12 months on thyroid treatment.", "citation": "American Thyroid Association guideline (2014)"},
+    {"condition": "ckd", "test": "CREAT", "panel": "KFT", "every_months": 6, "text": "Kidney function test is due every 6 months with chronic kidney disease.", "citation": "KDIGO 2024 CKD guideline"},
+    {"condition": "ckd", "test": "UACR", "panel": "UACR", "every_months": 6, "text": "Urine albumin test is due every 6 months with chronic kidney disease.", "citation": "KDIGO 2024 CKD guideline"}
+  ],
+  "repeat_windows_days": {"default": 21, "HBA1C": 75}
+}

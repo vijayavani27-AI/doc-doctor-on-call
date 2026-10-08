@@ -1,0 +1,17 @@
+{
+  "_about": "Test panels as they are usually ordered in Indian labs. Prices are illustrative estimates of typical private-lab prices in INR for demo purposes only; real prices vary by city and lab.",
+  "panels": [
+    {"code": "CBC", "name": "Complete Blood Count (CBC)", "tests": ["HB", "RBC", "MCV", "MCH", "RDW", "PLT", "WBC"], "price_inr": 350},
+    {"code": "LFT", "name": "Liver Function Test (LFT)", "tests": ["AST", "ALT", "ALP", "GGT", "TBIL", "ALB"], "price_inr": 600},
+    {"code": "KFT", "name": "Kidney Function Test (KFT)", "tests": ["CREAT", "UREA", "URIC", "NA", "K", "CA"], "price_inr": 700},
+    {"code": "LIPID", "name": "Lipid Profile", "tests": ["TC", "HDL", "LDL", "TG"], "price_inr": 550},
+    {"code": "FBS", "name": "Fasting Blood Sugar", "tests": ["FBG", "PPBG"], "price_inr": 120},
+    {"code": "HBA1C", "name": "HbA1c", "tests": ["HBA1C"], "price_inr": 450},
+    {"code": "TSH", "name": "Thyroid (TSH)", "tests": ["TSH"], "price_inr": 350},
+    {"code": "B12", "name": "Vitamin B12", "tests": ["B12"], "price_inr": 900},
+    {"code": "FERRITIN", "name": "Serum Ferritin", "tests": ["FERRITIN"], "price_inr": 700},
+    {"code": "VITD", "name": "Vitamin D (25-OH)", "tests": ["VITD"], "price_inr": 1200},
+    {"code": "UACR", "name": "Urine Albumin/Creatinine Ratio", "tests": ["UACR"], "price_inr": 600},
+    {"code": "HB_ELECTRO", "name": "Hb Electrophoresis (HPLC)", "tests": ["HBA2"], "price_inr": 1200}
+  ]
+}
