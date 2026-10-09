@@ -248,7 +248,7 @@ docs/                  ARCHITECTURE · EVALUATION · SAFETY · JUDGES_QA · scre
 - Cut-offs come from published (often non-Indian) cohorts.
 - Real photo accuracy depends on image quality, which is why the confirm step exists.
 - Prices are illustrative.
-- Not a certified medical device; clinical validation is needed before real-world use (CDSCO SaMD pathway).
+- Not a certified medical device; clinical validation is needed before real-world use (CDSCO SaMD pathway)..
 
 **Roadmap:** ABHA/ABDM + FHIR export · Bluetooth BP/glucose meters · WhatsApp reminders · clinician-labelled evaluation set · HOMA-IR & WHO CVD risk.
 
