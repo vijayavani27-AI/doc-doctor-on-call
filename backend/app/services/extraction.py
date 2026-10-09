@@ -229,6 +229,8 @@ def _lab_line(line: str) -> DraftTest | None:
             continue  # partial word ("hb" in "hba1c")
         offset = low.find(body) + rest_start
         rest = line[offset:]
+        if rest.lstrip().startswith("/") or re.match(r"\s*(?:k/c/o|kco|h/o)\b", line, re.I):
+            return None  # "K/C/O T2DM" (known case of) is history, not potassium = 2
         m = re.search(r"[<>]?\s*\d+(?:\.\d+)?", rest)
         if not m:
             return None

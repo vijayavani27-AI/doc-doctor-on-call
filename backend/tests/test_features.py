@@ -226,6 +226,7 @@ def test_discharge_summary_diagnoses(client):
     dx = {d["key"]: d for d in rep["draft_diagnoses"]}
     assert {"age", "t2dm", "htn"} <= set(dx) and dx["t2dm"]["icd10"] == "E11" and dx["t2dm"]["status"] == "history"
     assert {t["test_code"] for t in rep["results"]} >= {"CREAT", "K"}
+    assert [t["value"] for t in rep["results"] if t["test_code"] == "K"] == [3.2]  # "K/C/O T2DM" is not potassium
     assert {m["brand"].split()[0] for m in rep["draft_medicines"]} >= {"Glycomet", "Telma"}
     body = {"kind": "discharge", "lab_name": rep["lab_name"], "report_date": rep["report_date"],
             "tests": [{"test_name_raw": t["test_name_raw"], "value_raw": t["value_raw"], "unit_raw": t["unit_raw"], "test_code": t["test_code"]} for t in rep["results"]],
