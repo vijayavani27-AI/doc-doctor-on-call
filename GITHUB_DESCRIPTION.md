@@ -45,7 +45,7 @@ DOC also:
 Flags (including critical values) are computed in code, never by an AI. Urgent code rules show a "see a doctor now / call 112" banner.
 
 **Measured results:**
-- 92/92 automated tests pass (incl. 4 family-consent tests and FHIR R4 validation)
+- 94/94 automated tests pass (incl. 4 family-consent tests and FHIR R4 validation)
 - 9/9 formulas match hand calculations
 - own reader 100% accurate on 782 values in 100 synthetic PDFs
 - AI boost read 37/37 values from synthetic phone photos with 0 hallucinations
@@ -62,5 +62,5 @@ feat: DOC v2: own models, Firebase, Supabase, family consent, FHIR
 - XGBoost diabetes + heart screening with TreeSHAP, own 1024-d embeddings + pgvector RAG, wound colour model, meal parser
 - Firebase sign-in (replaces TOTP 2FA), Supabase Postgres + Storage with RLS deny-all, Fernet-encrypted files, signed URLs
 - Consent-based family sharing, care plan, food & diet, wound check, home care, SOS + nearby hospitals, ABHA (mock), FHIR R4
-- 92 tests, docs and evaluation updated
+- 94 tests, docs and evaluation updated
 ```

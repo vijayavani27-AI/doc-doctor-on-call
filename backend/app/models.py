@@ -1,6 +1,6 @@
 from datetime import UTC, date, datetime
 
-from sqlalchemy import JSON, Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, Boolean, Date, DateTime, Float, ForeignKey, Integer, LargeBinary, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base, Embedding
@@ -71,6 +71,7 @@ class Profile(Base):
     meals: Mapped[list["MealLog"]] = relationship(cascade="all, delete-orphan")
     wounds: Mapped[list["WoundScan"]] = relationship(cascade="all, delete-orphan")
     chunks: Mapped[list["Chunk"]] = relationship(cascade="all, delete-orphan")
+    diagnoses: Mapped[list["Diagnosis"]] = relationship(cascade="all, delete-orphan")
 
 
 class Report(Base):
@@ -96,6 +97,7 @@ class Report(Base):
     profile: Mapped[Profile] = relationship(back_populates="reports")
     results: Mapped[list["LabResult"]] = relationship(back_populates="report", cascade="all, delete-orphan")
     medications: Mapped[list["Medication"]] = relationship(back_populates="report")
+    diagnoses: Mapped[list["Diagnosis"]] = relationship(cascade="all, delete-orphan")
 
 
 class LabResult(Base):
@@ -211,6 +213,42 @@ class VitalReading(Base):
     source: Mapped[str] = mapped_column(String(20), default="manual")  # manual / csv / device_demo / demo
     note: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_demo: Mapped[bool] = mapped_column(Boolean, default=False)
+
+
+class Diagnosis(Base):
+    """A diagnosis read from a discharge summary / prescription (or added by hand), coded ICD-10 + SNOMED CT."""
+
+    __tablename__ = "diagnoses"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    profile_id: Mapped[int] = mapped_column(ForeignKey("profiles.id", ondelete="CASCADE"), index=True)
+    report_id: Mapped[int | None] = mapped_column(ForeignKey("reports.id", ondelete="CASCADE"), index=True, nullable=True)
+    name: Mapped[str] = mapped_column(String(160))
+    name_raw: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    key: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    icd10: Mapped[str | None] = mapped_column(String(12), nullable=True)
+    snomed: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    status: Mapped[str] = mapped_column(String(10), default="active")  # active / history
+    diagnosed_on: Mapped[_date | None] = mapped_column(Date, nullable=True)
+    source_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    confidence: Mapped[float] = mapped_column(Float, default=1.0)
+    is_demo: Mapped[bool] = mapped_column(Boolean, default=False)
+
+
+class StoredFile(Base):
+    """Encrypted file bytes kept in the database when no object storage is configured (survives restarts)."""
+
+    __tablename__ = "stored_files"
+    id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    data: Mapped[bytes] = mapped_column(LargeBinary)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class AppSetting(Base):
+    """Server secrets generated once and kept in the database (so they survive container restarts)."""
+
+    __tablename__ = "app_settings"
+    key: Mapped[str] = mapped_column(String(40), primary_key=True)
+    value: Mapped[str] = mapped_column(Text)
 
 
 class FamilyLink(Base):

@@ -61,6 +61,15 @@ def save(owner_key: str, filename: str, data: bytes) -> str:
             except httpx.HTTPError as e:
                 log.warning("upload attempt %d failed: %s", attempt + 1, type(e).__name__)
         raise RuntimeError("Could not save the file to cloud storage. Please try again.")
+    if config.IS_POSTGRES:  # no object storage configured: keep the encrypted bytes in Postgres (persistent)
+        from ..database import SessionLocal
+        from ..models import StoredFile
+
+        fid = uuid.uuid4().hex
+        with SessionLocal() as db:
+            db.add(StoredFile(id=fid, data=blob))
+            db.commit()
+        return f"db:{fid}"
     name = f"{uuid.uuid4().hex}.bin"
     (config.UPLOAD_DIR / name).write_bytes(blob)
     return name
@@ -72,6 +81,15 @@ def load(ref: str) -> bytes:
         if r.status_code != 200:
             raise FileNotFoundError(ref)
         return security.decrypt_bytes(r.content)
+    if ref.startswith("db:"):
+        from ..database import SessionLocal
+        from ..models import StoredFile
+
+        with SessionLocal() as db:
+            row = db.get(StoredFile, ref[3:])
+            if row is None:
+                raise FileNotFoundError(ref)
+            return security.decrypt_bytes(row.data)
     path = config.UPLOAD_DIR / ref
     if not path.is_file() or path.resolve().parent != config.UPLOAD_DIR.resolve():
         raise FileNotFoundError(ref)
@@ -88,8 +106,16 @@ def delete(ref: str | None):
         except httpx.HTTPError as e:
             log.warning("delete failed: %s", type(e).__name__)
         return
+    if ref.startswith("db:"):
+        from ..database import SessionLocal
+        from ..models import StoredFile
+
+        with SessionLocal() as db:
+            db.query(StoredFile).filter(StoredFile.id == ref[3:]).delete()
+            db.commit()
+        return
     (config.UPLOAD_DIR / ref).unlink(missing_ok=True)
 
 
 def backend_name() -> str:
-    return "supabase" if config.SUPABASE_STORAGE else "local-encrypted"
+    return "supabase" if config.SUPABASE_STORAGE else "postgres-encrypted" if config.IS_POSTGRES else "local-encrypted"

@@ -238,7 +238,7 @@ Everything in the demo is made up and marked as demo data.
 cd C:\Users\vani\carethread\backend
 .venv\Scripts\python -m pytest -q
 ```
-This runs **92 tests**. They include one that uploads the whole test kit and checks every expected result, and 4 that check family consent.
+This runs **94 tests**. They include one that uploads the whole test kit and checks every expected result, and 4 that check family consent.
 
 ---
 

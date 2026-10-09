@@ -65,7 +65,7 @@ export function ReportDrawer({ reportId, highlight, onClose }: { reportId: numbe
             <div>
               <p className="font-bold">{rep.lab_name || rep.filename}</p>
               <p className="text-xs muted">
-                {fmtDate(rep.report_date)} · {rep.kind === "lab" ? "Lab report" : "Prescription"} · read by {methodLabel(rep.method)}
+                {fmtDate(rep.report_date)} · {rep.kind === "lab" ? "Lab report" : rep.kind === "discharge" ? "Discharge summary" : "Prescription"} · read by {methodLabel(rep.method)}
                 {rep.doctor_name ? ` · ${rep.doctor_name}` : ""}
                 {rep.user_verified ? " · corrected by you" : ""}
               </p>
@@ -84,7 +84,7 @@ export function ReportDrawer({ reportId, highlight, onClose }: { reportId: numbe
             </div>
           </div>
 
-          {rep.kind === "lab" && !!rep.results?.length && (
+          {(rep.kind !== "prescription") && (!!rep.results?.length || !!rep.diagnoses?.length) && (
             <div className="flex flex-wrap items-center gap-2">
               <button className={`btn-ghost py-1.5 text-xs ${sumLang === "en" ? "text-brand-700 dark:text-brand-300" : ""}`} onClick={() => showSummary("en")}><Languages className="h-3.5 w-3.5" /> Simple summary</button>
               <button className={`btn-ghost py-1.5 text-xs ${sumLang === "ta" ? "text-brand-700 dark:text-brand-300" : ""}`} onClick={() => showSummary("ta")}><Languages className="h-3.5 w-3.5" /> தமிழில்</button>
@@ -101,6 +101,7 @@ export function ReportDrawer({ reportId, highlight, onClose }: { reportId: numbe
           {summary && (
             <div className="rounded-xl border border-brand-100 bg-brand-50/60 p-3 text-sm dark:border-brand-500/20 dark:bg-brand-500/10">
               <p className="font-semibold">{summary.headline}</p>
+              {!!summary.diagnoses?.length && <ul className="mt-2 space-y-1">{summary.diagnoses.map((d) => <li key={d.diagnosis_id}>🩺 {d.text}</li>)}</ul>}
               <ul className="mt-2 space-y-1">{summary.lines.map((l) => <li key={l.result_id} className={l.flag.startsWith("critical") ? "font-semibold text-red-700 dark:text-red-300" : ""}>• {l.text}</li>)}</ul>
               <p className="mt-2 text-xs muted">{summary.disclaimer}</p>
             </div>
@@ -141,6 +142,16 @@ export function ReportDrawer({ reportId, highlight, onClose }: { reportId: numbe
                 </tbody>
               </table>
               {editing && <p className="mt-2 text-xs muted">Type the number exactly as printed on your report. Units, ranges and flags are recalculated automatically.</p>}
+            </div>
+          )}
+          {!!rep.diagnoses?.length && (
+            <div className="space-y-2">
+              {rep.diagnoses.map((g) => (
+                <div key={g.id} className="rounded-xl border border-rose-100 p-3 text-sm dark:border-rose-500/20">
+                  <b>{g.name}</b> <span className="muted">{g.status === "history" ? "· past history" : "· diagnosis"}{g.icd10 ? ` · ICD-10 ${g.icd10}` : ""}</span>
+                  {g.simple && <p className="mt-1 text-xs muted">{g.simple}</p>}
+                </div>
+              ))}
             </div>
           )}
           {!!rep.medicines?.length && (

@@ -117,10 +117,11 @@ def _report_entries(rep, patient_url: str, tests: dict) -> list[dict]:
     entries = []
     when = rep.report_date.isoformat() if rep.report_date else None
     is_rx = rep.kind == "prescription"
+    is_dc = rep.kind == "discharge"
     doc_url = _urn("DocumentReference", rep.id)
     doc = {"resourceType": "DocumentReference", "status": "current",
-           "type": {"coding": [{"system": LOINC, "code": "57833-6" if is_rx else "11502-2",
-                                "display": "Prescription for medication" if is_rx else "Laboratory report"}]},
+           "type": {"coding": [{"system": LOINC, "code": "18842-5" if is_dc else "57833-6" if is_rx else "11502-2",
+                                "display": "Discharge summary" if is_dc else "Prescription for medication" if is_rx else "Laboratory report"}]},
            "subject": {"reference": patient_url},
            "content": [{"attachment": {"contentType": rep.mime or "application/pdf", "title": rep.filename}}]}
     if rep.created_at:
@@ -129,7 +130,10 @@ def _report_entries(rep, patient_url: str, tests: dict) -> list[dict]:
     if rep.lab_name or rep.doctor_name:
         doc["author"] = [{"display": rep.lab_name or rep.doctor_name}]
     entries.append(_entry(doc_url, doc))
-    if not is_rx:
+    for g in getattr(rep, "diagnoses", []):
+        u, res = diagnosis_condition(g, patient_url)
+        entries.append(_entry(u, res))
+    if not is_rx and (rep.results or not is_dc):
         obs_urls = []
         for r in rep.results:
             u, res = _observation(r, patient_url, tests)
@@ -174,6 +178,33 @@ def _condition(key: str, profile_id: int, patient_url: str) -> tuple[str, dict]:
                  "code": cc, "subject": {"reference": patient_url}}
 
 
+def diagnosis_condition(g, patient_url: str) -> tuple[str, dict]:
+    """Condition from a coded diagnosis: ICD-10 + SNOMED CT, with clinical status and recorded date."""
+    url = _urn("Condition", f"dx/{g.id}")
+    coding = []
+    if g.snomed:
+        coding.append({"system": "http://snomed.info/sct", "code": g.snomed, "display": g.name})
+    if g.icd10:
+        coding.append({"system": "http://hl7.org/fhir/sid/icd-10", "code": g.icd10, "display": g.name})
+    res: dict = {"resourceType": "Condition",
+                 "clinicalStatus": {"coding": [{"system": COND_CLINICAL, "code": "active" if g.status == "active" else "resolved"}]},
+                 "verificationStatus": {"coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-ver-status", "code": "confirmed"}]},
+                 "category": [{"coding": [{"system": COND_CAT, "code": "encounter-diagnosis" if g.status == "active" else "problem-list-item"}]}],
+                 "code": {"coding": coding, "text": g.name_raw or g.name} if coding else {"text": g.name_raw or g.name},
+                 "subject": {"reference": patient_url}}
+    if g.diagnosed_on:
+        res["recordedDate"] = g.diagnosed_on.isoformat()
+    if g.source_text:
+        res["note"] = [{"text": f"Source line: {g.source_text[:300]}"}]
+    return url, res
+
+
+def _dx_condition(key: str) -> str | None:
+    from . import diagnoses
+
+    return diagnoses.catalog().get(key, {}).get("condition")
+
+
 def _vital(v, patient_url: str) -> tuple[str, dict] | None:
     if v.kind not in VITAL_LOINC:
         return None
@@ -207,7 +238,12 @@ def bundle(profile, reports=None, include_vitals: bool = True, vitals_limit: int
         u, res = _medication(m, patient_url)
         entries.append(_entry(u, res))
     if reports is None:
-        for key in profile.conditions or []:
+        for g in getattr(profile, "diagnoses", []):
+            if g.report_id is None:
+                u, res = diagnosis_condition(g, patient_url)
+                entries.append(_entry(u, res))
+        coded = {g.key and _dx_condition(g.key) for g in getattr(profile, "diagnoses", [])}
+        for key in [c for c in (profile.conditions or []) if c not in coded]:
             u, res = _condition(key, profile.id, patient_url)
             entries.append(_entry(u, res))
         if include_vitals:

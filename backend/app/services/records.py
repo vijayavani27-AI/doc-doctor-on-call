@@ -102,7 +102,8 @@ def _seed_reports(db: Session, p: Profile, reports: list[dict]):
 
 def demo_outdated(u: User) -> bool:
     """Re-seed demos created by older versions (no wellness data / no care plan / no family links)."""
-    return not any(p.vitals for p in u.profiles) or not any(p.checkups for p in u.profiles) or not any(p.is_demo for p in u.profiles)
+    return (not any(p.vitals for p in u.profiles) or not any(p.checkups for p in u.profiles) or not any(p.is_demo for p in u.profiles)
+            or not any(p.diagnoses for p in u.profiles))
 
 
 def seed_demo(db: Session) -> User:
@@ -144,6 +145,21 @@ def seed_demo(db: Session) -> User:
             db.add(Symptom(profile_id=p.id, key=key, label=catalog.symptoms().get(key, key), onset_date=date.fromisoformat(onset),
                            severity=severity, notes=notes))
         db.flush()
+        if extra.get("discharge"):
+            from ..models import Diagnosis
+            from . import diagnoses as dxsvc
+
+            dc = extra["discharge"]
+            ddate = date.fromisoformat(dc["date"])
+            rep = Report(profile_id=p.id, filename=f"{dc['lab']} - discharge {dc['date']}.pdf", kind="discharge", lab_name=dc["lab"],
+                         doctor_name=dc.get("doctor"), report_date=ddate, status="confirmed", method="demo", is_demo=True,
+                         notes=json.dumps({"admission_date": dc.get("admitted"), "discharge_date": dc["date"]}))
+            db.add(rep)
+            db.flush()
+            for key, status, src in dc["diagnoses"]:
+                c = dxsvc.catalog()[key]
+                db.add(Diagnosis(profile_id=p.id, report_id=rep.id, name=c["name"], name_raw=c["name"], key=key, icd10=c["icd10"], snomed=c["snomed"],
+                                 status=status, diagnosed_on=ddate, source_text=src, confidence=1.0, is_demo=True))
         for c in extra.get("checkups", []):
             db.add(Checkup(profile_id=p.id, title=c["title"], kind=c["kind"], repeat_months=c.get("repeat_months"), provider=c.get("provider"),
                            due_date=today + timedelta(days=c["due_in_days"]) if "due_in_days" in c else None,

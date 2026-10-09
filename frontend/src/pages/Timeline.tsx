@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, ReferenceArea, ReferenceLine, CartesianGrid } from "recharts";
-import { Activity, FlaskConical, Pill, Thermometer, Radar, GitBranch, LineChart as LineIcon } from "lucide-react";
+import { Activity, FlaskConical, Pill, Thermometer, Radar, GitBranch, LineChart as LineIcon, Stethoscope, CalendarCheck } from "lucide-react";
 import { useApp, useFetch } from "../lib/store";
 import { fmtDate, fmtNum, statusStyles } from "../lib/format";
 import type { Status } from "../lib/types";
@@ -12,13 +12,15 @@ interface Series {
   lab_changes: { date: string; from: string | null; to: string | null }[];
 }
 interface Trends { series: Series[]; derived: { id: string; name: string; status: Status; points: { date: string; value: number; status: Status }[] }[] }
-interface Event { date: string; type: "report" | "medicine" | "symptom" | "insight"; kind?: string; title: string; subtitle: string; report_id?: number; abnormal?: string[]; status?: Status }
+interface Event { date: string; type: "report" | "medicine" | "symptom" | "insight" | "diagnosis" | "checkup"; kind?: string; title: string; subtitle: string; report_id?: number; abnormal?: string[]; status?: Status }
 
 const EV: Record<Event["type"], { icon: typeof Pill; cls: string }> = {
   report: { icon: FlaskConical, cls: "bg-brand-100 text-brand-700 dark:bg-brand-500/15 dark:text-brand-300" },
   medicine: { icon: Pill, cls: "bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300" },
   symptom: { icon: Thermometer, cls: "bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300" },
   insight: { icon: Radar, cls: "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300" },
+  diagnosis: { icon: Stethoscope, cls: "bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300" },
+  checkup: { icon: CalendarCheck, cls: "bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300" },
 };
 
 function TrendCard({ s }: { s: Series }) {
@@ -107,7 +109,7 @@ export default function Timeline() {
       ) : !events.data ? <Spinner /> : (
         <ol className="relative ml-4 border-l-2 border-slate-200 dark:border-white/10">
           {events.data.map((e, i) => {
-            const { icon: Icon, cls } = EV[e.type];
+            const { icon: Icon, cls } = EV[e.type] ?? EV.report;
             return (
               <li key={i} className="mb-5 ml-6 animate-fade-up" style={{ animationDelay: `${Math.min(i, 12) * 30}ms` }}>
                 <span className={`absolute -left-[17px] grid h-8 w-8 place-items-center rounded-full ring-4 ring-[#f6faf9] dark:ring-[#0a1413] ${cls}`}><Icon className="h-4 w-4" /></span>

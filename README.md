@@ -7,7 +7,7 @@
 
 **DOC reads medical reports, prescriptions and home wellness data with its own OCR and models, puts every lab on one scale, and joins values across labs, dates and medicines to run 8 published clinical formulas. It explains what it finds in English, हिन्दी or தமிழ், with a source for every number. Families can share records only with explicit, revocable consent.**
 
-![tests](https://img.shields.io/badge/tests-92%20passing-brightgreen) ![lint](https://img.shields.io/badge/lint-ruff%20clean-brightgreen) ![formulas](https://img.shields.io/badge/clinical%20formulas-8%20validated-teal) ![models](https://img.shields.io/badge/own%20models-OCR%20%C2%B7%20XGBoost%20%C2%B7%20RAG-blueviolet) ![FHIR](https://img.shields.io/badge/FHIR-R4%20export-red) ![PWA](https://img.shields.io/badge/mobile-installable%20PWA-orange) ![license](https://img.shields.io/badge/license-MIT-blue)
+![tests](https://img.shields.io/badge/tests-94%20passing-brightgreen) ![lint](https://img.shields.io/badge/lint-ruff%20clean-brightgreen) ![formulas](https://img.shields.io/badge/clinical%20formulas-8%20validated-teal) ![models](https://img.shields.io/badge/own%20models-OCR%20%C2%B7%20XGBoost%20%C2%B7%20RAG-blueviolet) ![FHIR](https://img.shields.io/badge/FHIR-R4%20export-red) ![PWA](https://img.shields.io/badge/mobile-installable%20PWA-orange) ![license](https://img.shields.io/badge/license-MIT-blue)
 
 `Altrix Labs Hackathon · Challenge 1 · AI-Powered Personal Health Copilot`
 
@@ -27,7 +27,7 @@
 | **Innovation** | **Hidden Disease Finder**: joins values *across* reports, labs and dates to compute 8 validated scores that no single report shows. Also prescribing cascades, wellness × medicine links (*BP rose after a painkiller was started*), and **consent-based family care** (a son can follow his mother's sugar trend only after she approves exactly what he may see). | `engine.py`, `family.py`; §3 |
 | **Own models** | Not an API wrapper: **Tesseract OCR (English + Tamil)** + dictionary NER parser, **two XGBoost risk models trained on public datasets** (diabetes AUC 0.83, heart AUC 0.91) with exact **TreeSHAP** explanations, our own **1024-d embedding + pgvector RAG**, colour-analysis **wound model**, rule KBs for medicines and diet, curated Tamil templates. Gemini/Claude are an *optional boost*. | §7, [Evaluation](docs/EVALUATION.md) |
 | **Responsible AI** | Flags (normal/low/high/**critical**) computed in code from numbers + ranges, never by an LLM. Medicine interactions from a deterministic KB. Every answer has a disclaimer and citations; **urgent code rules force a "see a doctor now / call 112" banner**. Items under 0.75 confidence go to a review list. Never diagnoses or prescribes. | §7, [Safety](docs/SAFETY.md) |
-| **Measured quality** | **92/92 tests** (incl. 4 required consent tests + FHIR R4 validation) · 9/9 formulas match hand calculations · reader 100% on 782 values · Gemini vision 37/37 with 0 hallucinations · risk models 5-fold CV AUC 0.834 / 0.913 | §8 |
+| **Measured quality** | **94/94 tests** (incl. 4 required consent tests + FHIR R4 validation) · 9/9 formulas match hand calculations · reader 100% on 782 values · Gemini vision 37/37 with 0 hallucinations · risk models 5-fold CV AUC 0.834 / 0.913 | §8 |
 | **Interoperability** | **FHIR R4 Bundle** (Patient + ABHA, DocumentReference, DiagnosticReport, Observation with LOINC + UCUM + referenceRange + interpretation, MedicationRequest, Condition, vital signs), validated against R4 models. ABHA link/import (mock). | `fhir.py`, `/api/fhir` |
 | **Privacy & security** | **Firebase** Google/email sign-in, backend-only access to **Supabase** (service role, RLS deny-all), files **Fernet-encrypted before upload** to a private bucket, 5-minute signed file URLs, CORS allow-list, rate limits, uniform errors, PHI-free structured logs, full audit log visible to the data owner, export/delete-all (DPDP Act 2023 principles). | §9 |
 | **Impact** | Earlier detection of liver scarring, silent kidney decline, thalassaemia trait and insulin resistance; risky drug combinations caught; missed checkups and doses reduced; families coordinate care without sharing passwords. | §3, §4 |
@@ -96,6 +96,7 @@ Values are normalised to canonical units and LOINC codes; the engine pairs the n
 |---|---|
 | 🔐 Sign-in | **Firebase**: Continue with Google, email + password, email verification, password reset. One-click demo. Backend verifies every token; all authorisation in backend code. |
 | 📤 Records pipeline | PDF/photo/camera (jpg/png/webp/pdf ≤15 MB, first 4 PDF pages). **Own reader**: PDF text layer → or **PyMuPDF page images + Tesseract OCR (eng+tam)** → dictionary NER → LOINC normaliser → unit converter → ISO dates. Per-item confidence + source line; <0.75 → "check this" list; brand → generic. AI boost only when our reading is weak. Corrections after saving re-normalise and re-flag in code (`user_verified`). |
+| 🏥 Discharge summaries & diagnoses | Discharge summaries detected automatically (admission/discharge dates). Diagnoses read from *Final diagnosis / Impression / Dx* and Indian shorthand *K/C/O DM, HTN*, coded to **ICD-10 + SNOMED CT** (42-condition dictionary), each with a plain-language meaning; unknown items go to review. Confirmed diagnoses switch on care-gap rules, appear in the timeline, chat and FHIR `Condition` resources. Handwritten / Tamil-English prescriptions via the AI boost with low-confidence review. |
 | 🗂️ Records & trends | Flags normal/low/high/**critical_low/critical_high** (code), plain-language summary (English + **Tamil** templates), trends with `change_percent`, direction and a neutral sentence, timeline, FHIR R4 export per record or combined |
 | 🎯 Hidden Disease Finder ★ | 8 formulas, gauges, plugged-in equations, source chips, trends, next step, citations |
 | 🧪 Risk check (ML) | XGBoost diabetes (Pima) + heart (Cleveland) screening, **TreeSHAP top 3 factors**, imputed features listed, bands, model cards, "screening estimate, not a diagnosis" |
@@ -163,7 +164,7 @@ The browser never talks to Supabase; only the API holds the service-role key. De
 ## 8. Evaluation (reproducible)
 | Check | Result | Command |
 |---|---|---|
-| Automated tests (formulas, units, parser, flags incl. critical, **FHIR R4 validation**, **family consent: unapproved can't read, approved is filtered, revoke blocks instantly, requester can't self-approve**, records corrections, signed URLs, vitals, care plan, risk, RAG, urgent rules, meals, wound, test-kit answer key) | **92 / 92** | `pytest -q` |
+| Automated tests (formulas, units, parser, flags incl. critical, **FHIR R4 validation**, **family consent: unapproved can't read, approved is filtered, revoke blocks instantly, requester can't self-approve**, records corrections, signed URLs, vitals, care plan, risk, RAG, urgent rules, meals, wound, test-kit answer key) | **94 / 94** | `pytest -q` |
 | Formulas vs hand calculations | **9 / 9** | `python scripts/evaluate.py` |
 | Own reader, 100 synthetic Indian-style PDFs (782 values, 4 unit systems) | names **100%**, values **100%**, dates **100%** | `python scripts/evaluate.py 100` |
 | AI boost (Gemini) on 6 synthetic phone photos (37 values) | recall **100%**, **0 hallucinated tests** | `python scripts/eval_ai.py 6` |
@@ -174,6 +175,7 @@ Honest limits are in [docs/EVALUATION.md](docs/EVALUATION.md).
 
 ## 9. Security, privacy & safety
 - **Auth:** Firebase ID tokens verified on the server (signature, audience, issuer, expiry); short session JWTs; rate-limited sign-in; local email/password only in development mode.
+- **Persistence:** production runs on PostgreSQL (Render free Postgres via the Blueprint, or Supabase). Users, records and even the encrypted original files (bytea) survive restarts; the file-encryption key is kept in the database when not set as an env var.
 - **Data access:** the frontend talks only to the API. The API uses the Supabase service role (env var only); every table has row-level security ON with no policies (deny-all for anon/authenticated). Ownership and family-consent checks run on **every request**.
 - **Files:** Fernet-encrypted on the server, then stored at `{uid}/{uuid}-{filename}` in a private bucket; downloads via 5-minute signed URLs to our API.
 - **Family consent:** adding someone never grants access; only the owner approves, changes permissions or revokes; revoked/denied/pending → 403; responses filtered by permission; every access audited and shown to the owner.
@@ -206,7 +208,7 @@ backend/app/services/  engine ★ · formulas · flags · fhir · family · rag 
                        medsafety · nutrition · wound · care · safety · templates · storage · firebase_auth · ai · assistant · summary
 backend/app/routers/   auth · records_api · reports · profiles · insights · wellness · family · care · features · doctor · assistant · account
 backend/data/          lab_tests · formulas · panels · medicines · med_safety · nutrition_in.csv · remedies · tamil · wellness · models/ (XGBoost)
-backend/tests/         92 tests          backend/scripts/  verify · evaluate · eval_ai · train_risk · make_schema · make_test_kit
+backend/tests/         94 tests          backend/scripts/  verify · evaluate · eval_ai · train_risk · make_schema · make_test_kit
 frontend/src/pages/    Dashboard · Upload · Review · Records · Timeline · Risks · Screening · Wellness · Medicines · Meals · WoundCheck
                        Remedies · CarePlan · Family · Chat · Doctor · Emergency · Settings · Guide · Landing · About · Contact · Legal
 datasets/              demo_family · demo_extras · abha_mock · test_kit/ (+ANSWER_KEY) · public/ (Pima, Cleveland + README)

@@ -68,6 +68,7 @@ def scoped_view(profile: Profile, perms: dict[str, bool]) -> SimpleNamespace:
         symptoms=list(profile.symptoms) if perms.get("timeline") else [],
         vitals=list(profile.vitals) if perms.get("vitals") else [],
         checkups=list(profile.checkups) if perms.get("timeline") else [],
+        diagnoses=list(profile.diagnoses) if records else [],
         chunks=[], rag_signature=None,
     )
 

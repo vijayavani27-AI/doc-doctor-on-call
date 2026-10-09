@@ -21,7 +21,7 @@ export default function UploadPage() {
   const nav = useNavigate();
   const input = useRef<HTMLInputElement>(null);
   const camera = useRef<HTMLInputElement>(null);
-  const [kind, setKind] = useState<"auto" | "lab" | "prescription">("auto");
+  const [kind, setKind] = useState<"auto" | "lab" | "prescription" | "discharge">("auto");
   const [busy, setBusy] = useState(false);
   const [step, setStep] = useState(0);
   const [err, setErr] = useState<string | null>(null);
@@ -52,10 +52,10 @@ export default function UploadPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <PageHeader icon={<UploadCloud className="h-6 w-6" />} title="Add a report" subtitle={`For ${profile?.name}. Lab reports, scans, phone photos or handwritten prescriptions. You'll confirm everything before it's saved.`} />
+      <PageHeader icon={<UploadCloud className="h-6 w-6" />} title="Add a report" subtitle={`For ${profile?.name}. Lab reports, discharge summaries, scans, phone photos or handwritten prescriptions (English / Tamil). You'll confirm everything before it's saved.`} />
 
       <div className="mb-4 flex gap-2">
-        {([["auto", "Detect automatically", Wand2], ["lab", "Lab report", FlaskConical], ["prescription", "Prescription", Pill]] as const).map(([k, l, Icon]) => (
+        {([["auto", "Detect automatically", Wand2], ["lab", "Lab report", FlaskConical], ["prescription", "Prescription", Pill], ["discharge", "Discharge summary", FileText]] as const).map(([k, l, Icon]) => (
           <button key={k} onClick={() => setKind(k)} className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2.5 text-xs font-semibold sm:text-sm ${kind === k ? "border-brand-500 bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-300" : "border-slate-200 bg-white dark:border-white/10 dark:bg-white/5"}`}>
             <Icon className="h-4 w-4" /> {l}
           </button>

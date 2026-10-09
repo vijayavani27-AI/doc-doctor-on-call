@@ -179,7 +179,7 @@ export interface DraftMed {
 export interface Report {
   id: number;
   filename: string;
-  kind: "lab" | "prescription";
+  kind: "lab" | "prescription" | "discharge";
   lab_name: string | null;
   doctor_name: string | null;
   report_date: string | null;
@@ -203,12 +203,32 @@ export interface Report {
   n_needs_review?: number;
   needs_review?: number[];
   reader?: string | null;
+  admission_date?: string | null;
+  discharge_date?: string | null;
+  diagnoses?: Diagnosis[];
+  draft_diagnoses?: Diagnosis[];
+  n_diagnoses?: number;
+  diagnosis_names?: string[];
+}
+
+export interface Diagnosis {
+  id?: number;
+  name: string;
+  name_raw?: string | null;
+  key: string | null;
+  icd10: string | null;
+  snomed?: string | null;
+  status: "active" | "history";
+  source_text: string | null;
+  confidence: number;
+  simple: string | null;
 }
 
 export interface PlainSummary {
   language: string;
   headline: string;
   lines: { result_id: number; flag: string; text: string }[];
+  diagnoses?: { diagnosis_id: number; name: string; icd10: string | null; status: string; text: string }[];
   disclaimer: string;
 }
 

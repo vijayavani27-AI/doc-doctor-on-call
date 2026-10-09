@@ -210,3 +210,52 @@ def test_tamil_doctor_pdf(client, demo):
     assert d_ta.page_count == d_en.page_count + 1
     text = d_ta[-1].get_text()
     assert "குடும்ப" in text and "Lakshmi" in text and f"Page {d_ta.page_count}" in text
+
+
+DISCHARGE = ["SRI RAMA MULTISPECIALITY HOSPITAL, CHENNAI", "DISCHARGE SUMMARY", "Date of Admission: 02/09/2026", "Date of Discharge: 06/09/2026",
+             "Consultant: Dr. K. Senthil", "Final Diagnosis: Acute gastroenteritis with dehydration", "K/C/O T2DM, HTN",
+             "Course in hospital: treated with IV fluids.", "Investigations:", "Serum Creatinine    1.4    mg/dL    0.7 - 1.3",
+             "Potassium    3.2    mmol/L    3.5 - 5.1", "Discharge Medications:", "1. Tab. Glycomet 500 mg  1-0-1  x 30 days",
+             "2. Tab. Telma 40 mg  1-0-0", "Advice: ORS, review after 1 week"]
+
+
+def test_discharge_summary_diagnoses(client):
+    h, pid = _register(client, "Dischg", "M")
+    rep = client.post("/api/records/upload", files={"file": ("dc.pdf", _pdf(DISCHARGE), "application/pdf")}, data={"profile_id": str(pid)}, headers=h).json()
+    assert rep["kind"] == "discharge" and rep["report_date"] == "2026-09-06" and rep["admission_date"] == "2026-09-02"
+    dx = {d["key"]: d for d in rep["draft_diagnoses"]}
+    assert {"age", "t2dm", "htn"} <= set(dx) and dx["t2dm"]["icd10"] == "E11" and dx["t2dm"]["status"] == "history"
+    assert {t["test_code"] for t in rep["results"]} >= {"CREAT", "K"}
+    assert {m["brand"].split()[0] for m in rep["draft_medicines"]} >= {"Glycomet", "Telma"}
+    body = {"kind": "discharge", "lab_name": rep["lab_name"], "report_date": rep["report_date"],
+            "tests": [{"test_name_raw": t["test_name_raw"], "value_raw": t["value_raw"], "unit_raw": t["unit_raw"], "test_code": t["test_code"]} for t in rep["results"]],
+            "medicines": [{"brand": m["brand"], "dose": m["dose"], "frequency": m["frequency"]} for m in rep["draft_medicines"]],
+            "diagnoses": [{"name": d["name"], "key": d["key"], "status": d["status"], "source_text": d["source_text"]} for d in rep["draft_diagnoses"]]}
+    done = client.post(f"/api/reports/{rep['id']}/confirm", json=body, headers=h).json()
+    coded = [d for d in done["diagnoses"] if d["key"]]
+    assert len(coded) == 3 and all(d["simple"] for d in coded) and any(d["name"].lower() == "dehydration" for d in done["diagnoses"])
+    prof = client.get(f"/api/profiles/{pid}", headers=h).json()
+    assert {"diabetes", "hypertension"} <= set(prof["conditions"])  # care-gap rules switch on
+    summ = client.get(f"/api/records/{rep['id']}/summary?lang=ta", headers=h).json()
+    assert summ["diagnoses"]
+    tl = client.get(f"/api/profiles/{pid}/timeline", headers=h).json()
+    assert any(e["type"] == "diagnosis" for e in tl)
+    fh = client.get(f"/api/records/{rep['id']}/fhir", headers=h).json()
+    conds = [e["resource"] for e in fh["entry"] if e["resource"]["resourceType"] == "Condition"]
+    assert any(c2["system"] == "http://hl7.org/fhir/sid/icd-10" and c2["code"] == "A09" for c in conds for c2 in c["code"]["coding"])
+    doc = next(e["resource"] for e in fh["entry"] if e["resource"]["resourceType"] == "DocumentReference")
+    assert doc["type"]["coding"][0]["code"] == "18842-5"
+    from fhir.resources.R4B.bundle import Bundle
+
+    Bundle.model_validate(client.get("/api/fhir", headers=h).json())
+
+
+def test_diagnosis_parser_unit():
+    from app.services import diagnoses
+
+    got = diagnoses.extract("Diagnosis:\n1. Type 2 Diabetes Mellitus with peripheral neuropathy\n2. Systemic hypertension\nAdvice: diet")
+    keys = [g.key for g in got]
+    assert keys[:3] == ["t2dm", "diabetic_neuropathy", "htn"]
+    assert diagnoses.extract("Age: 54  Sex: M\nBP 130/80") == []  # no diagnosis section -> nothing invented
+    unknown = diagnoses.extract("Impression: rare thing syndrome")
+    assert unknown and unknown[0].key is None and unknown[0].confidence < 0.75  # goes to review

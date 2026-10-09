@@ -22,6 +22,8 @@ def _signature(p: Profile) -> str:
         h.update(f"r{r.id}:{r.value}:{r.confirmed}:{r.test_code};".encode())
     for m in p.medications:
         h.update(f"m{m.id}:{m.active}:{m.dose};".encode())
+    for g in getattr(p, "diagnoses", []):
+        h.update(f"d{g.id}:{g.key};".encode())
     h.update(f"v{len(p.vitals)}:{max((v.id for v in p.vitals), default=0)};s{len(p.symptoms)};c{len(p.checkups)}".encode())
     return h.hexdigest()
 
@@ -45,6 +47,9 @@ def _facts(p: Profile, analysis: dict) -> list[tuple[str, str, str, str]]:
         if rep.kind == "prescription":
             meds = ", ".join(m.brand for m in rep.medications)
             out.append(("report", f"D{rep.id}", "records", f"Prescription by {rep.doctor_name or 'doctor'} on {rep.report_date}: {meds}"))
+    for g in getattr(p, "diagnoses", []):
+        out.append(("diagnosis", f"Dx{g.id}", "records", f"Diagnosis {g.name} ({g.name_raw or ''}) ICD-10 {g.icd10 or ''} "
+                    f"{'past history' if g.status == 'history' else 'current'} recorded {g.diagnosed_on}"))
     for m in p.medications:
         out.append(("medicine", f"M{m.id}", "medicines",
                     f"Medicine tablet {m.brand} ({m.generic or ''}) {m.dose or ''} {m.frequency or ''} started {m.start_date} "
@@ -83,7 +88,9 @@ def ensure_index(db: Session, p: Profile, analysis: dict) -> int:
 def search(db: Session, p: Profile, query: str, k: int = 8, sections: set[str] | None = None) -> list[dict]:
     q = embed.embed(query)
     allowed = set(sections) if sections is not None else set(SECTIONS)
-    if config.IS_POSTGRES:
+    from .. import database
+
+    if config.IS_POSTGRES and database.PGVECTOR:
         rows = db.execute(sql("select m.id, m.source_type, m.source_id, m.text, m.similarity, c.section from match_chunks(cast(:q as vector), :pid, :k) m "
                               "join chunks c on c.id = m.id"), {"q": str(q), "pid": p.id, "k": k * 3}).all()
         hits = [{"id": r.source_id, "type": r.source_type, "text": r.text, "score": round(float(r.similarity), 4), "section": r.section} for r in rows]

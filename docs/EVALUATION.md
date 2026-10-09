@@ -4,7 +4,7 @@ Every number below can be reproduced from `backend/`. The tests, formulas and re
 
 | Check | Result |
 |---|---|
-| Automated tests | **92 / 92 passed** |
+| Automated tests | **94 / 94 passed** |
 | Formulas vs hand calculations | **9 / 9** |
 | Own reader, 100 synthetic PDFs (782 values) | names, values and dates **100%** |
 | Optional AI boost (Gemini) on 6 synthetic photos (37 values) | recall **100%**, **0** hallucinated tests |
@@ -77,7 +77,7 @@ Six PDFs for one fictional patient (3 labs, 2+ years, mixed units, 2 prescriptio
 The human-readable version is in `datasets/test_kit/ANSWER_KEY.md`.
 
 ## 5. Automated test suite
-`cd backend && python -m pytest -q -p no:logging` gives **92 passed** (measured on the v2 code).
+`cd backend && python -m pytest -q -p no:logging` gives **94 passed** (measured on the v2 code).
 
 | File | Tests | What it covers |
 |---|---|---|

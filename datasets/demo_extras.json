@@ -3,50 +3,358 @@
   "care": {
     "Lakshmi Raman": {
       "checkups": [
-        {"title": "HbA1c (sugar control) recheck", "kind": "lab", "due_in_days": 9, "repeat_months": 3, "provider": "Any NABL lab"},
-        {"title": "Eye check (retina)", "kind": "eye", "due_in_days": -12, "repeat_months": 12, "provider": "Eye hospital"},
-        {"title": "Kidney tests (creatinine + urine ACR)", "kind": "lab", "due_in_days": 30, "repeat_months": 6},
-        {"title": "Diabetes review with Dr. Meena", "kind": "doctor", "done_days_ago": 40}
+        {
+          "title": "HbA1c (sugar control) recheck",
+          "kind": "lab",
+          "due_in_days": 9,
+          "repeat_months": 3,
+          "provider": "Any NABL lab"
+        },
+        {
+          "title": "Eye check (retina)",
+          "kind": "eye",
+          "due_in_days": -12,
+          "repeat_months": 12,
+          "provider": "Eye hospital"
+        },
+        {
+          "title": "Kidney tests (creatinine + urine ACR)",
+          "kind": "lab",
+          "due_in_days": 30,
+          "repeat_months": 6
+        },
+        {
+          "title": "Diabetes review with Dr. Meena",
+          "kind": "doctor",
+          "done_days_ago": 40
+        }
       ],
       "reminders": [
-        {"kind": "medicine", "brand": "Glycomet 500", "title": "Take Glycomet 500", "detail": "500 mg after food", "times": ["08:30", "20:30"]},
-        {"kind": "medicine", "brand": "Telma 40", "title": "Take Telma 40", "detail": "40 mg morning", "times": ["08:00"]},
-        {"kind": "reading", "title": "Check BP at home", "detail": "Sit quietly 5 minutes first", "times": ["07:30"]},
-        {"kind": "water", "title": "Drink a glass of water", "times": ["11:00", "16:00"]}
+        {
+          "kind": "medicine",
+          "brand": "Glycomet 500",
+          "title": "Take Glycomet 500",
+          "detail": "500 mg after food",
+          "times": [
+            "08:30",
+            "20:30"
+          ]
+        },
+        {
+          "kind": "medicine",
+          "brand": "Telma 40",
+          "title": "Take Telma 40",
+          "detail": "40 mg morning",
+          "times": [
+            "08:00"
+          ]
+        },
+        {
+          "kind": "reading",
+          "title": "Check BP at home",
+          "detail": "Sit quietly 5 minutes first",
+          "times": [
+            "07:30"
+          ]
+        },
+        {
+          "kind": "water",
+          "title": "Drink a glass of water",
+          "times": [
+            "11:00",
+            "16:00"
+          ]
+        }
       ],
-      "devices": ["bp_monitor"],
+      "devices": [
+        "bp_monitor"
+      ],
       "meals": [
-        {"days_ago": 0, "meal_type": "breakfast", "items": [["idli", 1.5], ["sambar", 1], ["coconut_chutney", 1]]},
-        {"days_ago": 1, "meal_type": "lunch", "items": [["white_rice", 1.5], ["sambar", 1], ["curd", 1]]},
-        {"days_ago": 1, "meal_type": "snack", "items": [["tea_milk_sugar", 1], ["medu_vada", 1]]},
-        {"days_ago": 2, "meal_type": "dinner", "items": [["chapati", 2], ["dal_tadka", 1]]}
+        {
+          "days_ago": 0,
+          "meal_type": "breakfast",
+          "items": [
+            [
+              "idli",
+              1.5
+            ],
+            [
+              "sambar",
+              1
+            ],
+            [
+              "coconut_chutney",
+              1
+            ]
+          ]
+        },
+        {
+          "days_ago": 1,
+          "meal_type": "lunch",
+          "items": [
+            [
+              "white_rice",
+              1.5
+            ],
+            [
+              "sambar",
+              1
+            ],
+            [
+              "curd",
+              1
+            ]
+          ]
+        },
+        {
+          "days_ago": 1,
+          "meal_type": "snack",
+          "items": [
+            [
+              "tea_milk_sugar",
+              1
+            ],
+            [
+              "medu_vada",
+              1
+            ]
+          ]
+        },
+        {
+          "days_ago": 2,
+          "meal_type": "dinner",
+          "items": [
+            [
+              "chapati",
+              2
+            ],
+            [
+              "dal_tadka",
+              1
+            ]
+          ]
+        }
       ],
-      "profile": {"blood_group": "B+", "allergies": ["Sulfa drugs"], "emergency_name": "Priya Raman (daughter)", "emergency_phone": "+91 98400 00000"}
+      "profile": {
+        "blood_group": "B+",
+        "allergies": [
+          "Sulfa drugs"
+        ],
+        "emergency_name": "Priya Raman (daughter)",
+        "emergency_phone": "+91 98400 00000"
+      },
+      "discharge": {
+        "date": "2026-07-18",
+        "admitted": "2026-07-15",
+        "lab": "Sri Rama Multispeciality Hospital (demo)",
+        "doctor": "Dr. K. Senthil",
+        "diagnoses": [
+          [
+            "age",
+            "active",
+            "Final Diagnosis: Acute gastroenteritis with dehydration"
+          ],
+          [
+            "t2dm",
+            "history",
+            "K/C/O T2DM, Systemic HTN"
+          ],
+          [
+            "htn",
+            "history",
+            "K/C/O T2DM, Systemic HTN"
+          ]
+        ]
+      }
     }
   },
   "linked_accounts": [
     {
-      "key": "sujitha", "email": "sujitha.demo@doconcall.app", "name": "Sujitha (demo)", "sex": "F", "dob": "1994-03-21", "height_cm": 158, "weight_kg": 66,
-      "conditions": [], "relation_to_demo": "daughter-in-law", "direction": "demo_views_them", "status": "approved",
-      "permissions": {"records": true, "timeline": true, "summary": true, "vitals": false, "medicines": false, "chat": true},
+      "key": "sujitha",
+      "email": "sujitha.demo@doconcall.app",
+      "name": "Sujitha (demo)",
+      "sex": "F",
+      "dob": "1994-03-21",
+      "height_cm": 158,
+      "weight_kg": 66,
+      "conditions": [],
+      "relation_to_demo": "daughter-in-law",
+      "direction": "demo_views_them",
+      "status": "approved",
+      "permissions": {
+        "records": true,
+        "timeline": true,
+        "summary": true,
+        "vitals": false,
+        "medicines": false,
+        "chat": true
+      },
       "reports": [
-        {"date": "2025-04-12", "lab": "Thyrocare", "results": [["HbA1c", "5.8", "%", "4.0 - 5.6"], ["Fasting Blood Sugar", "98", "mg/dL", "70 - 100"], ["Triglycerides", "142", "mg/dL", "< 150"], ["HDL Cholesterol", "48", "mg/dL", "> 50"]]},
-        {"date": "2025-11-20", "lab": "Metropolis", "results": [["Glycated Haemoglobin (HbA1c)", "6.0", "%", "4.0 - 5.6"], ["Glucose Fasting", "104", "mg/dL", "70 - 100"], ["Triglycerides", "158", "mg/dL", "< 150"], ["HDL", "46", "mg/dL", "> 50"]]},
-        {"date": "2026-06-18", "lab": "Thyrocare", "results": [["HbA1c", "6.2", "%", "4.0 - 5.6"], ["Fasting Blood Sugar", "109", "mg/dL", "70 - 100"], ["Triglycerides", "171", "mg/dL", "< 150"], ["HDL Cholesterol", "44", "mg/dL", "> 50"], ["Haemoglobin", "11.6", "g/dL", "12.0 - 15.5"]]}
+        {
+          "date": "2025-04-12",
+          "lab": "Thyrocare",
+          "results": [
+            [
+              "HbA1c",
+              "5.8",
+              "%",
+              "4.0 - 5.6"
+            ],
+            [
+              "Fasting Blood Sugar",
+              "98",
+              "mg/dL",
+              "70 - 100"
+            ],
+            [
+              "Triglycerides",
+              "142",
+              "mg/dL",
+              "< 150"
+            ],
+            [
+              "HDL Cholesterol",
+              "48",
+              "mg/dL",
+              "> 50"
+            ]
+          ]
+        },
+        {
+          "date": "2025-11-20",
+          "lab": "Metropolis",
+          "results": [
+            [
+              "Glycated Haemoglobin (HbA1c)",
+              "6.0",
+              "%",
+              "4.0 - 5.6"
+            ],
+            [
+              "Glucose Fasting",
+              "104",
+              "mg/dL",
+              "70 - 100"
+            ],
+            [
+              "Triglycerides",
+              "158",
+              "mg/dL",
+              "< 150"
+            ],
+            [
+              "HDL",
+              "46",
+              "mg/dL",
+              "> 50"
+            ]
+          ]
+        },
+        {
+          "date": "2026-06-18",
+          "lab": "Thyrocare",
+          "results": [
+            [
+              "HbA1c",
+              "6.2",
+              "%",
+              "4.0 - 5.6"
+            ],
+            [
+              "Fasting Blood Sugar",
+              "109",
+              "mg/dL",
+              "70 - 100"
+            ],
+            [
+              "Triglycerides",
+              "171",
+              "mg/dL",
+              "< 150"
+            ],
+            [
+              "HDL Cholesterol",
+              "44",
+              "mg/dL",
+              "> 50"
+            ],
+            [
+              "Haemoglobin",
+              "11.6",
+              "g/dL",
+              "12.0 - 15.5"
+            ]
+          ]
+        }
       ]
     },
     {
-      "key": "appa", "email": "appa.demo@doconcall.app", "name": "Appa (demo)", "sex": "M", "dob": "1958-08-02", "height_cm": 168, "weight_kg": 72,
-      "conditions": ["hypertension"], "relation_to_demo": "father", "direction": "they_view_demo", "status": "approved",
-      "permissions": {"records": false, "timeline": true, "summary": true, "vitals": true, "medicines": true, "chat": false},
+      "key": "appa",
+      "email": "appa.demo@doconcall.app",
+      "name": "Appa (demo)",
+      "sex": "M",
+      "dob": "1958-08-02",
+      "height_cm": 168,
+      "weight_kg": 72,
+      "conditions": [
+        "hypertension"
+      ],
+      "relation_to_demo": "father",
+      "direction": "they_view_demo",
+      "status": "approved",
+      "permissions": {
+        "records": false,
+        "timeline": true,
+        "summary": true,
+        "vitals": true,
+        "medicines": true,
+        "chat": false
+      },
       "reports": [
-        {"date": "2026-05-02", "lab": "Apollo Diagnostics", "results": [["Serum Creatinine", "1.2", "mg/dL", "0.7 - 1.3"], ["Potassium", "4.6", "mmol/L", "3.5 - 5.1"], ["Total Cholesterol", "188", "mg/dL", "< 200"]]}
+        {
+          "date": "2026-05-02",
+          "lab": "Apollo Diagnostics",
+          "results": [
+            [
+              "Serum Creatinine",
+              "1.2",
+              "mg/dL",
+              "0.7 - 1.3"
+            ],
+            [
+              "Potassium",
+              "4.6",
+              "mmol/L",
+              "3.5 - 5.1"
+            ],
+            [
+              "Total Cholesterol",
+              "188",
+              "mg/dL",
+              "< 200"
+            ]
+          ]
+        }
       ]
     },
     {
-      "key": "karthik", "email": "karthik.demo@doconcall.app", "name": "Karthik (demo)", "sex": "M", "dob": "1990-01-15",
-      "conditions": [], "relation_to_demo": "son", "direction": "they_view_demo", "status": "pending",
-      "permissions": {"summary": true, "records": true, "timeline": true, "vitals": true, "medicines": true, "chat": true},
+      "key": "karthik",
+      "email": "karthik.demo@doconcall.app",
+      "name": "Karthik (demo)",
+      "sex": "M",
+      "dob": "1990-01-15",
+      "conditions": [],
+      "relation_to_demo": "son",
+      "direction": "they_view_demo",
+      "status": "pending",
+      "permissions": {
+        "summary": true,
+        "records": true,
+        "timeline": true,
+        "vitals": true,
+        "medicines": true,
+        "chat": true
+      },
       "message": "Amma, please share your reports so I can help with hospital visits.",
       "reports": []
     }

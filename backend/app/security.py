@@ -25,6 +25,12 @@ _fernet = Fernet(config.ENCRYPTION_KEY.encode())
 _bearer = HTTPBearer(auto_error=False)
 
 
+def reload_keys():
+    """Re-read the encryption key (it may be loaded from the database at start-up)."""
+    global _fernet
+    _fernet = Fernet(config.ENCRYPTION_KEY.encode())
+
+
 # ---------------------------------------------------------------- encryption
 def encrypt_bytes(data: bytes) -> bytes:
     return _fernet.encrypt(data)

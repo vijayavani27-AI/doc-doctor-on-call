@@ -18,6 +18,7 @@ from datetime import date
 from difflib import get_close_matches
 
 from . import ai, catalog, normalizer, pii, units
+from . import diagnoses as dx
 
 # ---------------------------------------------------------------- output types
 
@@ -65,6 +66,9 @@ class Draft:
     pages: int | None = None
     reader: str | None = None  # pdf-text / ocr / text / none
     text: str | None = None
+    diagnoses: list = field(default_factory=list)  # list[diagnoses.DraftDiagnosis]
+    admission_date: date | None = None
+    discharge_date: date | None = None
 
 
 # ---------------------------------------------------------------- helpers
@@ -306,6 +310,18 @@ def parse_text(text: str, kind_hint: str | None = None) -> Draft:
             if m:
                 d.medicines.append(m)
     d.kind = "prescription" if d.medicines and len(d.medicines) >= len(d.tests) else "lab"
+    d.diagnoses = dx.extract(text)
+    if kind_hint == "discharge" or dx.is_discharge(text):
+        d.kind = "discharge"
+        d.admission_date, d.discharge_date = dx.admission_dates(text, parse_date)
+        if d.discharge_date:
+            d.report_date = d.discharge_date
+        if not d.medicines:  # discharge medicines are often written without "Tab."
+            for line in text.splitlines():
+                if not _lab_line(line):
+                    m = _med_line(line)
+                    if m:
+                        d.medicines.append(m)
     return d
 
 
@@ -313,7 +329,20 @@ def parse_text(text: str, kind_hint: str | None = None) -> Draft:
 _SCHEMA = {
     "type": "object",
     "properties": {
-        "report_type": {"type": "string", "enum": ["lab", "prescription", "other"]},
+        "report_type": {"type": "string", "enum": ["lab", "prescription", "discharge", "other"]},
+        "admission_date": {"type": "string", "description": "Discharge summaries only: date of admission YYYY-MM-DD, else empty string."},
+        "discharge_date": {"type": "string", "description": "Discharge summaries only: date of discharge YYYY-MM-DD, else empty string."},
+        "diagnoses": {"type": "array", "description": "Diagnoses exactly as written (final/provisional diagnosis, impression, Dx, K/C/O history). Empty if none.", "items": {
+            "type": "object",
+            "properties": {
+                "name": {"type": "string", "description": "Diagnosis as written, expanded if an abbreviation is certain (e.g. 'T2DM' -> 'Type 2 diabetes mellitus')"},
+                "status": {"type": "string", "enum": ["active", "history"], "description": "history for K/C/O / past history items"},
+                "source_text": {"type": "string"},
+                "confidence": {"type": "number"},
+            },
+            "required": ["name", "status", "source_text", "confidence"],
+            "additionalProperties": False,
+        }},
         "lab_name": {"type": "string", "description": "Lab, clinic or hospital name. Empty string if not printed."},
         "doctor_name": {"type": "string", "description": "Doctor name if printed, else empty string."},
         "report_date": {"type": "string", "description": "Sample collection or report date as YYYY-MM-DD; empty string if absent."},
@@ -345,23 +374,31 @@ _SCHEMA = {
             "additionalProperties": False,
         }},
     },
-    "required": ["report_type", "lab_name", "doctor_name", "report_date", "tests", "medicines"],
+    "required": ["report_type", "admission_date", "discharge_date", "diagnoses", "lab_name", "doctor_name", "report_date", "tests", "medicines"],
     "additionalProperties": False,
 }
 
-_SYSTEM = """You read Indian medical documents (lab reports, prescriptions, including handwritten ones) and transcribe them into JSON.
+_SYSTEM = """You read Indian medical documents (lab reports, prescriptions, discharge summaries; printed or handwritten; English, Tamil, Hindi or mixed) and transcribe them into JSON.
 
 Rules:
 - Transcribe only what is printed or written. Never guess, infer, or calculate a value that is not on the page.
 - Copy values, units and reference ranges exactly as printed (e.g. platelets '1.55' with unit 'lakhs/cumm').
 - For every item include the exact source line, and a confidence from 0 to 1. Lower confidence for handwriting, blur, or ambiguous digits - the user will be asked to confirm anything below 0.8.
 - Skip personal identifiers (patient name, phone, address, ID numbers); they are not needed.
-- Use DD/MM order when reading Indian dates like 03/04/2025 (3 April 2025)."""
+- Use DD/MM order when reading Indian dates like 03/04/2025 (3 April 2025).
+- Handwritten prescriptions: read each medicine line with dose and frequency (e.g. 1-0-1, BD, HS). If a word is unclear, give your best reading with a LOW confidence instead of skipping it.
+- Tamil or Hindi text: keep medicine and test names in English as written; translate nothing else.
+- Diagnoses: copy them as written; never add a diagnosis that is not on the page."""
 
 
 def _from_ai(data: dict) -> Draft:
     d = Draft(method="ai")
-    d.kind = data.get("report_type") if data.get("report_type") in ("lab", "prescription") else "lab"
+    d.kind = data.get("report_type") if data.get("report_type") in ("lab", "prescription", "discharge") else "lab"
+    d.admission_date = parse_date(data.get("admission_date"))
+    d.discharge_date = parse_date(data.get("discharge_date"))
+    for g in data.get("diagnoses", []):
+        d.diagnoses.append(dx.DraftDiagnosis(name_raw=g["name"], status=g.get("status") or "active", source_text=g.get("source_text"),
+                                             confidence=float(g.get("confidence", 0.8))))
     d.lab_name = data.get("lab_name") or None
     d.doctor_name = data.get("doctor_name") or None
     d.report_date = parse_date(data.get("report_date"))
@@ -389,7 +426,7 @@ def pdf_text(data: bytes) -> str:
 def _quality(d: Draft | None) -> tuple[int, float]:
     if d is None:
         return 0, 0.0
-    items = [t.confidence for t in d.tests] + [m.confidence for m in d.medicines]
+    items = [t.confidence for t in d.tests] + [m.confidence for m in d.medicines] + [g.confidence for g in d.diagnoses]
     return len(items), (sum(items) / len(items) if items else 0.0)
 
 
@@ -451,6 +488,7 @@ def extract(data: bytes, mime: str, sex: str | None = None, kind_hint: str | Non
     if kind_hint in ("lab", "prescription") and not (draft.tests and draft.medicines):
         draft.kind = kind_hint if not (kind_hint == "lab" and draft.medicines and not draft.tests) else draft.kind
     draft.tests = [finalize_test(t, sex) for t in draft.tests]
+    draft.diagnoses = [dx.finalize(g) for g in draft.diagnoses]
     draft.medicines = [finalize_med(m) for m in draft.medicines]
     if not draft.report_date:
         draft.warnings.append("Report date not found. Please set it before saving.")

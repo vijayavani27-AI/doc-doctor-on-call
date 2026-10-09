@@ -4,13 +4,14 @@ from datetime import date
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import Response
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from .. import config, security
 from ..database import get_db
-from ..models import LabResult, Report, User
+from ..models import Diagnosis, LabResult, Report, User
 from ..services import catalog, extraction, flags, records, storage, templates
+from ..services import diagnoses as dxsvc
 
 router = APIRouter(prefix="/api", tags=["reports"])
 
@@ -39,8 +40,16 @@ class ConfirmMed(BaseModel):
     confidence: float = 1.0
 
 
+class ConfirmDx(BaseModel):
+    name: str = Field(min_length=1, max_length=160)
+    key: str | None = None
+    status: str = Field(default="active", pattern="^(active|history)$")
+    source_text: str | None = None
+
+
 class ConfirmIn(BaseModel):
-    kind: str = "lab"
+    kind: str = Field(default="lab", pattern="^(lab|prescription|discharge)$")
+    diagnoses: list[ConfirmDx] = []
     lab_name: str | None = None
     doctor_name: str | None = None
     report_date: date
@@ -64,7 +73,7 @@ def _report_out(r: Report, full: bool = False) -> dict:
            "report_date": r.report_date.isoformat() if r.report_date else None, "status": r.status, "method": r.method,
            "has_file": bool(r.stored_name), "mime": r.mime, "created_at": r.created_at.isoformat(),
            "n_results": len(r.results), "n_abnormal": sum(1 for x in r.results if x.flag in ("H", "L")),
-           "n_medicines": len(r.medications), "pages": r.pages, "user_verified": bool(r.user_verified), "is_demo": bool(r.is_demo),
+           "n_medicines": len(r.medications), "n_diagnoses": len(r.diagnoses), "diagnosis_names": [g.name for g in r.diagnoses][:4], "pages": r.pages, "user_verified": bool(r.user_verified), "is_demo": bool(r.is_demo),
            "n_critical": sum(1 for x in r.results if flags.flag_for(x.test_code, x.value, x.ref_low, x.ref_high) in ("critical_low", "critical_high")),
            "n_needs_review": sum(1 for x in r.results if not x.confirmed and flags.needs_review(x.confidence, x.user_verified))}
     if full:
@@ -75,10 +84,20 @@ def _report_out(r: Report, full: bool = False) -> dict:
         meta = json.loads(r.notes) if r.notes else {}
         out["draft_medicines"] = meta.get("draft_medicines", []) if r.status == "review" else []
         out["warnings"] = meta.get("warnings", [])
+        out["admission_date"], out["discharge_date"] = meta.get("admission_date"), meta.get("discharge_date")
+        out["diagnoses"] = [dx_out(g) for g in r.diagnoses]
+        out["draft_diagnoses"] = meta.get("draft_diagnoses", []) if r.status == "review" else []
         out["redactions"] = meta.get("redactions", 0)
         out["reader"] = meta.get("reader")
         out["needs_review"] = [x["id"] for x in out["results"] if x["needs_review"]]
     return out
+
+
+def dx_out(g: Diagnosis) -> dict:
+    c = dxsvc.catalog().get(g.key or "", {})
+    return {"id": g.id, "name": g.name, "name_raw": g.name_raw, "key": g.key, "icd10": g.icd10, "snomed": g.snomed, "status": g.status,
+            "diagnosed_on": g.diagnosed_on.isoformat() if g.diagnosed_on else None, "source_text": g.source_text,
+            "confidence": g.confidence, "simple": c.get("simple"), "report_id": g.report_id}
 
 
 def plain_summary(r: Report, lang: str = "en") -> dict:
@@ -95,11 +114,17 @@ def plain_summary(r: Report, lang: str = "en") -> dict:
         lines.append({"result_id": x.id, "flag": f, "text": templates.t(f"flag.{f}", lang, test=name, value=x.value, unit=x.unit or "")})
     lines.sort(key=lambda z: z["flag"] == "normal")
     n = len(lines)
+    dx_lines = [{"diagnosis_id": g.id, "name": g.name, "icd10": g.icd10, "status": g.status,
+                 "text": f"{g.name}{' (past history)' if g.status == 'history' else ''}: {dxsvc.catalog().get(g.key or '', {}).get('simple') or 'Ask your doctor what this diagnosis means for you.'}"}
+                for g in r.diagnoses]
     head = templates.t("summary.header", lang, name=r.lab_name or r.doctor_name or r.filename,
                        date=r.report_date.isoformat() if r.report_date else "-")
     overview = (templates.t("summary.no_abnormal", lang, count=n) if abnormal == 0
                 else templates.t("summary.n_abnormal", lang, count=n, abnormal=abnormal))
-    return {"language": lang, "headline": f"{head}. {overview}" if n else head, "lines": lines, "disclaimer": templates.disclaimer(lang)}
+    if not n and dx_lines:
+        overview = f"{len(dx_lines)} diagnosis(es) recorded."
+    return {"language": lang, "headline": f"{head}. {overview}" if (n or dx_lines) else head, "lines": lines, "diagnoses": dx_lines,
+            "disclaimer": templates.disclaimer(lang)}
 
 
 def _owned_report(rid: int, u: User, db: Session) -> Report:
@@ -134,11 +159,16 @@ async def upload_report(pid: int, request: Request, file: UploadFile = File(...)
     except RuntimeError as e:
         raise HTTPException(503, str(e)) from None
 
-    draft = extraction.extract(data, mime, p.sex, kind if kind in ("lab", "prescription") else None)
+    draft = extraction.extract(data, mime, p.sex, kind if kind in ("lab", "prescription", "discharge") else None)
     rep = Report(profile_id=p.id, filename=file.filename or "report", stored_name=stored, mime=mime, kind=draft.kind,
                  lab_name=draft.lab_name, doctor_name=draft.doctor_name, report_date=draft.report_date, status="review",
                  method=draft.method, pages=draft.pages, ocr_text=draft.text,
                  notes=json.dumps({"warnings": draft.warnings, "redactions": draft.redactions, "reader": draft.reader,
+                                   "admission_date": draft.admission_date.isoformat() if draft.admission_date else None,
+                                   "discharge_date": draft.discharge_date.isoformat() if draft.discharge_date else None,
+                                   "draft_diagnoses": [{"name": g.name, "name_raw": g.name_raw, "key": g.key, "icd10": g.icd10, "snomed": g.snomed,
+                                                        "status": g.status, "source_text": g.source_text, "confidence": g.confidence,
+                                                        "simple": dxsvc.catalog().get(g.key or "", {}).get("simple")} for g in draft.diagnoses],
                                    "draft_medicines": [{"brand": m.brand, "generic": m.generic, "dose": m.dose, "frequency": m.frequency,
                                                         "duration": m.duration, "source_text": m.source_text, "confidence": m.confidence,
                                                         "matched": bool(m.generics)} for m in draft.medicines]}))
@@ -164,6 +194,8 @@ def confirm_report(rid: int, body: ConfirmIn, u: User = Depends(security.current
         db.delete(r)
     for m in list(rep.medications):
         db.delete(m)
+    for g in list(rep.diagnoses):
+        db.delete(g)
     db.flush()
     for ct in body.tests:
         t = extraction.finalize_test(extraction.DraftTest(test_name_raw=ct.test_name_raw, value_raw=ct.value_raw, unit_raw=ct.unit_raw,
@@ -177,8 +209,18 @@ def confirm_report(rid: int, body: ConfirmIn, u: User = Depends(security.current
     for cm in body.medicines:
         records.add_medication(db, p, rep, cm.brand, cm.dose, cm.frequency, cm.start_date or body.report_date, cm.reason,
                                source_text=cm.source_text)
+    conds = list(p.conditions or [])
+    for cd in body.diagnoses:
+        g = dxsvc.finalize(dxsvc.DraftDiagnosis(name_raw=cd.name, key=cd.key if cd.key in dxsvc.catalog() else None, status=cd.status,
+                                                source_text=cd.source_text, confidence=1.0))
+        db.add(Diagnosis(profile_id=p.id, report_id=rep.id, name=g.name[:160], name_raw=cd.name[:160], key=g.key, icd10=g.icd10, snomed=g.snomed,
+                         status=g.status, diagnosed_on=body.report_date, source_text=cd.source_text, confidence=1.0))
+        if g.condition and g.condition not in conds:  # confirmed diagnosis switches on the matching care-gap rules
+            conds.append(g.condition)
+    p.conditions = conds
     meta = json.loads(rep.notes) if rep.notes else {}
     meta.pop("draft_medicines", None)
+    meta.pop("draft_diagnoses", None)
     rep.notes = json.dumps(meta)
     rep.status = "confirmed"
     db.commit()
@@ -288,6 +330,7 @@ def timeline_events(p, include_insights: bool = True) -> list[dict]:
             abn = [x for x in r.results if x.flag in ("H", "L")]
             events.append({"date": r.report_date.isoformat(), "type": "report", "kind": r.kind, "title": r.lab_name or r.filename,
                            "subtitle": (f"{len(r.results)} tests, {len(abn)} outside range" if r.kind == "lab" else
+                                        f"Discharge summary: {', '.join(g.name for g in r.diagnoses) or 'no diagnosis recorded'}" if r.kind == "discharge" else
                                         f"Prescription by {r.doctor_name or 'doctor'}: " + ", ".join(m.brand for m in r.medications)),
                            "report_id": r.id, "abnormal": [catalog.tests().get(x.test_code or "", {}).get("name", x.test_name_raw) for x in abn][:4]})
     for m in p.medications:
@@ -296,6 +339,10 @@ def timeline_events(p, include_insights: bool = True) -> list[dict]:
                            "subtitle": f"{m.generic or ''} {m.dose or ''} {m.frequency or ''}".strip() + (f": {m.reason}" if m.reason else "")})
     for s in p.symptoms:
         events.append({"date": s.onset_date.isoformat(), "type": "symptom", "title": s.label, "subtitle": s.notes or ""})
+    for g in getattr(p, "diagnoses", []):
+        if g.diagnosed_on:
+            events.append({"date": g.diagnosed_on.isoformat(), "type": "diagnosis", "title": g.name + (" (history)" if g.status == "history" else ""),
+                           "subtitle": f"ICD-10 {g.icd10}" if g.icd10 else "", "report_id": g.report_id})
     for c in getattr(p, "checkups", []):
         when = c.done_date or c.due_date
         if when:

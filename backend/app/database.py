@@ -17,6 +17,7 @@ if config.IS_POSTGRES:
 else:
     engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
+PGVECTOR = config.IS_POSTGRES  # turned off at start-up if the vector extension is not available
 
 
 class Base(DeclarativeBase):
@@ -30,7 +31,7 @@ class Embedding(TypeDecorator):
     cache_ok = True
 
     def load_dialect_impl(self, dialect):
-        if dialect.name == "postgresql":
+        if dialect.name == "postgresql" and PGVECTOR:
             from pgvector.sqlalchemy import Vector
 
             return dialect.type_descriptor(Vector(config.EMBED_DIM))
@@ -84,19 +85,55 @@ $$;
 """
 
 
+def _persist_secrets():
+    """Keep the file-encryption key in the database when it is not set as an env var, so encrypted files
+    stay readable after container restarts (free hosting has no persistent disk)."""
+    import os
+
+    from . import security
+    from .models import AppSetting
+
+    if os.getenv("DOC_ENCRYPTION_KEY") or os.getenv("CARETHREAD_ENCRYPTION_KEY"):
+        return
+    with SessionLocal() as db:
+        row = db.get(AppSetting, "fernet_key")
+        if row is None:
+            db.add(AppSetting(key="fernet_key", value=config.ENCRYPTION_KEY))
+            db.commit()
+        elif row.value != config.ENCRYPTION_KEY:
+            config.ENCRYPTION_KEY = row.value
+            security.reload_keys()
+        if not os.getenv("JWT_SECRET"):
+            jwt_row = db.get(AppSetting, "jwt_secret")
+            if jwt_row is None:
+                db.add(AppSetting(key="jwt_secret", value=config.JWT_SECRET))
+                db.commit()
+            else:
+                config.JWT_SECRET = jwt_row.value
+
+
 def init_db():
+    global PGVECTOR
     from . import models  # noqa: F401  (register tables)
 
     if config.IS_POSTGRES:
-        with engine.begin() as conn:
-            conn.execute(text("create extension if not exists vector"))
+        try:
+            with engine.begin() as conn:
+                conn.execute(text("create extension if not exists vector"))
+        except Exception as e:  # noqa: BLE001
+            PGVECTOR = False
+            log.warning("pgvector not available (%s): embeddings stored as JSON", type(e).__name__)
     Base.metadata.create_all(bind=engine)
     _add_missing_columns()
     if config.IS_POSTGRES:
+        _persist_secrets()
+    if config.IS_POSTGRES and PGVECTOR:
         with engine.begin() as conn:
             conn.execute(text(MATCH_CHUNKS_SQL))
             # Row-level security ON with no policies = deny-all for Supabase's anon/authenticated roles.
             # Only this API (table owner / service role) can read or write; authorization is enforced in code.
+            conn.execute(text("create index if not exists chunks_embedding_hnsw on chunks using hnsw (embedding vector_cosine_ops)"))
+    if config.IS_POSTGRES:
+        with engine.begin() as conn:
             for table in Base.metadata.sorted_tables:
                 conn.execute(text(f'alter table "{table.name}" enable row level security'))
-            conn.execute(text("create index if not exists chunks_embedding_hnsw on chunks using hnsw (embedding vector_cosine_ops)"))

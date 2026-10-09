@@ -17,7 +17,9 @@ services:
       - key: FIREBASE_APP_ID
         sync: false
       - key: DATABASE_URL
-        sync: false        # Supabase session-pooler URI
+        fromDatabase:      # persistent Postgres (users, records, files survive restarts)
+          name: doc-db
+          property: connectionString
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_SERVICE_KEY
@@ -34,3 +36,10 @@ services:
         generateValue: true
       - key: DOC_ENCRYPTION_KEY
         sync: false        # Fernet key; must stay the same so stored files remain readable
+
+databases:
+  - name: doc-db
+    plan: free
+    databaseName: doc
+    user: doc
+    ipAllowList: []        # internal only: reachable from the DOC service, not the internet

@@ -76,7 +76,7 @@ No. Formulas, flags (including critical), trends, rules and wellness thresholds 
 - In the vision evaluation, Gemini reported **0 tests that weren't printed**.
 
 **How accurate is it?**
-- **92/92 automated tests pass.**
+- **94/94 automated tests pass.**
 - 9/9 formulas match hand calculations.
 - The own reader is 100% accurate on 782 values in 100 synthetic PDFs.
 - The AI boost read 37/37 values from 6 rotated, blurry synthetic photos.

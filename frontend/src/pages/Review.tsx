@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ClipboardCheck, Trash2, Plus, ExternalLink, AlertTriangle, CheckCircle2, Pill, FlaskConical, EyeOff, Sparkles, Pencil, ArrowLeft } from "lucide-react";
+import { ClipboardCheck, Trash2, Plus, ExternalLink, AlertTriangle, CheckCircle2, Pill, FlaskConical, EyeOff, Sparkles, Pencil, ArrowLeft, Stethoscope } from "lucide-react";
 import { api, getToken, openAuthed } from "../lib/api";
 import { useApp, useFetch } from "../lib/store";
 import { fmtDate, fmtNum, methodLabel } from "../lib/format";
@@ -10,6 +10,8 @@ import { ExplainButton } from "../components/Explain";
 
 interface Row { key: string; test_code: string | null; test_name_raw: string; value_raw: string; unit_raw: string; ref_low: string; ref_high: string; confidence: number; source_text: string | null; value?: number | null; unit?: string | null }
 interface MedRow { key: string; brand: string; dose: string; frequency: string; start_date: string; reason: string; confidence: number; source_text: string | null; matched: boolean; generic: string | null }
+
+interface DxRow { key: string; name: string; dxkey: string | null; icd10: string | null; status: "active" | "history"; confidence: number; source_text: string | null; simple: string | null }
 
 let k = 0;
 const nk = () => `r${++k}`;
@@ -23,6 +25,7 @@ export default function ReviewPage() {
   const [editing, setEditing] = useState(false);
   const [rows, setRows] = useState<Row[]>([]);
   const [meds, setMeds] = useState<MedRow[]>([]);
+  const [dxs, setDxs] = useState<DxRow[]>([]);
   const [head, setHead] = useState({ kind: "lab", lab_name: "", doctor_name: "", report_date: "" });
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -41,6 +44,8 @@ export default function ReviewPage() {
       key: nk(), brand: m.brand, dose: m.dose ?? "", frequency: m.frequency ?? "", start_date: ("start_date" in m && (m as { start_date?: string }).start_date) || rep.report_date || "",
       reason: ("reason" in m && (m as { reason?: string }).reason) || "", confidence: m.confidence, source_text: m.source_text, matched: m.matched, generic: m.generic,
     })));
+    const dsrc = rep.status === "review" ? rep.draft_diagnoses ?? [] : (rep.diagnoses ?? []).map((g) => ({ ...g, confidence: 1 }));
+    setDxs(dsrc.map((g) => ({ key: nk(), name: g.name, dxkey: g.key, icd10: g.icd10, status: g.status, confidence: g.confidence, source_text: g.source_text, simple: g.simple })));
   }, [rep]);
 
   useEffect(() => {
@@ -53,12 +58,13 @@ export default function ReviewPage() {
   }, [rep]);
 
   const tests = useMemo(() => meta?.tests ?? [], [meta]);
-  const lowConf = rows.filter((r) => r.confidence < 0.75).length + meds.filter((m) => m.confidence < 0.75).length;
+  const lowConf = rows.filter((r) => r.confidence < 0.75).length + meds.filter((m) => m.confidence < 0.75).length + dxs.filter((d) => d.confidence < 0.75).length;
 
   if (error) return <ErrorBox msg={error} />;
   if (!rep) return <Spinner />;
 
   const upd = (key: string, patch: Partial<Row>) => setRows((rs) => rs.map((r) => (r.key === key ? { ...r, ...patch, confidence: 1 } : r)));
+  const updDx = (key: string, patch: Partial<DxRow>) => setDxs((ds) => ds.map((d) => (d.key === key ? { ...d, ...patch, confidence: 1, ...(patch.name !== undefined ? { dxkey: null, icd10: null, simple: null } : {}) } : d)));
   const updMed = (key: string, patch: Partial<MedRow>) => setMeds((ms) => ms.map((m) => (m.key === key ? { ...m, ...patch, confidence: 1 } : m)));
 
   async function save() {
@@ -74,6 +80,7 @@ export default function ReviewPage() {
           ref_low: r.ref_low === "" ? null : Number(r.ref_low), ref_high: r.ref_high === "" ? null : Number(r.ref_high),
         })),
         medicines: meds.filter((m) => m.brand.trim()).map((m) => ({ brand: m.brand, dose: m.dose || null, frequency: m.frequency || null, start_date: m.start_date || null, reason: m.reason || null, source_text: m.source_text })),
+        diagnoses: dxs.filter((d) => d.name.trim()).map((d) => ({ name: d.name, key: d.dxkey, status: d.status, source_text: d.source_text })),
       });
       bump();
       await refreshProfiles();
@@ -120,7 +127,7 @@ export default function ReviewPage() {
         <div className="space-y-6">
           <section className="card grid gap-3 p-5 sm:grid-cols-4">
             <div><label className="label">Type</label>
-              <select disabled={!editing} className="input" value={head.kind} onChange={(e) => setHead({ ...head, kind: e.target.value })}><option value="lab">Lab report</option><option value="prescription">Prescription</option></select></div>
+              <select disabled={!editing} className="input" value={head.kind} onChange={(e) => setHead({ ...head, kind: e.target.value })}><option value="lab">Lab report</option><option value="prescription">Prescription</option><option value="discharge">Discharge summary</option></select></div>
             <div><label className="label">Date</label><input disabled={!editing} type="date" className="input" value={head.report_date} onChange={(e) => setHead({ ...head, report_date: e.target.value })} /></div>
             <div><label className="label">Lab / clinic</label><input disabled={!editing} className="input" value={head.lab_name} onChange={(e) => setHead({ ...head, lab_name: e.target.value })} /></div>
             <div><label className="label">Doctor</label><input disabled={!editing} className="input" value={head.doctor_name} onChange={(e) => setHead({ ...head, doctor_name: e.target.value })} /></div>
@@ -175,7 +182,38 @@ export default function ReviewPage() {
             </section>
           )}
 
-          {(head.kind === "prescription" || meds.length > 0) && (
+          {(head.kind === "discharge" || dxs.length > 0) && (
+            <section className="card p-5">
+              <h2 className="mb-1 flex items-center gap-2 font-bold"><Stethoscope className="h-5 w-5 text-rose-500" /> Diagnoses ({dxs.length})</h2>
+              <p className="mb-3 text-xs muted">Read from the document and matched to standard codes (ICD-10). Check each one. Saving a known condition (e.g. diabetes) switches on the right reminders.</p>
+              <div className="space-y-2">
+                {dxs.map((d) => (
+                  <div key={d.key} className={`rounded-xl border p-3 ${d.confidence < 0.75 ? "border-amber-300 bg-amber-50/70 dark:bg-amber-500/10" : "border-slate-200 dark:border-white/10"}`}>
+                    {editing ? (
+                      <div className="grid grid-cols-[1fr_auto_auto] gap-2">
+                        <input className="input" placeholder="Diagnosis" value={d.name} onChange={(e) => updDx(d.key, { name: e.target.value })} />
+                        <select className="input" value={d.status} onChange={(e) => setDxs((ds) => ds.map((x) => (x.key === d.key ? { ...x, status: e.target.value as "active" | "history", confidence: 1 } : x)))}>
+                          <option value="active">Current</option><option value="history">Past history</option>
+                        </select>
+                        <button className="btn-ghost p-2 text-slate-400 hover:text-red-600" onClick={() => setDxs((ds) => ds.filter((x) => x.key !== d.key))} aria-label="Remove"><Trash2 className="h-4 w-4" /></button>
+                      </div>
+                    ) : (
+                      <p className="text-sm"><b>{d.name}</b> <span className="muted">{d.status === "history" ? "· past history" : "· current"}</span></p>
+                    )}
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] muted">
+                      {editing && <ConfidenceBadge value={d.confidence} />}
+                      {d.icd10 ? <span className="chip bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">ICD-10 {d.icd10}</span> : editing && <span className="text-amber-700">not in our list: it will be saved as written</span>}
+                      {d.source_text && <span className="truncate">“{d.source_text}”</span>}
+                    </div>
+                    {d.simple && <p className="mt-1.5 text-xs">{d.simple}</p>}
+                  </div>
+                ))}
+              </div>
+              {editing && <button className="btn-ghost mt-3 text-brand-700" onClick={() => setDxs((ds) => [...ds, { key: nk(), name: "", dxkey: null, icd10: null, status: "active", confidence: 1, source_text: null, simple: null }])}><Plus className="h-4 w-4" /> Add a diagnosis</button>}
+            </section>
+          )}
+
+          {(head.kind === "prescription" || head.kind === "discharge" || meds.length > 0) && (
             <section className="card p-5">
               <h2 className="mb-3 flex items-center gap-2 font-bold"><Pill className="h-5 w-5 text-violet-500" /> Medicines ({meds.length})</h2>
               <div className="space-y-2">

@@ -29,6 +29,9 @@ def build_context(profile: Profile, analysis: dict) -> str:
         rng = f"ref {r.ref_low if r.ref_low is not None else ''}-{r.ref_high if r.ref_high is not None else ''}"
         lab = reports[r.report_id].lab_name if r.report_id in reports else ""
         lines.append(f"[R{r.id}] {r.date} | {lab} | {name}: {r.value:g} {r.unit or ''} ({rng}) flag {r.flag or '-'}" if r.value is not None else f"[R{r.id}] {r.date} | {name}: {r.value_raw}")
+    lines += ["", "DIAGNOSES (from discharge summaries / prescriptions, confirmed by the person):"]
+    for g in getattr(profile, "diagnoses", []):
+        lines.append(f"[Dx{g.id}] {g.diagnosed_on or '?'} {g.name} (ICD-10 {g.icd10 or '-'}) {'past history' if g.status == 'history' else 'current'}")
     lines += ["", "MEDICINES:"]
     for m in profile.medications:
         lines.append(f"[M{m.id}] {m.brand} ({m.generic or '?'}) {m.dose or ''} {m.frequency or ''} started {m.start_date or '?'} {'active' if m.active else 'stopped'} reason: {m.reason or '-'}")
@@ -124,7 +127,7 @@ def chat(profile: Profile, analysis: dict, message: str, history: list[dict], la
                     res["unsupported_claims"] = v.get("unsupported_claims", [])
             res["mode"] = "ai"
             res["engine"] = ai.engine_label(ai.last_engine)
-            res["citations"] = sorted(set(res.get("citations", [])) | set(re.findall(r"\[((?:R|M|S)\d+|I:[\w-]+|A:[\w:.-]+|V:\w+)\]", res["answer"])))
+            res["citations"] = sorted(set(res.get("citations", [])) | set(re.findall(r"\[((?:R|M|S|D|Dx)\d+|I:[\w-]+|A:[\w:.-]+|V:\w+)\]", res["answer"])))
             return res
     return offline_chat(profile, analysis, message, retrieved)
 
