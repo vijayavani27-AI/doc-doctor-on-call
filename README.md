@@ -19,6 +19,21 @@
 
 ---
 
+## Team
+
+| Role | Member | Area |
+|---|---|---|
+| 👑 **Team Leader** | **Vijayavani K** | Frontend |
+| 💻 Developer | **RubikaDevi P** | Frontend |
+| 💻 Developer | **Sujitha S** | Frontend |
+| ⚙️ Developer | **Prathip M** | Backend |
+| ⚙️ Developer | **Vijanthar MC** | Backend |
+
+**Frontend:** React 18 · TypeScript · Vite · Tailwind CSS v4 · PWA (27 pages, 3 languages, voice, dark mode)
+**Backend:** FastAPI · own OCR + NER pipeline · XGBoost + TreeSHAP · RAG · FHIR R4 · consent-based family sharing · 103 API endpoints
+
+---
+
 ## For judges: how DOC meets each criterion
 
 | Criterion | What DOC does | Evidence |
