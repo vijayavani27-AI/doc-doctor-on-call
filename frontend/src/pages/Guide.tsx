@@ -1,13 +1,14 @@
 import { Link } from "react-router-dom";
 import {
   BookOpen, UserPlus, Upload, ClipboardCheck, Radar, Home, FolderOpen, Activity, Pill, MessageCircle, Stethoscope, Settings, ShieldCheck, CheckCircle2, FlaskConical, Calculator, Sparkles, HeartPulse,
+  Users, CalendarCheck, Gauge, Utensils, Bandage, HeartHandshake, Siren,
 } from "lucide-react";
 import { PageHeader } from "../components/ui";
 import { SampleReports } from "../components/SampleReports";
 
 const STEPS = [
   { icon: UserPlus, title: "Set up the person", text: "Settings → Family profiles. Add the date of birth, sex and known conditions (e.g. Diabetes, High BP). The formulas need age and sex. Conditions switch on the right reminders.", to: "/app/settings#family" },
-  { icon: ShieldCheck, title: "Turn on 2FA (recommended)", text: "Settings → Two-factor authentication → scan the QR code with Google/Microsoft Authenticator → type the 6-digit code. Save your backup codes.", to: "/app/settings#security" },
+  { icon: ShieldCheck, title: "Sign in safely", text: "Use 'Continue with Google' or your email. For extra safety, turn on 2-Step Verification in your Google account. Settings shows how you are signed in.", to: "/app/settings#security" },
   { icon: Upload, title: "Upload reports", text: "Upload → choose a PDF or take a photo. Old reports matter: the more history, the more DOC can find.", to: "/app/upload" },
   { icon: ClipboardCheck, title: "Check & confirm", text: "DOC shows every value it read, with its source line. Yellow rows are ones it's unsure about; fix them, then press Confirm & save.", to: "/app/records" },
   { icon: Radar, title: "See hidden risks", text: "Hidden Risks shows scores calculated by joining your reports, what each means, and the next step.", to: "/app/risks" },
@@ -17,14 +18,21 @@ const STEPS = [
 const FEATURES: { icon: typeof Home; page: string; to: string; items: string[] }[] = [
   { icon: Home, page: "Home (Dashboard)", to: "/app", items: ["Health snapshot score", "Top 3 things to do now", "Hidden-risk tiles", "Next best test", "Key numbers with mini-charts", "Alerts & silent trends", "Recent reports"] },
   { icon: Radar, page: "Hidden Risks ★", to: "/app/risks", items: ["8 medical formulas joined across reports: FIB-4, APRI, eGFR + decline rate, Mentzer, TyG, TG/HDL, Non-HDL, corrected calcium", "Colour gauge, formula with your numbers, citation", "Every input links to its report", "Trend over the years", "Personal-normal (silent drift) alerts", "Next Best Test with ₹ estimate"] },
-  { icon: Upload, page: "Upload & Review", to: "/app/upload", items: ["PDF / photo / camera", "AI reading with a confidence score per value (offline reader for text PDFs)", "Unit conversion to one scale", "Personal details removed before AI", "Edit, add or delete values before saving", "Encrypted original file"] },
+  { icon: Upload, page: "Upload & Review", to: "/app/upload", items: ["PDF / photo / camera", "DOC's own reader (PDF text + OCR) with a confidence score per value; AI boost for messy photos", "Unit conversion to one scale", "Personal details removed before AI", "Edit, add or delete values before saving", "Encrypted original file", "Values we're unsure about are marked 'Check this'", "Fix a value later from the report viewer"] },
   { icon: FolderOpen, page: "Records", to: "/app/records", items: ["All reports with search & filters", "All values table with LOINC codes", "'As printed' vs stored value", "Explain any value simply"] },
   { icon: Activity, page: "Timeline & Trends", to: "/app/timeline", items: ["One chart per test across all labs", "Normal-range band and lab-change markers", "Score history", "Timeline of reports, medicines, symptoms and risks"] },
   { icon: HeartPulse, page: "Wellness", to: "/app/wellness", items: ["Home BP, sugar, weight & BMI, heart rate, oxygen, steps, sleep", "Add by hand or import a CSV (template provided)", "30-day averages and charts against guideline targets", "Linked to medicines, e.g. BP rise after a painkiller", "Shown in Ask AI and the Doctor summary"] },
   { icon: Pill, page: "Medicines", to: "/app/medicines", items: ["Brand → generic name", "Yearly saving with generics", "Kidney dose checks", "Prescribing cascades", "Risky combinations (triple whammy)", "Monitoring due (e.g. B12 on metformin)", "Symptom diary & side-effect timing"] },
-  { icon: MessageCircle, page: "Ask AI", to: "/app/chat", items: ["Answers only from your records", "Source button on every fact", "Second AI fact-checks the answer", "Says 'I don't know' when unsure", "Voice input & read aloud", "English / Hindi / Tamil"] },
-  { icon: Stethoscope, page: "Doctor Visit", to: "/app/doctor", items: ["One-page summary", "PDF download & print", "Share link that expires (24 h / 3 d / 7 d), can be revoked, views counted", "WhatsApp share"] },
-  { icon: Settings, page: "Settings", to: "/app/settings", items: ["2FA with QR + backup codes", "Family profiles (up to 10)", "Language & dark mode", "Access log", "Export all data", "Delete account"] },
+  { icon: MessageCircle, page: "Ask AI", to: "/app/chat", items: ["Answers only from your records", "Source button on every fact", "Second AI fact-checks the answer", "Says 'I don't know' when unsure", "Voice input & read aloud", "English / Hindi / Tamil", "Ask about an approved family member", "Emergency words show a 'call 112' banner"] },
+  { icon: Stethoscope, page: "Doctor Visit", to: "/app/doctor", items: ["One-page summary", "PDF download & print", "Share link that expires (24 h / 3 d / 7 d), can be revoked, views counted", "WhatsApp share", "PDF with a Tamil page for the family"] },
+  { icon: Users, page: "Family", to: "/app/family", items: ["Ask to see a family member's health (they must approve)", "Approve only the parts you want to share", "Change or stop sharing anytime", "See who viewed your data in the access log", "Ask AI about an approved family member"] },
+  { icon: CalendarCheck, page: "Care Plan", to: "/app/care", items: ["Checkups with overdue / due-soon colours", "Repeat checkups plan themselves", "Medicine, reading and water reminders", "Today's checklist", "Browser notifications"] },
+  { icon: Gauge, page: "Risk Check", to: "/app/screening", items: ["Diabetes and heart screening estimates (our own XGBoost models)", "Which of your values moved the estimate (SHAP)", "What was missing and how it was filled", "Model card with accuracy and limits", "A screening estimate, never a diagnosis"] },
+  { icon: Utensils, page: "Food & Diet", to: "/app/meals", items: ["Type what you ate, e.g. '2 idli, sambar'", "65 Indian foods with calories, carbs, protein", "7-day chart", "Tips based on your own reports"] },
+  { icon: Bandage, page: "Wound Check", to: "/app/wound", items: ["Photo + a few safety questions", "Tells you how soon to see a doctor", "Compare photos to track healing", "Emergency numbers on the page"] },
+  { icon: HeartHandshake, page: "Home Care", to: "/app/remedies", items: ["Safe self-care for 15 common problems", "What to avoid", "Red flags that need a doctor"] },
+  { icon: Siren, page: "SOS", to: "/app/emergency", items: ["Tap to call 112 / 108 / 14416", "Emergency card for the ambulance team", "Share with your location", "Nearby hospitals (OpenStreetMap)"] },
+  { icon: Settings, page: "Settings", to: "/app/settings", items: ["Sign-in details (Google / email)", "Family profiles (up to 10) with blood group, allergies, emergency contact", "ABHA link (demo)", "FHIR R4 download for hospitals", "Access log, export, delete account"] },
 ];
 
 export default function Guide() {

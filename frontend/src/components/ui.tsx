@@ -55,7 +55,9 @@ export function StatusChip({ status, children }: { status: Status | Level; child
   );
 }
 
-export function FlagChip({ flag }: { flag: string | null | undefined }) {
+export function FlagChip({ flag, computed }: { flag: string | null | undefined; computed?: string | null }) {
+  if (computed === "critical_high") return <span className="chip bg-red-600 text-white">Critical high</span>;
+  if (computed === "critical_low") return <span className="chip bg-red-600 text-white">Critical low</span>;
   if (flag === "H") return <span className="chip bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300">High</span>;
   if (flag === "L") return <span className="chip bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300">Low</span>;
   if (flag === "N") return <span className="chip bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">Normal</span>;

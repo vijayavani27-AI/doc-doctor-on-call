@@ -48,11 +48,17 @@ def engine_label(provider: str | None = None) -> str | None:
 
 
 def structured(system: str, content: list[dict] | str, schema: dict, effort: str = "medium",
-               max_tokens: int = 16000) -> dict | None:
+               max_tokens: int = 16000, only: tuple[str, ...] | None = None) -> dict | None:
     """One model call that returns a dict matching `schema`, or None on any failure."""
     global last_engine
     for p in providers():
-        result = _claude(system, content, schema, effort, max_tokens) if p == "claude" else _gemini(system, content, schema, max_tokens)
+        if only and p not in only:
+            continue
+        try:
+            result = _claude(system, content, schema, effort, max_tokens) if p == "claude" else _gemini(system, content, schema, max_tokens)
+        except Exception as e:  # noqa: BLE001  (the AI boost is optional: never let it break a request)
+            log.warning("%s failed (%s); falling back", p, type(e).__name__)
+            result = None
         if result is not None:
             last_engine = p
             return result

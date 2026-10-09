@@ -1,3 +1,4 @@
+"""Sign-in. Production: Firebase (Google or email) -> our session token. Dev/tests: local email + password."""
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy.orm import Session
@@ -5,7 +6,7 @@ from sqlalchemy.orm import Session
 from .. import config, security
 from ..database import get_db
 from ..models import Profile, User
-from ..services import ai, records
+from ..services import ai, firebase_auth, records
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -22,18 +23,10 @@ class LoginIn(BaseModel):
     password: str
 
 
-class VerifyIn(BaseModel):
-    challenge_token: str
-    code: str
-
-
-class CodeIn(BaseModel):
-    code: str
-
-
-class DisableIn(BaseModel):
-    password: str
-    code: str
+class FirebaseIn(BaseModel):
+    id_token: str = Field(min_length=20, max_length=4096)
+    name: str | None = Field(default=None, max_length=120)
+    sex: str | None = Field(default=None, pattern="^[FM]$")
 
 
 class MeIn(BaseModel):
@@ -42,26 +35,59 @@ class MeIn(BaseModel):
 
 
 def user_out(u: User) -> dict:
-    return {"id": u.id, "email": u.email, "name": u.name, "language": u.language, "totp_enabled": u.totp_enabled,
-            "backup_codes_left": len(u.backup_codes or []), "is_demo": u.email == config.DEMO_EMAIL, "ai_enabled": ai.enabled(), "ai_engine": ai.engine_label()}
+    primary = next((p for p in u.profiles if p.is_primary), None)
+    return {"id": u.id, "email": u.email, "name": u.name, "language": u.language, "auth_provider": u.auth_provider or "local",
+            "email_verified": bool(u.email_verified), "is_demo": u.email == config.DEMO_EMAIL or bool(u.is_demo),
+            "profile_incomplete": bool(primary and primary.profile_incomplete),
+            "ai_enabled": ai.enabled(), "ai_engine": ai.engine_label()}
 
 
 def _session(u: User) -> dict:
     return {"access_token": security.create_token(u.id), "token_type": "bearer", "user": user_out(u)}
 
 
+@router.get("/config")
+def auth_config():
+    """Public sign-in settings for the web app (Firebase web config is public by design)."""
+    return {"mode": config.AUTH_MODE, "firebase": config.FIREBASE_WEB_CONFIG if config.AUTH_MODE == "firebase" else None}
+
+
+@router.post("/firebase")
+def firebase_login(body: FirebaseIn, request: Request, db: Session = Depends(get_db)):
+    """Exchange a verified Firebase ID token (Google or email sign-in) for a DOC session."""
+    key = security.client_ip(request)
+    security.login_limiter.check(f"fb|{key}")
+    try:
+        ident = firebase_auth.verify(body.id_token)
+    except firebase_auth.FirebaseTokenError as e:
+        security.login_limiter.hit(f"fb|{key}")
+        raise HTTPException(401, str(e)) from None
+    u, created = security.upsert_firebase_user(db, ident, body.name, body.sex)
+    security.audit(db, u.id, "register" if created else "login", f"firebase ({ident.provider or 'unknown'})", request)
+    db.commit()
+    db.refresh(u)
+    return {**_session(u), "created": created}
+
+
+def _local_only():
+    if config.AUTH_MODE == "firebase":
+        raise HTTPException(410, "Please use 'Continue with Google' or email sign-in")
+
+
 @router.post("/register")
 def register(body: RegisterIn, request: Request, db: Session = Depends(get_db)):
+    _local_only()
     email = body.email.lower()
     if db.query(User).filter(User.email == email).first():
         raise HTTPException(409, "An account with this email already exists")
     problems = security.password_problems(body.password)
     if problems:
         raise HTTPException(422, "Password needs " + ", ".join(problems))
-    u = User(email=email, name=body.name.strip(), password_hash=security.hash_password(body.password))
+    u = User(email=email, name=body.name.strip(), password_hash=security.hash_password(body.password), auth_provider="local")
     db.add(u)
     db.flush()
     db.add(Profile(user_id=u.id, name=u.name, relation="self", sex=body.sex, is_primary=True))
+    security.attach_pending_invites(db, u)
     security.audit(db, u.id, "register", None, request)
     db.commit()
     return _session(u)
@@ -69,6 +95,7 @@ def register(body: RegisterIn, request: Request, db: Session = Depends(get_db)):
 
 @router.post("/login")
 def login(body: LoginIn, request: Request, db: Session = Depends(get_db)):
+    _local_only()
     key = f"{body.email.lower()}|{security.client_ip(request)}"
     security.login_limiter.check(key)
     u = db.query(User).filter(User.email == body.email.lower()).first()
@@ -76,83 +103,9 @@ def login(body: LoginIn, request: Request, db: Session = Depends(get_db)):
         security.login_limiter.hit(key)
         raise HTTPException(401, "Wrong email or password")
     security.login_limiter.reset(key)
-    if u.totp_enabled:
-        return {"requires_2fa": True, "challenge_token": security.create_token(u.id, "2fa")}
     security.audit(db, u.id, "login", "password", request)
     db.commit()
     return _session(u)
-
-
-@router.post("/2fa/verify")
-def verify_2fa(body: VerifyIn, request: Request, db: Session = Depends(get_db)):
-    uid = security.decode_token(body.challenge_token, "2fa")
-    security.otp_limiter.check(str(uid))
-    u = db.get(User, uid)
-    if not u or not u.totp_enabled or not u.totp_secret_enc:
-        raise HTTPException(400, "Two-factor authentication is not enabled")
-    secret = security.decrypt_str(u.totp_secret_enc)
-    method = "totp"
-    if not security.verify_totp(secret, body.code):
-        if security.use_backup_code(u, body.code):
-            method = "backup code"
-        else:
-            security.otp_limiter.hit(str(uid))
-            raise HTTPException(401, "Invalid code")
-    security.otp_limiter.reset(str(uid))
-    security.audit(db, u.id, "login", f"password + {method}", request)
-    db.commit()
-    return _session(u)
-
-
-@router.post("/2fa/setup")
-def setup_2fa(u: User = Depends(security.current_user), db: Session = Depends(get_db)):
-    if u.totp_enabled:
-        raise HTTPException(400, "Two-factor authentication is already on")
-    secret = security.new_totp_secret()
-    u.totp_secret_enc = security.encrypt_str(secret)
-    db.commit()
-    uri = security.totp_uri(secret, u.email)
-    return {"secret": secret, "otpauth_uri": uri, "qr": security.qr_svg_data_uri(uri)}
-
-
-@router.post("/2fa/enable")
-def enable_2fa(body: CodeIn, request: Request, u: User = Depends(security.current_user), db: Session = Depends(get_db)):
-    if not u.totp_secret_enc:
-        raise HTTPException(400, "Start setup first")
-    security.otp_limiter.check(f"enable-{u.id}")
-    if not security.verify_totp(security.decrypt_str(u.totp_secret_enc), body.code):
-        security.otp_limiter.hit(f"enable-{u.id}")
-        raise HTTPException(401, "That code didn't match. Check your phone's time is correct and try the newest code.")
-    plain, hashed = security.new_backup_codes()
-    u.totp_enabled, u.backup_codes = True, hashed
-    security.audit(db, u.id, "2fa_enabled", None, request)
-    db.commit()
-    return {"backup_codes": plain, "user": user_out(u)}
-
-
-@router.post("/2fa/disable")
-def disable_2fa(body: DisableIn, request: Request, u: User = Depends(security.current_user), db: Session = Depends(get_db)):
-    if not u.totp_enabled:
-        raise HTTPException(400, "Two-factor authentication is not on")
-    if not security.verify_password(body.password, u.password_hash):
-        raise HTTPException(401, "Wrong password")
-    if not (security.verify_totp(security.decrypt_str(u.totp_secret_enc), body.code) or security.use_backup_code(u, body.code)):
-        raise HTTPException(401, "Invalid code")
-    u.totp_enabled, u.totp_secret_enc, u.backup_codes = False, None, []
-    security.audit(db, u.id, "2fa_disabled", None, request)
-    db.commit()
-    return {"user": user_out(u)}
-
-
-@router.post("/2fa/backup-codes")
-def regenerate_backup_codes(body: CodeIn, request: Request, u: User = Depends(security.current_user), db: Session = Depends(get_db)):
-    if not u.totp_enabled or not security.verify_totp(security.decrypt_str(u.totp_secret_enc), body.code):
-        raise HTTPException(401, "Invalid code")
-    plain, hashed = security.new_backup_codes()
-    u.backup_codes = hashed
-    security.audit(db, u.id, "backup_codes_regenerated", None, request)
-    db.commit()
-    return {"backup_codes": plain}
 
 
 @router.get("/me")
@@ -172,12 +125,10 @@ def update_me(body: MeIn, u: User = Depends(security.current_user), db: Session 
 
 @router.post("/demo")
 def demo_login(request: Request, db: Session = Depends(get_db)):
-    """One-click demo: logs into a shared demo account with a synthetic family (no 2FA)."""
+    """One-click demo: a shared account with a synthetic family (all data is_demo=true)."""
     u = db.query(User).filter(User.email == config.DEMO_EMAIL).first()
-    if u is None or not any(p.vitals for p in u.profiles):  # missing, or seeded before wellness data existed
+    if u is None or records.demo_outdated(u):
         u = records.seed_demo(db)
-    if u.totp_enabled:  # someone turned 2FA on for the shared demo; keep the demo open for others
-        u.totp_enabled, u.totp_secret_enc, u.backup_codes = False, None, []
     security.audit(db, u.id, "login", "demo", request)
     db.commit()
     return _session(u)

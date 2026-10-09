@@ -1,4 +1,5 @@
 # One-click deploy on Render (https://render.com): New > Blueprint > pick this repo.
+# Secrets are entered in the Render dashboard (sync: false) and are never committed.
 services:
   - type: web
     name: doc-doctor-on-call
@@ -7,13 +8,29 @@ services:
     dockerfilePath: ./Dockerfile
     healthCheckPath: /api/health
     envVars:
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_API_KEY
+        sync: false
+      - key: FIREBASE_AUTH_DOMAIN
+        sync: false
+      - key: FIREBASE_APP_ID
+        sync: false
+      - key: DATABASE_URL
+        sync: false        # Supabase session-pooler URI
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
       - key: GEMINI_API_KEY
-        sync: false        # paste your key in the Render dashboard; never commit it
+        sync: false        # optional AI boost
       - key: ANTHROPIC_API_KEY
         sync: false
       - key: AI_PROVIDER
         value: auto
+      - key: ALLOWED_ORIGINS
+        value: https://doc-doctor-on-call.onrender.com
       - key: JWT_SECRET
         generateValue: true
       - key: DOC_ENCRYPTION_KEY
-        sync: false        # optional: set a Fernet key to keep uploads readable across restarts
+        sync: false        # Fernet key; must stay the same so stored files remain readable

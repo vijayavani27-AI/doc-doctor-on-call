@@ -19,7 +19,7 @@ const SECTIONS = [
     id: "terms", icon: FileText, title: "Terms of use",
     items: [
       ["The service", `${SITE.name} is a hackathon prototype provided "as is" to help people organise and understand their medical records.`],
-      ["Your responsibility", "Check the values DOC reads before confirming them, keep your password and backup codes safe, and only upload reports you have the right to manage (yours, or a family member's with their consent)."],
+      ["Your responsibility", "Check the values DOC reads before confirming them, keep your sign-in (Google account or password) safe, and only upload reports you have the right to manage (yours, or a family member's with their consent)."],
       ["Fair use", "Don't misuse the service, try to access other people's data, or upload harmful files."],
       ["Changes", "Features may change as the project develops."],
     ],

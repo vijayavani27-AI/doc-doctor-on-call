@@ -1,0 +1,237 @@
+{
+  "kind": "heart",
+  "model_name": "XGBoost",
+  "features": [
+    "age",
+    "sex",
+    "cp",
+    "trestbps",
+    "chol",
+    "fbs",
+    "restecg",
+    "thalach",
+    "exang",
+    "oldpeak",
+    "slope",
+    "ca",
+    "thal"
+  ],
+  "labels": {
+    "age": "Age",
+    "sex": "Sex (1 = male, 0 = female)",
+    "cp": "Chest pain type (1 typical angina, 2 atypical, 3 non-anginal, 4 none/asymptomatic)",
+    "trestbps": "Resting blood pressure (upper number)",
+    "chol": "Total cholesterol",
+    "fbs": "Fasting blood sugar above 120 mg/dL (1 = yes)",
+    "restecg": "Resting ECG (0 normal, 1 ST-T abnormality, 2 left ventricular hypertrophy)",
+    "thalach": "Maximum heart rate reached in exercise test",
+    "exang": "Chest pain brought on by exercise (1 = yes)",
+    "oldpeak": "ST depression on exercise ECG",
+    "slope": "Slope of peak exercise ST segment (1 up, 2 flat, 3 down)",
+    "ca": "Major vessels coloured by fluoroscopy (0-3)",
+    "thal": "Thallium scan result (3 normal, 6 fixed defect, 7 reversible defect)"
+  },
+  "units": {
+    "age": "years",
+    "sex": "1/0",
+    "cp": "type 1-4",
+    "trestbps": "mmHg",
+    "chol": "mg/dL",
+    "fbs": "1/0",
+    "restecg": "code 0-2",
+    "thalach": "beats/min",
+    "exang": "1/0",
+    "oldpeak": "mm",
+    "slope": "code 1-3",
+    "ca": "count 0-3",
+    "thal": "code 3/6/7"
+  },
+  "medians": {
+    "age": 56.0,
+    "sex": 1.0,
+    "cp": 3.0,
+    "trestbps": 130.0,
+    "chol": 241.0,
+    "fbs": 0.0,
+    "restecg": 1.0,
+    "thalach": 153.0,
+    "exang": 0.0,
+    "oldpeak": 0.8,
+    "slope": 2.0,
+    "ca": 0.0,
+    "thal": 3.0
+  },
+  "missing_in_training": {
+    "age": 0,
+    "sex": 0,
+    "cp": 0,
+    "trestbps": 0,
+    "chol": 0,
+    "fbs": 0,
+    "restecg": 0,
+    "thalach": 0,
+    "exang": 0,
+    "oldpeak": 0,
+    "slope": 0,
+    "ca": 4,
+    "thal": 2
+  },
+  "ranges": {
+    "age": [
+      18,
+      100
+    ],
+    "sex": [
+      0,
+      1
+    ],
+    "cp": [
+      1,
+      4
+    ],
+    "trestbps": [
+      70,
+      250
+    ],
+    "chol": [
+      80,
+      700
+    ],
+    "fbs": [
+      0,
+      1
+    ],
+    "restecg": [
+      0,
+      2
+    ],
+    "thalach": [
+      50,
+      230
+    ],
+    "exang": [
+      0,
+      1
+    ],
+    "oldpeak": [
+      0,
+      8
+    ],
+    "slope": [
+      1,
+      3
+    ],
+    "ca": [
+      0,
+      3
+    ],
+    "thal": [
+      3,
+      7
+    ]
+  },
+  "n_rows": 303,
+  "positives": 139,
+  "prevalence": 0.459,
+  "cv_auc_mean": 0.913,
+  "cv_auc_sd": 0.032,
+  "cv_auc_folds": [
+    0.859,
+    0.93,
+    0.909,
+    0.938,
+    0.927
+  ],
+  "brier": 0.122,
+  "brier_baseline": 0.248,
+  "oof_auc": 0.906,
+  "calibration": {
+    "intercept": -0.006,
+    "slope": 0.998,
+    "note": "Logistic recalibration of out-of-fold predictions; ideal intercept 0 and slope 1.",
+    "quintiles": [
+      {
+        "n": 61,
+        "mean_predicted": 0.038,
+        "observed_rate": 0.033
+      },
+      {
+        "n": 61,
+        "mean_predicted": 0.155,
+        "observed_rate": 0.18
+      },
+      {
+        "n": 61,
+        "mean_predicted": 0.388,
+        "observed_rate": 0.361
+      },
+      {
+        "n": 60,
+        "mean_predicted": 0.774,
+        "observed_rate": 0.8
+      },
+      {
+        "n": 60,
+        "mean_predicted": 0.955,
+        "observed_rate": 0.933
+      }
+    ],
+    "bands": [
+      {
+        "band": "low",
+        "n": 110,
+        "mean_predicted": 0.083,
+        "observed_rate": 0.082
+      },
+      {
+        "band": "moderate",
+        "n": 65,
+        "mean_predicted": 0.339,
+        "observed_rate": 0.323
+      },
+      {
+        "band": "high",
+        "n": 128,
+        "mean_predicted": 0.845,
+        "observed_rate": 0.852
+      }
+    ]
+  },
+  "bands": {
+    "low_below": 0.2,
+    "high_from": 0.5,
+    "rationale": "low < 0.2 <= moderate < 0.5 <= high: fixed, round cut-offs chosen before training so they are easy to explain. Checked against out-of-fold predictions ('calibration.bands'): the observed rate in every band falls within (±0.05 of) that band's range, so the defaults were kept."
+  },
+  "hyperparameters": {
+    "objective": "binary:logistic",
+    "eval_metric": "logloss",
+    "tree_method": "exact",
+    "seed": 42,
+    "nthread": 1,
+    "max_depth": 3,
+    "eta": 0.05,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "min_child_weight": 5,
+    "lambda": 2.0,
+    "gamma": 0.0,
+    "num_boost_round": 150,
+    "selection_note": "Hyperparameters chosen from an 18-setting grid on the same 5-fold CV (target: calibration slope close to 1 at near-best AUC); reported CV metrics are therefore slightly optimistic."
+  },
+  "dataset": {
+    "name": "UCI Heart Disease (Cleveland Clinic, processed)",
+    "source": "UCI Machine Learning Repository, dataset 45",
+    "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/processed.cleveland.data",
+    "citation": "Janosi A, Steinbrunn W, Pfisterer M, Detrano R. Heart Disease [Dataset]. UCI Machine Learning Repository, 1988. https://doi.org/10.24432/C52P4X",
+    "licence": "CC BY 4.0"
+  },
+  "trained_at": "2026-10-09",
+  "xgboost_version": "3.4.1",
+  "limitations": [
+    "Trained on 303 patients referred to the Cleveland Clinic (USA) for angiography around 1988; it may not fit the general population.",
+    "Several inputs (exercise ECG, fluoroscopy vessel count, thallium scan) come from hospital tests most people will not have.",
+    "Outcome is >50% narrowing of a major coronary artery on angiography, not heart attack risk over time.",
+    "Small dataset, so estimates are uncertain.",
+    "A screening estimate, not a diagnosis."
+  ]
+}

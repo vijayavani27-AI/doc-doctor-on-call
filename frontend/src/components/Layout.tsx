@@ -2,6 +2,7 @@ import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   Home, Upload, FolderOpen, BookOpen, HeartPulse, Activity, Radar, Pill, MessageCircle, Stethoscope, Settings, Moon, Sun, LogOut, ChevronDown, Plus, Menu, Sparkles, WifiOff,
+  Users, CalendarCheck, Gauge, Utensils, Bandage, HeartHandshake, Siren,
 } from "lucide-react";
 import { useApp } from "../lib/store";
 import { LANG_NAMES, t, type Key } from "../lib/i18n";
@@ -21,6 +22,16 @@ const NAV: { to: string; key: Key; icon: typeof Home; star?: boolean }[] = [
   { to: "/app/doctor", key: "doctor", icon: Stethoscope },
   { to: "/app/settings", key: "settings", icon: Settings },
   { to: "/app/guide", key: "guide", icon: BookOpen },
+];
+
+const TOOLS: { to: string; key: Key; icon: typeof Home }[] = [
+  { to: "/app/family", key: "family", icon: Users },
+  { to: "/app/care", key: "care", icon: CalendarCheck },
+  { to: "/app/screening", key: "screening", icon: Gauge },
+  { to: "/app/meals", key: "meals", icon: Utensils },
+  { to: "/app/wound", key: "wound", icon: Bandage },
+  { to: "/app/remedies", key: "remedies", icon: HeartHandshake },
+  { to: "/app/emergency", key: "emergency", icon: Siren },
 ];
 
 function Avatar({ name, color, size = "h-9 w-9 text-sm" }: { name: string; color: string; size?: string }) {
@@ -75,10 +86,13 @@ function TopControls() {
   return (
     <div className="flex items-center gap-1.5 sm:gap-2">
       {user && (
-        <span className={`hidden items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold lg:inline-flex ${user.ai_enabled ? "bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-300" : "bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-slate-300"}`} title={user.ai_enabled ? `${user.ai_engine} is reading and explaining` : "Offline mode: rule-based reader and explanations"}>
-          {user.ai_enabled ? <Sparkles className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />} {user.ai_enabled ? `AI on · ${(user.ai_engine ?? "").split(" ")[0]}` : "Offline mode"}
+        <span className={`hidden items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold lg:inline-flex ${user.ai_enabled ? "bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-300" : "bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-slate-300"}`} title={user.ai_enabled ? `DOC's own OCR, parser, formulas and ML models run first; ${user.ai_engine} is an optional boost` : "DOC's own OCR, parser, formulas and ML models (no external AI)"}>
+          {user.ai_enabled ? <Sparkles className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />} {user.ai_enabled ? `Own models + ${(user.ai_engine ?? "").split(" ")[0]}` : "Own models"}
         </span>
       )}
+      <NavLink to="/app/emergency" className="inline-flex items-center gap-1 rounded-full bg-red-600 px-2.5 py-1.5 text-[11px] font-extrabold text-white shadow-sm hover:bg-red-700" aria-label="SOS emergency">
+        <Siren className="h-3.5 w-3.5" /> SOS
+      </NavLink>
       <select aria-label="Language" value={lang} onChange={(e) => setLang(e.target.value as Lang)} className="rounded-full border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold dark:border-white/10 dark:bg-white/5">
         {(Object.keys(LANG_NAMES) as Lang[]).map((l) => <option key={l} value={l}>{l === "en" ? "EN" : LANG_NAMES[l]}</option>)}
       </select>
@@ -107,7 +121,7 @@ export function AppLayout() {
             <p className="text-[11px] muted">Doctor On Call · AI copilot</p>
           </div>
         </div>
-        <nav className="flex-1 space-y-1">
+        <nav className="-mx-1 flex-1 space-y-1 overflow-y-auto px-1">
           {NAV.map(({ to, key, icon: Icon, star }) => (
             <NavLink
               key={to}
@@ -120,6 +134,19 @@ export function AppLayout() {
               <Icon className="h-[18px] w-[18px]" />
               <span className="flex-1">{t(key, lang)}</span>
               {star && <span className="rounded-md bg-amber-400 px-1.5 py-0.5 text-[10px] font-extrabold text-amber-950">★</span>}
+            </NavLink>
+          ))}
+          <p className="px-3 pb-1 pt-4 text-[11px] font-bold uppercase tracking-wider muted">{t("tools", lang)}</p>
+          {TOOLS.map(({ to, key, icon: Icon }) => (
+            <NavLink
+              key={to}
+              to={to}
+              className={({ isActive }) =>
+                `group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition ${isActive ? "bg-brand-600 text-white shadow-lift" : to === "/app/emergency" ? "text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10" : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/5"}`
+              }
+            >
+              <Icon className="h-[18px] w-[18px]" />
+              <span className="flex-1">{t(key, lang)}</span>
             </NavLink>
           ))}
         </nav>
@@ -170,7 +197,7 @@ export function AppLayout() {
       </nav>
       <Modal open={more} onClose={() => setMore(false)} title="Menu">
         <div className="grid grid-cols-3 gap-2">
-          {NAV.map(({ to, key, icon: Icon }) => (
+          {[...NAV, ...TOOLS].map(({ to, key, icon: Icon }) => (
             <NavLink key={to} to={to} end={to === "/app"} onClick={() => setMore(false)} className={({ isActive }) => `flex flex-col items-center gap-1.5 rounded-2xl border p-3 text-center text-xs font-semibold ${isActive ? "border-brand-400 bg-brand-50 text-brand-700 dark:bg-brand-500/10" : "border-slate-200 dark:border-white/10"}`}>
               <Icon className="h-5 w-5" /> {t(key, lang)}
             </NavLink>

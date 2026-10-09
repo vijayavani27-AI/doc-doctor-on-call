@@ -15,7 +15,8 @@ router = APIRouter(prefix="/api", tags=["account"])
 
 
 class DeleteIn(BaseModel):
-    password: str
+    confirm: str = Field(default="", max_length=20)  # type DELETE
+    password: str | None = None  # older clients (local accounts)
 
 
 @router.get("/meta")
@@ -80,8 +81,13 @@ def contact(body: ContactIn, request: Request, db: Session = Depends(get_db)):
 
 @router.get("/audit")
 def audit_log(u: User = Depends(security.current_user), db: Session = Depends(get_db)):
-    rows = db.query(AuditLog).filter(AuditLog.user_id == u.id).order_by(AuditLog.created_at.desc()).limit(100).all()
-    return [{"action": r.action, "detail": r.detail, "ip": r.ip, "at": r.created_at.isoformat()} for r in rows]
+    from sqlalchemy import or_
+
+    rows = (db.query(AuditLog).filter(or_(AuditLog.user_id == u.id, AuditLog.subject_user_id == u.id))
+            .order_by(AuditLog.created_at.desc()).limit(150).all())
+    names = {x.id: x.name for x in db.query(User).filter(User.id.in_({r.user_id for r in rows if r.user_id and r.user_id != u.id})).all()}
+    return [{"action": r.action, "detail": r.detail, "ip": r.ip if r.user_id == u.id else None, "at": r.created_at.isoformat(),
+             "by": "you" if r.user_id == u.id else names.get(r.user_id, "family member")} for r in rows]
 
 
 @router.get("/export")
@@ -94,6 +100,11 @@ def export(request: Request, u: User = Depends(security.current_user), db: Sessi
             "results": [_result_out(r) for r in p.results],
             "symptoms": [{"label": s.label, "onset": s.onset_date.isoformat(), "notes": s.notes} for s in p.symptoms],
             "insights": records.analyze(p),
+            "vitals": [{"kind": v.kind, "value": v.value, "value2": v.value2, "context": v.context, "at": v.measured_at.isoformat(), "source": v.source} for v in p.vitals],
+            "checkups": [{"title": c.title, "due": c.due_date.isoformat() if c.due_date else None, "done": c.done_date.isoformat() if c.done_date else None} for c in p.checkups],
+            "reminders": [{"title": r.title, "times": r.times, "active": r.active} for r in p.reminders],
+            "meals": [{"at": m.eaten_at.isoformat(), "items": m.items, "totals": m.totals} for m in p.meals],
+            "wound_scans": [{"label": w.label, "at": w.created_at.isoformat(), "metrics": w.metrics, "result": w.result} for w in p.wounds],
         })
     security.audit(db, u.id, "data_exported", "JSON", request)
     db.commit()
@@ -104,12 +115,15 @@ def export(request: Request, u: User = Depends(security.current_user), db: Sessi
 def delete_account(body: DeleteIn, u: User = Depends(security.current_user), db: Session = Depends(get_db)):
     if u.email == config.DEMO_EMAIL:
         raise HTTPException(400, "The shared demo account can't be deleted. Use 'Reset demo data' instead.")
-    if not security.verify_password(body.password, u.password_hash):
-        raise HTTPException(401, "Wrong password")
+    if body.confirm.strip().upper() != "DELETE" and not (body.password and security.verify_password(body.password, u.password_hash)):
+        raise HTTPException(400, "Type DELETE to confirm")
+    from ..services import storage
+
     for p in u.profiles:
         for r in p.reports:
-            if r.stored_name:
-                (config.UPLOAD_DIR / r.stored_name).unlink(missing_ok=True)
+            storage.delete(r.stored_name)
+        for w in p.wounds:
+            storage.delete(w.stored_name)
     db.query(AuditLog).filter(AuditLog.user_id == u.id).delete()
     db.delete(u)
     db.commit()

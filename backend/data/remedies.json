@@ -1,0 +1,491 @@
+{
+  "_about": "Safe home-care steps for common minor problems, written in simple language for Indian families. Each item lists self-care steps, things to avoid, red flags (when to get urgent help) and when to see a doctor. Steps are taken from public guidance (WHO, NHS, CDC, AAP, ICMR, MoHFW). The file has no medicine names, no doses and no herbal dosing. Use it for education only.",
+  "disclaimer": "This is general self-care information, not a diagnosis or treatment. If you are unsure, if you are pregnant, if the person is a baby, a child or an older adult, or if they have a long-term illness, talk to a doctor. Do not start, stop or change any medicine without your doctor. In an emergency, call 112, or 108 for an ambulance.",
+  "emergency": {
+    "numbers": [
+      {"label": "Emergency (police/fire/ambulance)", "number": "112"},
+      {"label": "Ambulance", "number": "108"}
+    ]
+  },
+  "items": [
+    {
+      "key": "common_cold",
+      "title": "Common cold",
+      "title_ta": "சளி / ஜலதோஷம்",
+      "title_hi": "सर्दी-जुकाम",
+      "summary": "A cold is a viral infection of the nose and throat that usually gets better on its own in 7 to 10 days.",
+      "self_care": [
+        "Rest and sleep well.",
+        "Drink plenty of fluids such as water, warm soups and warm water with lemon.",
+        "Breathe in steam from a bowl of hot water, but keep children away from hot water to prevent burns.",
+        "For adults and children over 1 year, a spoon of honey in warm water may soothe the throat.",
+        "Wash your hands often and cover coughs and sneezes to protect others."
+      ],
+      "avoid": [
+        "Do not give honey to babies under 1 year old.",
+        "Do not take antibiotics for a cold unless a doctor prescribes them. Antibiotics do not work on cold viruses.",
+        "Avoid smoking and smoky rooms."
+      ],
+      "red_flags": [
+        "Trouble breathing, fast breathing or chest pain: call 112 or 108 now.",
+        "Lips or face turning blue or grey: call 112 now.",
+        "A baby under 3 months with a fever of 38°C (100.4°F) or more.",
+        "Very high fever, confusion, or being very hard to wake.",
+        "Fever with a stiff neck or a rash that does not fade when pressed with a glass."
+      ],
+      "see_doctor_if": [
+        "Symptoms last more than 10 days or keep getting worse.",
+        "You have diabetes, heart, lung or kidney disease, or a weak immune system.",
+        "Ear pain, pain over the cheeks or forehead, or thick green mucus with fever."
+      ],
+      "sources": ["NHS: Common cold", "CDC: Common cold", "WHO: Antibiotic resistance fact sheet", "AAP (HealthyChildren.org): honey not for infants under 12 months"]
+    },
+    {
+      "key": "sore_throat",
+      "title": "Sore throat",
+      "title_ta": "தொண்டை வலி",
+      "title_hi": "गले में खराश",
+      "summary": "Most sore throats are caused by viruses and get better within about a week.",
+      "self_care": [
+        "Gargle with warm salt water (about half a teaspoon of salt in a glass of warm water). Adults and older children only.",
+        "Drink warm fluids and plenty of water.",
+        "Eat soft, cool or warm foods that are easy to swallow.",
+        "For adults and children over 1 year, a spoon of honey may soothe the throat.",
+        "Rest your voice and avoid smoke."
+      ],
+      "avoid": [
+        "Do not give honey to babies under 1 year old.",
+        "Do not ask young children to gargle, because they may swallow the water or choke.",
+        "Do not take leftover or shared antibiotics."
+      ],
+      "red_flags": [
+        "Difficulty breathing or noisy breathing: call 112 or 108 now.",
+        "Cannot swallow saliva or is drooling.",
+        "Cannot open the mouth fully, or there is swelling on one side of the throat or neck.",
+        "Very high fever, or feeling very unwell.",
+        "Signs of dehydration: very little urine, very dry mouth, dizziness."
+      ],
+      "see_doctor_if": [
+        "The sore throat lasts more than 1 week or keeps coming back.",
+        "Fever with white patches on the tonsils and no cough.",
+        "You have a weak immune system, for example from cancer treatment."
+      ],
+      "sources": ["NHS: Sore throat", "CDC: Sore throat", "NICE NG84: Sore throat (acute) antimicrobial prescribing"]
+    },
+    {
+      "key": "dry_cough",
+      "title": "Dry cough",
+      "title_ta": "வறட்டு இருமல்",
+      "title_hi": "सूखी खांसी",
+      "summary": "A dry cough often follows a cold and usually gets better within 3 weeks.",
+      "self_care": [
+        "Drink plenty of warm fluids and water.",
+        "For adults and children over 1 year, a spoon of honey in warm water may ease the cough.",
+        "Breathe in steam, or keep the room air less dry. Keep children away from hot water.",
+        "Rest, and raise your head with an extra pillow at night.",
+        "Stay away from smoke, dust and strong smells."
+      ],
+      "avoid": [
+        "Do not give honey to babies under 1 year old.",
+        "Do not smoke, and keep children away from smoke.",
+        "Do not give any cough medicine to young children without a doctor's advice."
+      ],
+      "red_flags": [
+        "Severe breathlessness, chest pain or blue lips: call 112 or 108 now.",
+        "Coughing up blood.",
+        "A child who makes a 'whoop' sound or turns blue during coughing fits.",
+        "High fever with fast breathing.",
+        "Sudden cough after choking on food or a small object."
+      ],
+      "see_doctor_if": [
+        "The cough lasts more than 3 weeks.",
+        "Weight loss, night sweats or fever with a long cough. These can be signs of TB, which needs a test.",
+        "You have asthma, COPD, heart disease or diabetes and the cough is getting worse."
+      ],
+      "sources": ["NHS: Cough", "NICE NG120: Cough (acute) antimicrobial prescribing", "WHO: Tuberculosis fact sheet", "AAP (HealthyChildren.org): Coughs and colds"]
+    },
+    {
+      "key": "acidity",
+      "title": "Acidity / heartburn",
+      "title_ta": "அசிடிட்டி / நெஞ்செரிச்சல்",
+      "title_hi": "एसिडिटी / सीने में जलन",
+      "summary": "Heartburn is a burning feeling in the chest when stomach acid comes back up. It is often linked to food and habits.",
+      "self_care": [
+        "Eat smaller meals more often instead of large meals.",
+        "Finish your dinner at least 3 hours before lying down.",
+        "Raise the head end of your bed by 10 to 20 cm.",
+        "Notice which foods trigger it (for example very spicy, oily or fried food, coffee, alcohol) and cut down on them.",
+        "If you are overweight, losing weight slowly may help.",
+        "Stop smoking. Ask your doctor for help to quit."
+      ],
+      "avoid": [
+        "Do not lie down or bend over right after eating.",
+        "Avoid tight belts and clothes around the waist.",
+        "Do not assume chest pain is acidity. Heart pain can feel like a burning in the chest."
+      ],
+      "red_flags": [
+        "Chest pain or pressure that spreads to the arm, jaw, neck or back, or comes with sweating or breathlessness: call 112 or 108 now. This may be a heart attack.",
+        "Vomiting blood, or vomit that looks like coffee grounds.",
+        "Black, tarry stools.",
+        "Food getting stuck when you swallow, or pain when swallowing.",
+        "Weight loss without trying."
+      ],
+      "see_doctor_if": [
+        "You have heartburn most days for more than 3 weeks.",
+        "You are over 55 and the symptoms are new.",
+        "Home steps do not help."
+      ],
+      "sources": ["NHS: Heartburn and acid reflux", "NICE CG184: Dyspepsia and GORD in adults", "American Heart Association: Warning signs of a heart attack"]
+    },
+    {
+      "key": "constipation",
+      "title": "Constipation",
+      "title_ta": "மலச்சிக்கல்",
+      "title_hi": "कब्ज़",
+      "summary": "Constipation means passing hard stools less often than usual. Diet, water and activity often help.",
+      "self_care": [
+        "Slowly add more fibre: whole grains, millets, dal, vegetables, fruits like guava and papaya.",
+        "Drink enough water through the day.",
+        "Be active every day, for example a 20 to 30 minute walk.",
+        "Go to the toilet when you feel the urge. Do not hold it in.",
+        "Try a regular toilet time, such as after breakfast. Raising your feet on a small stool may help."
+      ],
+      "avoid": [
+        "Do not use laxatives or enemas regularly without a doctor's advice.",
+        "Do not strain hard for a long time on the toilet.",
+        "Avoid eating mostly refined foods like maida, white bread and fried snacks."
+      ],
+      "red_flags": [
+        "Severe belly pain with a swollen, hard belly and vomiting.",
+        "Cannot pass stool or gas at all, with belly swelling.",
+        "Blood in the stool, or black, tarry stools.",
+        "Constipation with fever and belly pain."
+      ],
+      "see_doctor_if": [
+        "Constipation lasts more than 3 weeks, or your bowel habit changes for no clear reason.",
+        "Weight loss without trying, or feeling very tired.",
+        "It started after a new medicine. Talk to your doctor, and do not stop the medicine on your own."
+      ],
+      "sources": ["NHS: Constipation", "NICE CKS: Constipation", "ICMR-NIN Dietary Guidelines for Indians 2024"]
+    },
+    {
+      "key": "diarrhoea",
+      "title": "Loose motions (diarrhoea)",
+      "title_ta": "வயிற்றுப்போக்கு",
+      "title_hi": "दस्त (लूज़ मोशन)",
+      "summary": "Loose motions are often caused by an infection and usually stop within a few days. The main danger is losing too much water.",
+      "self_care": [
+        "Drink ORS (oral rehydration solution) made exactly as written on the WHO-ORS packet, in small sips after each loose motion.",
+        "Keep drinking other safe fluids too: boiled and cooled water, rice kanji, buttermilk, coconut water, dal water.",
+        "Keep eating light, normal food such as rice, curd rice, idli, khichdi or banana. Keep breastfeeding babies.",
+        "Wash hands with soap after using the toilet and before cooking or eating.",
+        "Watch how much urine is passed. Pale urine passed often is a good sign."
+      ],
+      "avoid": [
+        "Do not use soft drinks, packaged fruit juice or glucose powder in place of ORS. Too much sugar can make loose motions worse.",
+        "Do not give medicines to stop loose motions to children unless a doctor advises it.",
+        "Do not stop feeding a child who has loose motions."
+      ],
+      "red_flags": [
+        "Signs of dehydration: very little or no urine, very dry mouth, sunken eyes, dizziness, a child who is very sleepy or floppy.",
+        "Blood in the stool.",
+        "Cannot keep any fluids down because of vomiting.",
+        "High fever, or severe belly pain.",
+        "Watery motions like rice water in large amounts. This may be cholera, so go to a hospital now or call 108."
+      ],
+      "see_doctor_if": [
+        "Loose motions last more than 2 days in adults or more than 1 day in a young child.",
+        "The person is elderly, pregnant, or has diabetes or kidney disease.",
+        "Loose motions keep coming back."
+      ],
+      "sources": ["WHO: Diarrhoeal disease fact sheet", "WHO/UNICEF: Oral rehydration salts (low-osmolarity ORS)", "NHS: Diarrhoea and vomiting", "MoHFW India: Stop Diarrhoea Campaign (ORS and zinc)"]
+    },
+    {
+      "key": "mild_fever",
+      "title": "Mild fever",
+      "title_ta": "லேசான காய்ச்சல்",
+      "title_hi": "हल्का बुखार",
+      "summary": "Fever is the body fighting an infection. A mild fever with no warning signs can often be managed at home.",
+      "self_care": [
+        "Rest, and drink plenty of fluids like water, ORS, soups and buttermilk.",
+        "Wear light clothes and keep the room cool and airy.",
+        "Wipe the forehead and body with a cloth soaked in normal-temperature (not cold) water if it helps comfort.",
+        "Check the temperature with a thermometer and write it down with the time.",
+        "If you need a medicine for fever, ask a doctor or pharmacist which one and how much is safe for you or your child."
+      ],
+      "avoid": [
+        "Do not use ice-cold water or alcohol to sponge the body.",
+        "Do not wrap the person in heavy blankets.",
+        "Do not take antibiotics without a doctor's prescription."
+      ],
+      "red_flags": [
+        "A baby under 3 months with a temperature of 38°C (100.4°F) or more: see a doctor now.",
+        "Stiff neck, severe headache, confusion, a fit (seizure) or being very hard to wake: call 112 or 108 now.",
+        "Trouble breathing.",
+        "A rash that does not fade when pressed with a glass, or bleeding from the gums or nose.",
+        "Signs of dehydration: very little urine, very dry mouth, sunken eyes.",
+        "Fever of 40°C (104°F) or more."
+      ],
+      "see_doctor_if": [
+        "Fever lasts more than 3 days. In India, a test for dengue, malaria or typhoid may be needed.",
+        "Fever keeps coming back, or comes with chills and shivering.",
+        "The person is elderly, pregnant, or has diabetes, kidney, heart or lung disease."
+      ],
+      "sources": ["NHS: Fever in adults", "NHS: Fever in children", "NICE NG143: Fever in under 5s", "WHO: Dengue and severe dengue fact sheet", "ICMR/NCVBDC: Dengue and malaria guidance"]
+    },
+    {
+      "key": "tension_headache",
+      "title": "Headache (tension type)",
+      "title_ta": "தலைவலி (மன அழுத்தத் தலைவலி)",
+      "title_hi": "सिरदर्द (तनाव वाला)",
+      "summary": "A tension headache feels like a tight band around the head and is often linked to stress, poor sleep, hunger or screen time.",
+      "self_care": [
+        "Drink a glass of water and eat if you have missed a meal.",
+        "Rest in a quiet, dim room.",
+        "Gently massage your neck, shoulders and temples, or put a warm cloth on your neck.",
+        "Take regular breaks from screens and check your sitting posture.",
+        "Try to sleep at the same time every night and manage stress, for example with slow breathing."
+      ],
+      "avoid": [
+        "Do not take pain medicines on more than a few days a week without a doctor's advice. This can cause more headaches.",
+        "Avoid skipping meals and going without water for long."
+      ],
+      "red_flags": [
+        "A sudden, very severe headache, like the worst ever: call 112 or 108 now.",
+        "Headache with weakness, numbness, drooping face, slurred speech or trouble seeing: call 112 now. This may be a stroke.",
+        "Headache with fever and stiff neck, or a rash.",
+        "Headache after a head injury, with vomiting or drowsiness.",
+        "Headache with confusion or a fit (seizure)."
+      ],
+      "see_doctor_if": [
+        "Headaches happen often or keep getting worse.",
+        "Headaches wake you up at night or are worst in the morning with vomiting.",
+        "You are over 50 and this is a new kind of headache, or you have high blood pressure."
+      ],
+      "sources": ["NHS: Tension-type headaches", "NICE CG150: Headaches in over 12s", "WHO: Headache disorders fact sheet"]
+    },
+    {
+      "key": "minor_cuts",
+      "title": "Minor cuts and scrapes",
+      "title_ta": "சிறு வெட்டுக்காயம் / சிராய்ப்பு",
+      "title_hi": "छोटी कटन / खरोंच",
+      "summary": "Small cuts and scrapes usually heal well if they are cleaned and kept covered.",
+      "self_care": [
+        "Wash your hands first.",
+        "Press on the cut with a clean cloth for a few minutes to stop bleeding.",
+        "Rinse the wound under clean running water to remove dirt.",
+        "Cover it with a clean dressing or plaster, and change it daily or when it gets wet or dirty.",
+        "Watch for signs of infection over the next few days."
+      ],
+      "avoid": [
+        "Do not put turmeric paste, coffee powder, mud, ash or toothpaste on a wound.",
+        "Do not blow on the wound or touch it with dirty hands.",
+        "Do not pull out an object stuck deep in the wound. Leave it and get medical help."
+      ],
+      "red_flags": [
+        "Bleeding that does not stop after 10 minutes of firm pressure: call 108.",
+        "Blood spurting out of the wound: press hard and call 112 or 108 now.",
+        "A deep or gaping cut, or a cut on the face, eye or genitals.",
+        "Numbness or cannot move the finger or limb past the cut.",
+        "Animal or human bite. A dog, cat or monkey bite needs urgent rabies care the same day."
+      ],
+      "see_doctor_if": [
+        "Signs of infection: growing redness, swelling, pus, warmth or fever.",
+        "The wound was dirty or from rusty metal and you are not sure your tetanus vaccine is up to date.",
+        "You have diabetes and the wound is on your foot, or it heals slowly."
+      ],
+      "sources": ["NHS: Cuts and grazes", "St John Ambulance / Indian Red Cross Society first aid guidance", "WHO: Rabies fact sheet", "WHO: Tetanus fact sheet"]
+    },
+    {
+      "key": "minor_burns",
+      "title": "Minor burns",
+      "title_ta": "சிறு தீக்காயம்",
+      "title_hi": "हल्का जलना",
+      "summary": "A small, shallow burn can be cared for at home if it is cooled quickly and kept clean.",
+      "self_care": [
+        "Cool the burn under cool or lukewarm running water for 20 minutes as soon as possible.",
+        "Remove rings, bangles, watches or tight clothing near the burn, unless they are stuck to the skin.",
+        "After cooling, cover the burn loosely with cling film or a clean, non-fluffy cloth.",
+        "Keep the person warm while you cool only the burned area.",
+        "Leave blisters alone and let them heal."
+      ],
+      "avoid": [
+        "Do not put toothpaste, butter, oil, ghee, ice, turmeric or ink on a burn.",
+        "Do not use ice or ice-cold water.",
+        "Do not burst blisters or peel off loose skin.",
+        "Do not pull off clothing that is stuck to the burn."
+      ],
+      "red_flags": [
+        "A burn larger than the person's palm: call 108 or go to hospital.",
+        "A burn on the face, hands, feet, genitals or over a joint.",
+        "A deep burn that looks white, brown or charred, or that does not hurt.",
+        "An electrical or chemical burn, or burns from a fire in a closed room (smoke breathed in): call 112 now.",
+        "Any burn in a baby, a young child, an older adult or a pregnant woman.",
+        "Trouble breathing, a hoarse voice, or burns in the mouth or nose: call 112 now."
+      ],
+      "see_doctor_if": [
+        "The burn shows signs of infection: more pain, redness, swelling, pus or fever.",
+        "The burn has not healed in 2 weeks.",
+        "You are not sure your tetanus vaccine is up to date."
+      ],
+      "sources": ["NHS: Burns and scalds", "WHO: Burns fact sheet", "British Burn Association first aid guidance (cool running water for 20 minutes)"]
+    },
+    {
+      "key": "mouth_ulcers",
+      "title": "Mouth ulcers",
+      "title_ta": "வாய்ப்புண்",
+      "title_hi": "मुँह के छाले",
+      "summary": "Small, painful mouth ulcers are common and usually heal on their own within 1 to 2 weeks.",
+      "self_care": [
+        "Rinse your mouth with warm salt water.",
+        "Use a soft toothbrush and brush gently.",
+        "Eat soft, cool foods such as curd, curd rice or idli.",
+        "Drink plenty of water, using a straw if it hurts.",
+        "Try to notice triggers such as stress, a sharp tooth, or biting the cheek."
+      ],
+      "avoid": [
+        "Avoid very spicy, salty, sour or hot foods until it heals.",
+        "Do not chew tobacco, gutka or paan, and do not smoke.",
+        "Do not touch or scrape the ulcer."
+      ],
+      "red_flags": [
+        "An ulcer or patch in the mouth that has not healed in 3 weeks. This needs a doctor or dentist check, especially if you use tobacco.",
+        "A red or white patch, or a lump in the mouth.",
+        "Cannot eat or drink, with signs of dehydration.",
+        "Mouth ulcers with a high fever, skin rash or blisters on the body or eyes."
+      ],
+      "see_doctor_if": [
+        "Ulcers keep coming back often.",
+        "Ulcers are large, many, or very painful.",
+        "Ulcers come with tiredness, weight loss or loose motions."
+      ],
+      "sources": ["NHS: Mouth ulcers", "WHO: Oral health fact sheet", "ICMR: National cancer registry programme reports on oral cancer"]
+    },
+    {
+      "key": "sprain",
+      "title": "Muscle or joint sprain",
+      "title_ta": "சுளுக்கு / தசைப் பிடிப்பு",
+      "title_hi": "मोच / मांसपेशी में खिंचाव",
+      "summary": "A sprain or strain is a stretch or small tear of a ligament or muscle. Most get better with rest and care over a few weeks.",
+      "self_care": [
+        "Rest the injured part for the first 2 to 3 days. Avoid putting weight on it.",
+        "Put a cold pack or ice wrapped in a cloth on it for up to 20 minutes, every 2 to 3 hours. Never put ice straight on the skin.",
+        "Wrap it with a crepe bandage that is firm but not tight.",
+        "Keep the injured part raised above heart level when you can, for example on pillows.",
+        "After 2 to 3 days, start moving it gently as pain allows."
+      ],
+      "avoid": [
+        "For the first 2 to 3 days, avoid heat such as hot water or hot packs, and avoid rubbing or massaging hard.",
+        "Do not get massage or bone-setting from untrained people.",
+        "Do not wrap the bandage so tight that fingers or toes turn blue, cold or numb."
+      ],
+      "red_flags": [
+        "The limb looks bent or out of shape, or you heard a crack: get it checked today. It may be broken.",
+        "Cannot put any weight on the leg, or cannot move the joint at all.",
+        "Numbness, tingling, or cold, pale or blue fingers or toes.",
+        "Severe pain or swelling that keeps getting worse.",
+        "A swollen, painful calf with no clear injury, especially after a long journey or bed rest. Get urgent care."
+      ],
+      "see_doctor_if": [
+        "It is not getting better after 1 week.",
+        "The joint feels loose or keeps giving way.",
+        "You have diabetes, or take blood-thinning medicines, and the swelling or bruising is large."
+      ],
+      "sources": ["NHS: Sprains and strains", "NICE CKS: Sprains and strains", "St John Ambulance first aid guidance (RICE)"]
+    },
+    {
+      "key": "heat_dehydration",
+      "title": "Mild dehydration / heat exhaustion",
+      "title_ta": "லேசான நீரிழப்பு / வெயில் களைப்பு",
+      "title_hi": "पानी की कमी / गर्मी से थकान",
+      "summary": "In hot weather the body can lose too much water and salt, causing tiredness, headache, dizziness and dark urine.",
+      "self_care": [
+        "Move to a cool, shaded place and lie down with legs slightly raised.",
+        "Sip water, ORS, buttermilk, lemon water with a pinch of salt, or coconut water.",
+        "Loosen tight clothes and cool the skin with a wet cloth and a fan.",
+        "Rest for the day and avoid going out in the hottest hours (about 12 noon to 3 pm).",
+        "Drink water often in hot weather, even if you are not thirsty. Older adults may not feel thirst well."
+      ],
+      "avoid": [
+        "Avoid alcohol, and drinks with a lot of sugar or caffeine, during a heatwave.",
+        "Do not leave children or older adults in a parked car or closed room.",
+        "Do not do heavy work or exercise in the midday sun."
+      ],
+      "red_flags": [
+        "Confusion, fainting, a fit (seizure) or very hot skin: call 108 or 112 now. This may be heat stroke. Cool the person with water and a fan while you wait.",
+        "Body temperature of 40°C (104°F) or more.",
+        "No urine for 8 hours or more, or very dark urine.",
+        "Fast heartbeat, fast breathing, or cannot keep fluids down.",
+        "Not better after 30 minutes of rest and fluids in a cool place."
+      ],
+      "see_doctor_if": [
+        "You get dizzy or tired often in the heat.",
+        "You have heart or kidney disease, or take water tablets (diuretics). Ask your doctor how much to drink in hot weather.",
+        "Muscle cramps last more than 1 hour."
+      ],
+      "sources": ["MoHFW India (NPCCHH): Heat-related illness guidelines", "NDMA India: Heat wave do's and don'ts", "WHO: Heat and health fact sheet", "NHS: Heat exhaustion and heatstroke"]
+    },
+    {
+      "key": "poor_sleep",
+      "title": "Poor sleep",
+      "title_ta": "தூக்கமின்மை",
+      "title_hi": "नींद न आना",
+      "summary": "Trouble sleeping now and then is common. Simple daily habits can often improve sleep.",
+      "self_care": [
+        "Go to bed and wake up at the same time every day, including weekends.",
+        "Keep your bedroom dark, quiet and cool.",
+        "Stop using phones and TV about 1 hour before bed.",
+        "Get daylight and some exercise during the day, but not late in the evening.",
+        "If you cannot sleep after about 20 minutes, get up, do something calm in dim light, then go back to bed when sleepy."
+      ],
+      "avoid": [
+        "Avoid tea, coffee and cola after the afternoon.",
+        "Avoid heavy meals, alcohol and smoking close to bedtime.",
+        "Do not take sleeping pills that are not prescribed for you."
+      ],
+      "red_flags": [
+        "Thoughts of harming yourself or ending your life: call 112 now, or the Tele-MANAS helpline 14416.",
+        "Loud snoring with choking or stopping breathing during sleep, noticed by others.",
+        "Falling asleep while driving or at work.",
+        "Sudden confusion or very unusual behaviour at night."
+      ],
+      "see_doctor_if": [
+        "Poor sleep lasts more than 3 to 4 weeks, or affects your daily life.",
+        "You feel low, worried or hopeless most days.",
+        "You think a medicine or health problem, such as pain or passing urine at night, is affecting your sleep."
+      ],
+      "sources": ["NHS: Insomnia", "AASM: Healthy sleep habits", "MoHFW India: Tele-MANAS mental health helpline 14416", "NICE CKS: Insomnia"]
+    },
+    {
+      "key": "menstrual_cramps",
+      "title": "Mild period pain (menstrual cramps)",
+      "title_ta": "லேசான மாதவிடாய் வலி",
+      "title_hi": "हल्का माहवारी दर्द (पीरियड्स में ऐंठन)",
+      "summary": "Cramping pain in the lower belly during periods is common and is usually worst in the first 1 to 2 days.",
+      "self_care": [
+        "Put a hot water bag or warm cloth on your lower belly or back. Check it is not too hot.",
+        "Do gentle exercise such as walking, stretching or yoga.",
+        "Take a warm bath or shower.",
+        "Rest, drink enough water, and eat regular light meals.",
+        "Gently massage the lower belly."
+      ],
+      "avoid": [
+        "Do not use a very hot bag or sleep with it on the skin. It can cause burns.",
+        "Do not take painkillers often without a doctor's advice, especially if you have stomach, kidney or asthma problems.",
+        "Avoid smoking. It can make period pain worse."
+      ],
+      "red_flags": [
+        "Sudden, severe belly pain, especially if your period is late or you could be pregnant: go to hospital now or call 108.",
+        "Fainting, dizziness or a fast heartbeat with pain.",
+        "Very heavy bleeding that soaks a pad every hour for 2 hours or more.",
+        "Pain with high fever or bad-smelling discharge."
+      ],
+      "see_doctor_if": [
+        "Pain stops you from going to school or work, or is getting worse over time.",
+        "Pain also happens outside your period, or during or after sex.",
+        "Periods are very heavy, last more than 7 days, or are very irregular."
+      ],
+      "sources": ["NHS: Period pain", "ACOG: Dysmenorrhea (painful periods) patient FAQ", "NICE CKS: Dysmenorrhoea"]
+    }
+  ]
+}

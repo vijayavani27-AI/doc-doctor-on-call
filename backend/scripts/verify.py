@@ -1,6 +1,6 @@
 """One command to verify the whole project (no API key needed).
 
-Runs: lint (ruff, if installed), the 47 automated tests (incl. the test-kit answer key),
+Runs: lint (ruff, if installed), all automated tests (incl. the test-kit answer key),
 the offline pipeline evaluation, and checks the built frontend. Prints a scorecard.
 
 Run from backend/:  python scripts/verify.py

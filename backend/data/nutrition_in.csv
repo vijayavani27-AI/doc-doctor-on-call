@@ -1,0 +1,66 @@
+key,name,name_ta,name_hi,serving,serving_g,kcal,carbs_g,protein_g,fat_g,fiber_g,sodium_mg,gi_band,veg,tags,source
+idli,Idli,இட்லி,इडली,2 medium idli,100,130,27,4.5,0.5,1.5,250,high,true,breakfast;dinner,"IFCT 2017 (approx., std recipe); GI band estimated"
+plain_dosa,Plain dosa,தோசை,सादा डोसा,1 medium dosa,80,165,26,4,5,1.2,230,high,true,breakfast;dinner,"IFCT 2017 (approx., std recipe); GI band estimated"
+masala_dosa,Masala dosa,மசாலா தோசை,मसाला डोसा,1 masala dosa,175,330,46,7,13,3.5,520,high,true,breakfast;dinner,"IFCT 2017 (approx., std recipe); GI band estimated"
+ragi_dosa,Ragi dosa,கேழ்வரகு தோசை,रागी डोसा,1 medium dosa,80,140,22,3,4.5,3,200,medium,true,breakfast;dinner;millet;high_fiber,"IFCT 2017 (approx., std recipe); GI band estimated"
+pesarattu,Pesarattu (moong dal dosa),பெசரட்டு (பாசிப்பருப்பு தோசை),पेसरट्टू (मूंग दाल चीला),1 medium,80,140,17,7.5,4.5,3,200,low,true,breakfast;dinner;high_protein,"IFCT 2017 (approx., std recipe); GI band estimated"
+sambar,Sambar,சாம்பார்,सांभर,1 katori (150 g),150,95,13,4.5,2.8,3.5,420,low,true,breakfast;lunch;dinner;high_fiber,"IFCT 2017 (approx., std recipe); GI band estimated"
+rasam,Rasam,ரசம்,रसम,1 katori (150 g),150,45,6,1.5,1.8,1,450,low,true,lunch;dinner,"IFCT 2017 (approx., std recipe); GI band estimated"
+coconut_chutney,Coconut chutney,தேங்காய் சட்னி,नारियल की चटनी,2 tablespoons (30 g),30,70,3,1,6,1.5,120,low,true,breakfast;dinner,"IFCT 2017 (approx., std recipe); GI band estimated"
+curd_rice,Curd rice,தயிர் சாதம்,दही चावल,1 katori (150 g),150,190,30,5,5.5,0.6,300,medium,true,lunch;dinner,"IFCT 2017 (approx., std recipe); GI band estimated"
+lemon_rice,Lemon rice,எலுமிச்சை சாதம்,नींबू चावल,1 katori (150 g),150,250,38,4,9,1.5,380,high,true,lunch,"IFCT 2017 (approx., std recipe); GI band estimated"
+upma,Rava upma,ரவா உப்புமா,रवा उपमा,1 katori (150 g),150,220,30,5,9,2,380,medium,true,breakfast,"IFCT 2017 (approx., std recipe); GI band estimated"
+ven_pongal,Ven pongal,வெண் பொங்கல்,वेन पोंगल,1 katori (150 g),150,240,30,6.5,10.5,1.5,350,medium,true,breakfast,"IFCT 2017 (approx., std recipe); GI band estimated"
+appam,Appam,ஆப்பம்,अप्पम,2 appam (120 g),120,200,38,3,4,1,200,high,true,breakfast;dinner,"IFCT 2017 (approx., std recipe); GI band estimated"
+puttu,Rice puttu,அரிசி புட்டு,चावल पुट्टु,1 piece (100 g),100,175,32,3,3.8,2,150,high,true,breakfast,"IFCT 2017 (approx., std recipe); GI band estimated"
+ragi_mudde,Ragi mudde / ragi kali,கேழ்வரகு களி,रागी मुद्दे,1 ball (150 g cooked),150,160,33,3.7,0.9,5.5,100,high,true,lunch;dinner;millet;high_fiber,"IFCT 2017 (approx., std recipe); GI band estimated"
+medu_vada,Medu vada,உளுந்து வடை,मेदु वड़ा,2 small vada (60 g),60,180,16,5.5,10.5,2.5,220,medium,true,breakfast;snack;fried,"IFCT 2017 (approx., std recipe); GI band estimated"
+veg_poriyal,Vegetable poriyal (dry sabzi),காய்கறி பொரியல்,सूखी सब्ज़ी (पोरियल),1 katori (100 g),100,90,8,2,5.5,3,250,low,true,lunch;dinner;high_fiber,"IFCT 2017 (approx., std recipe); GI band estimated"
+payasam,Payasam / kheer,பாயசம்,खीर / पायसम,1 small katori (100 g),100,170,26,4,5.5,0.3,50,high,true,sweet,"IFCT 2017 (approx., std recipe); GI band estimated"
+chapati,Chapati / roti (no ghee),சப்பாத்தி,रोटी / चपाती,1 medium phulka (40 g),40,105,21,3.5,0.6,3,10,medium,true,lunch;dinner;high_fiber,"IFCT 2017 (approx., std recipe); GI band: Atkinson et al. 2021 Intl GI tables"
+plain_paratha,Plain paratha,பராத்தா,सादा पराठा,1 medium (80 g),80,260,36,6,10,4.5,250,medium,true,breakfast;lunch;dinner,"IFCT 2017 (approx., std recipe); GI band estimated"
+aloo_paratha,Aloo paratha,ஆலு பராத்தா,आलू पराठा,1 medium (120 g),120,300,42,6.5,12,4.5,380,medium,true,breakfast;lunch,"IFCT 2017 (approx., std recipe); GI band estimated"
+jowar_roti,Jowar roti,சோள ரொட்டி,ज्वार की रोटी,1 medium (50 g),50,120,25,3.5,0.6,3.5,5,medium,true,lunch;dinner;millet;high_fiber,"IFCT 2017 (approx., std recipe); GI band estimated"
+bajra_roti,Bajra roti,கம்பு ரொட்டி,बाजरे की रोटी,1 medium (50 g),50,125,23,4,1.7,4,5,medium,true,lunch;dinner;millet;high_fiber,"IFCT 2017 (approx., std recipe); GI band estimated"
+dal_tadka,Dal tadka,பருப்பு தட்கா,दाल तड़का,1 katori (150 g),150,150,18,7.5,5.5,4,400,low,true,lunch;dinner;high_protein;high_fiber,"IFCT 2017 (approx., std recipe); GI band: Atkinson et al. 2021 Intl GI tables"
+rajma,Rajma curry,ராஜ்மா,राजमा,1 katori (150 g),150,180,22,8,6.5,6.5,420,low,true,lunch;dinner;high_protein;high_fiber,"IFCT 2017 (approx., std recipe); GI band: Atkinson et al. 2021 Intl GI tables"
+chole,Chole (chickpea curry),கொண்டைக்கடலை கறி (சோலே),छोले,1 katori (150 g),150,210,25,8.5,8.5,7,450,low,true,lunch;dinner;high_protein;high_fiber,"IFCT 2017 (approx., std recipe); GI band: Atkinson et al. 2021 Intl GI tables"
+moong_khichdi,Moong dal khichdi,பாசிப்பருப்பு கிச்சடி,मूंग दाल खिचड़ी,1 katori (150 g),150,180,28,6,4.5,2.5,350,medium,true,lunch;dinner,"IFCT 2017 (approx., std recipe); GI band estimated"
+palak_paneer,Palak paneer,பாலக் பனீர்,पालक पनीर,1 katori (150 g),150,230,7,11,17.5,2.5,450,low,true,lunch;dinner;high_protein,"IFCT 2017 (approx., std recipe); GI band estimated"
+paneer_butter_masala,Paneer butter masala,பனீர் பட்டர் மசாலா,पनीर बटर मसाला,1 katori (150 g),150,330,10,12,27,1.5,550,low,true,lunch;dinner;high_protein,"IFCT 2017 (approx., std recipe); GI band estimated"
+paneer,Paneer (plain),பனீர்,पनीर,50 g (4 small cubes),50,130,0.6,9,10.4,0,15,low,true,high_protein,"IFCT 2017 (approx.); negligible carbs, GI band low by convention"
+poha,Poha,அவல் உப்புமா (போஹா),पोहा,1 katori (150 g),150,200,33,4,6,2,350,medium,true,breakfast,"IFCT 2017 (approx., std recipe); GI band estimated"
+aloo_sabzi,Aloo sabzi (potato),உருளைக்கிழங்கு பொரியல்,आलू की सब्ज़ी,1 katori (150 g),150,165,22,2.5,7.5,3,400,high,true,lunch;dinner,"IFCT 2017 (approx., std recipe); GI band estimated"
+dhokla,Dhokla,டோக்ளா,ढोकला,2 pieces (80 g),80,130,18,5,4,2,380,medium,true,breakfast;snack,"IFCT 2017 (approx., std recipe); GI band estimated"
+white_rice,White rice (cooked),வெள்ளை சாதம்,सफ़ेद चावल (पका हुआ),1 katori (150 g cooked),150,195,42,4,0.4,0.6,2,high,true,lunch;dinner,USDA FDC (approx.); GI band: Atkinson et al. 2021 Intl GI tables
+brown_rice,Brown rice (cooked),பழுப்பு அரிசி சாதம்,ब्राउन चावल (पका हुआ),1 katori (150 g cooked),150,185,38,4,1.5,2.4,6,medium,true,lunch;dinner,USDA FDC (approx.); GI band: Atkinson et al. 2021 Intl GI tables
+foxtail_millet,Foxtail millet (cooked),தினை சாதம்,"कंगनी (फॉक्सटेल मिलेट), पकी हुई",1 katori (150 g cooked),150,170,30,6,2,4,3,medium,true,lunch;dinner;millet;high_fiber,IFCT 2017 (approx.); GI band estimated
+chicken_biryani,Chicken biryani,சிக்கன் பிரியாணி,चिकन बिरयानी,1 plate (250 g),250,450,50,20,18.5,2,900,medium,false,lunch;dinner;high_protein,"IFCT 2017 (approx., std recipe); GI band estimated"
+veg_biryani,Veg biryani,வெஜ் பிரியாணி,वेज बिरयानी,1 plate (250 g),250,380,55,8,14,4,800,medium,true,lunch;dinner,"IFCT 2017 (approx., std recipe); GI band estimated"
+oats_porridge,Oats porridge with milk,பாலுடன் ஓட்ஸ் கஞ்சி,दूध वाला ओट्स दलिया,1 katori (150 g),150,170,24,7,5,2.5,70,medium,true,breakfast;high_fiber,USDA FDC (approx.); GI band: Atkinson et al. 2021 Intl GI tables
+white_bread,White bread,வெள்ளை பிரெட்,सफ़ेद ब्रेड,2 slices (50 g),50,133,25,4.5,1.6,1.2,245,high,true,breakfast;snack,USDA FDC (approx.); GI band: Atkinson et al. 2021 Intl GI tables
+moong_sprouts,Sprouted moong,முளைகட்டிய பச்சைப்பயறு,अंकुरित मूंग,1 katori (100 g),100,105,17,8,0.6,5,10,low,true,breakfast;snack;high_protein;high_fiber,IFCT 2017 (approx.) (soaked whole green gram estimate); GI band estimated
+boiled_egg,Boiled egg,அவித்த முட்டை,उबला अंडा,1 large egg (50 g),50,78,0.6,6.3,5.3,0,62,low,false,breakfast;snack;high_protein,"USDA FDC (approx.); negligible carbs, GI band low by convention"
+omelette,Onion omelette,வெங்காய ஆம்லெட்,प्याज़ वाला ऑमलेट,1-egg omelette (70 g),70,120,2,7,9.5,0.4,250,low,false,breakfast;high_protein,"IFCT 2017 (approx., std recipe); negligible carbs, GI band low by convention"
+chicken_curry,Chicken curry,கோழிக் குழம்பு,चिकन करी,1 katori (150 g),150,250,6,22,15.5,1.5,550,low,false,lunch;dinner;high_protein,"IFCT 2017 (approx., std recipe); negligible carbs, GI band low by convention"
+fish_curry,Fish curry,மீன் குழம்பு,मछली करी,1 katori (150 g),150,200,6,20,10.5,1,550,low,false,lunch;dinner;high_protein,"IFCT 2017 (approx., std recipe); negligible carbs, GI band low by convention"
+peanuts,Roasted peanuts (unsalted),வறுத்த வேர்க்கடலை,भुनी मूंगफली (बिना नमक),1 small handful (30 g),30,176,6.5,7.3,14.9,2.5,2,low,true,snack;high_protein,USDA FDC (approx.); GI band: Atkinson et al. 2021 Intl GI tables
+roasted_chana,Roasted chana (pottukadalai),பொட்டுக்கடலை,भुना चना,1 small handful (30 g),30,110,17,6.7,1.6,5,10,low,true,snack;high_protein;high_fiber,IFCT 2017 (approx.); GI band estimated
+curd,Curd / dahi (plain),தயிர்,दही,1 katori (100 g),100,60,3,3,4,0,35,low,true,lunch;dinner;snack,IFCT 2017 (approx.); GI band: Atkinson et al. 2021 Intl GI tables
+buttermilk,"Buttermilk (salted, spiced)",நீர் மோர்,छाछ,1 glass (200 ml),200,40,3,2,2,0,300,low,true,drink,"IFCT 2017 (approx., std recipe); GI band estimated"
+toned_milk,Toned milk,பால் (டோன்ட்),टोंड दूध,1 glass (200 ml),200,115,9,6.2,6,0,90,low,true,drink;breakfast,IFCT 2017 (approx.); GI band: Atkinson et al. 2021 Intl GI tables
+tea_milk_sugar,Tea with milk and sugar,பால் டீ (சர்க்கரையுடன்),चाय (दूध और चीनी वाली),1 cup (150 ml) with 2 tsp sugar,150,70,12.5,1.6,1.6,0,25,medium,true,drink,"IFCT 2017 (approx., std recipe); GI band estimated"
+filter_coffee,Filter coffee with milk and sugar,ஃபில்டர் காபி (சர்க்கரையுடன்),फ़िल्टर कॉफ़ी (दूध और चीनी वाली),1 cup (150 ml) with 2 tsp sugar,150,100,15,3.2,3,0,45,medium,true,drink,"IFCT 2017 (approx., std recipe); GI band estimated"
+coconut_water,Tender coconut water,இளநீர்,नारियल पानी,1 glass (200 ml),200,38,7.4,1.4,0.4,2.2,210,low,true,drink,USDA FDC (approx.); GI band estimated
+banana,Banana,வாழைப்பழம்,केला,1 medium (100 g edible),100,90,23,1.1,0.3,2.6,1,low,true,fruit;snack,USDA FDC (approx.); GI band: Atkinson et al. 2021 Intl GI tables
+mango,Mango,மாம்பழம்,आम,1 cup slices (150 g),150,90,22.5,1.2,0.6,2.4,2,low,true,fruit;snack,USDA FDC (approx.); GI band: Atkinson et al. 2021 Intl GI tables
+guava,Guava,கொய்யாப்பழம்,अमरूद,1 medium (100 g),100,68,14.3,2.6,1,5.4,2,low,true,fruit;snack;high_fiber,USDA FDC (approx.); GI band estimated
+apple,Apple,ஆப்பிள்,सेब,1 medium (150 g),150,78,21,0.4,0.3,3.6,2,low,true,fruit;snack,USDA FDC (approx.); GI band: Atkinson et al. 2021 Intl GI tables
+papaya,Papaya,பப்பாளி,पपीता,1 cup cubes (150 g),150,65,16,0.7,0.4,2.6,12,medium,true,fruit;snack,USDA FDC (approx.); GI band: Atkinson et al. 2021 Intl GI tables
+orange,Orange,ஆரஞ்சு,संतरा,1 medium (130 g),130,61,15.3,1.2,0.2,3.1,0,low,true,fruit;snack,USDA FDC (approx.); GI band: Atkinson et al. 2021 Intl GI tables
+watermelon,Watermelon,தர்பூசணி,तरबूज़,1 cup cubes (150 g),150,45,11.3,0.9,0.2,0.6,2,high,true,fruit;snack,USDA FDC (approx.); GI band: Atkinson et al. 2021 Intl GI tables (low total sugar per cup)
+dates,Dates,பேரீச்சம்பழம்,खजूर,3 dates (24 g),24,68,18,0.6,0.1,1.9,1,medium,true,fruit;snack;sweet,USDA FDC (approx.); GI band estimated
+samosa,Samosa,சமோசா,समोसा,1 medium (80 g),80,260,28,4,15,2.5,350,medium,true,snack;fried,"IFCT 2017 (approx., std recipe); GI band estimated"
+onion_pakora,Onion pakora / bhaji,வெங்காய பக்கோடா,प्याज़ के पकौड़े,4 pieces (60 g),60,180,14,4.5,12,2.5,280,medium,true,snack;fried,"IFCT 2017 (approx., std recipe); GI band estimated"
+jalebi,Jalebi,ஜிலேபி,जलेबी,2 pieces (50 g),50,190,30,1,7.5,0.2,15,high,true,sweet;fried,"IFCT 2017 (approx., std recipe); GI band estimated"
+gulab_jamun,Gulab jamun,குலாப் ஜாமூன்,गुलाब जामुन,2 pieces with syrup (80 g),80,300,44,4,12,0.3,60,high,true,sweet;fried,"IFCT 2017 (approx., std recipe); GI band estimated"

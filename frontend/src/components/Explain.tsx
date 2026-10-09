@@ -101,7 +101,7 @@ export function ExplainButton({ kind, id, small }: { kind: "result" | "risk" | "
               </div>
             )}
             {data.note && <p className="text-xs text-amber-700 dark:text-amber-300">{data.note}</p>}
-            <p className="text-xs muted">{data.mode === "ai" ? `Written by ${data.engine ?? "AI"} from your records.` : "Offline explanation (AI not configured)."} {t("notDoctor", lang)}</p>
+            <p className="text-xs muted">{data.mode === "ai" ? `Written by ${data.engine ?? "AI"} from your records.` : "Explanation from DOC's own templates."} {t("notDoctor", lang)}</p>
           </div>
         )}
       </Modal>

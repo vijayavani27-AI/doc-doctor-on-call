@@ -41,13 +41,49 @@ if not _db_file.exists() and (INSTANCE_DIR / "carethread.db").exists():  # proje
         (INSTANCE_DIR / "carethread.db").rename(_db_file)
     except OSError:
         _db_file = INSTANCE_DIR / "carethread.db"
-DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{_db_file.as_posix()}")
+
+
+def _db_url(url: str) -> str:
+    """Accept Supabase / Heroku style URLs and use the psycopg 3 driver."""
+    for prefix in ("postgres://", "postgresql://"):
+        if url.startswith(prefix):
+            return "postgresql+psycopg://" + url[len(prefix):]
+    return url
+
+
+DATABASE_URL = _db_url(os.getenv("DATABASE_URL", "").strip() or f"sqlite:///{_db_file.as_posix()}")
+IS_POSTGRES = DATABASE_URL.startswith("postgresql")
 JWT_SECRET = _persistent_secret("jwt.secret", "JWT_SECRET", lambda: secrets.token_urlsafe(48))
 ENCRYPTION_KEY = _persistent_secret("fernet.key", "DOC_ENCRYPTION_KEY", _fernet_key, legacy_env="CARETHREAD_ENCRYPTION_KEY")
 ACCESS_TOKEN_MINUTES = int(os.getenv("ACCESS_TOKEN_MINUTES", "720"))
 CHALLENGE_TOKEN_MINUTES = 5
 MAX_UPLOAD_MB = int(os.getenv("MAX_UPLOAD_MB", "15"))
-CORS_ORIGINS = [o.strip() for o in os.getenv("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",") if o.strip()]
+CORS_ORIGINS = [o.strip() for o in (os.getenv("ALLOWED_ORIGINS") or os.getenv("CORS_ORIGINS") or "http://localhost:5173,http://127.0.0.1:5173").split(",") if o.strip()]
+ALLOWED_UPLOAD_TYPES = ("image/jpeg", "image/png", "image/webp", "application/pdf")
+MAX_PDF_PAGES = 4
+
+# --- Auth: Firebase (Google + email sign-in). Without FIREBASE_PROJECT_ID the app falls back to
+# local email + password accounts (for development and tests). These web-config values are public.
+FIREBASE_PROJECT_ID = os.getenv("FIREBASE_PROJECT_ID", "").strip()
+FIREBASE_WEB_CONFIG = {
+    "apiKey": os.getenv("FIREBASE_API_KEY", "").strip(),
+    "authDomain": os.getenv("FIREBASE_AUTH_DOMAIN", "").strip() or (f"{FIREBASE_PROJECT_ID}.firebaseapp.com" if FIREBASE_PROJECT_ID else ""),
+    "projectId": FIREBASE_PROJECT_ID,
+    "appId": os.getenv("FIREBASE_APP_ID", "").strip(),
+}
+AUTH_MODE = "firebase" if FIREBASE_PROJECT_ID and FIREBASE_WEB_CONFIG["apiKey"] else "local"
+
+# --- Storage: Supabase Storage (private bucket) when configured, else encrypted files in instance/.
+# Files are Fernet-encrypted before they leave this server either way; the browser never talks to Supabase.
+SUPABASE_URL = os.getenv("SUPABASE_URL", "").strip().rstrip("/")
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "").strip() or os.getenv("SUPABASE_SERVICE_ROLE_KEY", "").strip()
+SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET", "health-files")
+SUPABASE_STORAGE = bool(SUPABASE_URL and SUPABASE_SERVICE_KEY)
+
+# --- Own models
+TESSERACT_CMD = os.getenv("TESSERACT_CMD", "").strip()  # optional path to tesseract.exe
+EMBED_DIM = 1024
+AI_RATE_PER_MIN = int(os.getenv("AI_RATE_PER_MIN", "12"))
 
 # --- AI engines ---
 # AI turns on when a Claude or Gemini key is present. Without one the app runs in

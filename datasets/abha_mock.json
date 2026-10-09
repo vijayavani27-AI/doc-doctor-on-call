@@ -1,0 +1,14 @@
+{
+  "_about": "SYNTHETIC record used by the ABHA (ABDM) mock import. Not real patient data. Imported reports are flagged is_demo=true and method=abha-mock.",
+  "record": {
+    "lab": "Government District Hospital Lab (ABDM demo)",
+    "days_ago": 21,
+    "results": [
+      ["Haemoglobin", "12.4", "g/dL", "12.0 - 15.5"],
+      ["Fasting Blood Sugar", "112", "mg/dL", "70 - 100"],
+      ["Serum Creatinine", "0.9", "mg/dL", "0.6 - 1.1"],
+      ["Total Cholesterol", "206", "mg/dL", "< 200"],
+      ["TSH", "3.1", "mIU/L", "0.4 - 4.5"]
+    ]
+  }
+}

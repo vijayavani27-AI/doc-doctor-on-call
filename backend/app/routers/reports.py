@@ -1,6 +1,5 @@
 """Upload -> AI reading -> confirm step, plus records, trends and timeline."""
 import json
-import uuid
 from datetime import date
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
@@ -11,13 +10,11 @@ from sqlalchemy.orm import Session
 from .. import config, security
 from ..database import get_db
 from ..models import LabResult, Report, User
-from ..services import catalog, extraction, records
+from ..services import catalog, extraction, flags, records, storage, templates
 
 router = APIRouter(prefix="/api", tags=["reports"])
 
-ALLOWED = {
-    "application/pdf": b"%PDF", "image/jpeg": b"\xff\xd8", "image/png": b"\x89PNG", "image/webp": b"RIFF", "text/plain": None,
-}
+ALLOWED = {"application/pdf": b"%PDF", "image/jpeg": b"\xff\xd8", "image/png": b"\x89PNG", "image/webp": b"RIFF"}
 
 
 class ConfirmTest(BaseModel):
@@ -53,7 +50,9 @@ class ConfirmIn(BaseModel):
 
 def _result_out(r: LabResult) -> dict:
     t = catalog.tests().get(r.test_code or "")
-    return {"id": r.id, "report_id": r.report_id, "test_code": r.test_code, "test_name": t["name"] if t else r.test_name_raw,
+    fc = flags.flag_for(r.test_code, r.value, r.ref_low, r.ref_high)
+    return {"flag_computed": fc, "needs_review": not r.confirmed and flags.needs_review(r.confidence, r.user_verified),
+            "user_verified": bool(r.user_verified), "id": r.id, "report_id": r.report_id, "test_code": r.test_code, "test_name": t["name"] if t else r.test_name_raw,
             "test_name_raw": r.test_name_raw, "category": t["category"] if t else "Other", "value": r.value, "unit": r.unit,
             "value_raw": r.value_raw, "unit_raw": r.unit_raw, "ref_low": r.ref_low, "ref_high": r.ref_high, "flag": r.flag,
             "date": r.date.isoformat() if r.date else None, "confidence": r.confidence, "source_text": r.source_text,
@@ -65,7 +64,9 @@ def _report_out(r: Report, full: bool = False) -> dict:
            "report_date": r.report_date.isoformat() if r.report_date else None, "status": r.status, "method": r.method,
            "has_file": bool(r.stored_name), "mime": r.mime, "created_at": r.created_at.isoformat(),
            "n_results": len(r.results), "n_abnormal": sum(1 for x in r.results if x.flag in ("H", "L")),
-           "n_medicines": len(r.medications)}
+           "n_medicines": len(r.medications), "pages": r.pages, "user_verified": bool(r.user_verified), "is_demo": bool(r.is_demo),
+           "n_critical": sum(1 for x in r.results if flags.flag_for(x.test_code, x.value, x.ref_low, x.ref_high) in ("critical_low", "critical_high")),
+           "n_needs_review": sum(1 for x in r.results if not x.confirmed and flags.needs_review(x.confidence, x.user_verified))}
     if full:
         out["results"] = [_result_out(x) for x in r.results]
         out["medicines"] = [{"id": m.id, "brand": m.brand, "generic": m.generic, "dose": m.dose, "frequency": m.frequency,
@@ -75,7 +76,30 @@ def _report_out(r: Report, full: bool = False) -> dict:
         out["draft_medicines"] = meta.get("draft_medicines", []) if r.status == "review" else []
         out["warnings"] = meta.get("warnings", [])
         out["redactions"] = meta.get("redactions", 0)
+        out["reader"] = meta.get("reader")
+        out["needs_review"] = [x["id"] for x in out["results"] if x["needs_review"]]
     return out
+
+
+def plain_summary(r: Report, lang: str = "en") -> dict:
+    """Code-generated plain-language summary of one report (no AI): a headline + one sentence per value."""
+    tests = catalog.tests()
+    lines = []
+    abnormal = 0
+    for x in r.results:
+        if x.value is None:
+            continue
+        f = flags.flag_for(x.test_code, x.value, x.ref_low, x.ref_high) or "normal"
+        abnormal += f != "normal"
+        name = tests.get(x.test_code or "", {}).get("name", x.test_name_raw)
+        lines.append({"result_id": x.id, "flag": f, "text": templates.t(f"flag.{f}", lang, test=name, value=x.value, unit=x.unit or "")})
+    lines.sort(key=lambda z: z["flag"] == "normal")
+    n = len(lines)
+    head = templates.t("summary.header", lang, name=r.lab_name or r.doctor_name or r.filename,
+                       date=r.report_date.isoformat() if r.report_date else "-")
+    overview = (templates.t("summary.no_abnormal", lang, count=n) if abnormal == 0
+                else templates.t("summary.n_abnormal", lang, count=n, abnormal=abnormal))
+    return {"language": lang, "headline": f"{head}. {overview}" if n else head, "lines": lines, "disclaimer": templates.disclaimer(lang)}
 
 
 def _owned_report(rid: int, u: User, db: Session) -> Report:
@@ -100,14 +124,21 @@ async def upload_report(pid: int, request: Request, file: UploadFile = File(...)
     if magic and not data.startswith(magic):
         raise HTTPException(415, "The file content does not match its type")
 
-    stored = f"{uuid.uuid4().hex}.bin"
-    (config.UPLOAD_DIR / stored).write_bytes(security.encrypt_bytes(data))  # encrypted at rest
+    if mime == "application/pdf":
+        from ..services import ocr
+
+        if ocr.pdf_page_count(data) > 20:
+            raise HTTPException(413, "This PDF has too many pages. Please upload the report pages only (we read the first 4).")
+    try:
+        stored = storage.save(u.firebase_uid or f"u{u.id}", file.filename or "report", data)  # encrypted, then stored
+    except RuntimeError as e:
+        raise HTTPException(503, str(e)) from None
 
     draft = extraction.extract(data, mime, p.sex, kind if kind in ("lab", "prescription") else None)
     rep = Report(profile_id=p.id, filename=file.filename or "report", stored_name=stored, mime=mime, kind=draft.kind,
                  lab_name=draft.lab_name, doctor_name=draft.doctor_name, report_date=draft.report_date, status="review",
-                 method=draft.method,
-                 notes=json.dumps({"warnings": draft.warnings, "redactions": draft.redactions,
+                 method=draft.method, pages=draft.pages, ocr_text=draft.text,
+                 notes=json.dumps({"warnings": draft.warnings, "redactions": draft.redactions, "reader": draft.reader,
                                    "draft_medicines": [{"brand": m.brand, "generic": m.generic, "dose": m.dose, "frequency": m.frequency,
                                                         "duration": m.duration, "source_text": m.source_text, "confidence": m.confidence,
                                                         "matched": bool(m.generics)} for m in draft.medicines]}))
@@ -171,7 +202,10 @@ def get_report_file(rid: int, request: Request, u: User = Depends(security.curre
     rep = _owned_report(rid, u, db)
     if not rep.stored_name:
         raise HTTPException(404, "No original file for this report (demo data)")
-    data = security.decrypt_bytes((config.UPLOAD_DIR / rep.stored_name).read_bytes())
+    try:
+        data = storage.load(rep.stored_name)
+    except FileNotFoundError:
+        raise HTTPException(404, "The original file is no longer available") from None
     security.audit(db, u.id, "file_viewed", rep.filename, request)
     db.commit()
     return Response(data, media_type=rep.mime or "application/octet-stream",
@@ -181,8 +215,7 @@ def get_report_file(rid: int, request: Request, u: User = Depends(security.curre
 @router.delete("/reports/{rid}")
 def delete_report(rid: int, request: Request, u: User = Depends(security.current_user), db: Session = Depends(get_db)):
     rep = _owned_report(rid, u, db)
-    if rep.stored_name:
-        (config.UPLOAD_DIR / rep.stored_name).unlink(missing_ok=True)
+    storage.delete(rep.stored_name)
     security.audit(db, u.id, "report_deleted", rep.filename, request)
     db.delete(rep)
     db.commit()
@@ -196,8 +229,19 @@ def list_results(pid: int, code: str | None = None, u: User = Depends(security.c
     return [_result_out(r) for r in sorted(rs, key=lambda r: (r.date or date.min), reverse=True)]
 
 
+def trend_change(name: str, unit: str, first: float, last: float, d0: date, d1: date, lang: str = "en") -> dict:
+    """change_percent, direction (up / down / stable; under 3% counts as stable) and a neutral sentence."""
+    if d0 == d1:
+        return {"change_percent": None, "direction": None, "trend_sentence": None}
+    pct = round((last - first) / first * 100, 1) if first else None
+    direction = "stable" if pct is None or abs(pct) < 3 else ("up" if pct > 0 else "down")
+    sentence = templates.t(f"trend.{direction}", lang, test=name, from_value=round(first, 2), to_value=round(last, 2), unit=unit,
+                           change_percent=f"{pct:+g}" if pct is not None else "0", from_date=d0.strftime("%b %Y"), to_date=d1.strftime("%b %Y"))
+    return {"change_percent": pct, "direction": direction, "trend_sentence": sentence}
+
+
 @router.get("/profiles/{pid}/trends")
-def trends(pid: int, u: User = Depends(security.current_user), db: Session = Depends(get_db)):
+def trends(pid: int, lang: str = "en", u: User = Depends(security.current_user), db: Session = Depends(get_db)):
     p = security.owned_profile(pid, u, db)
     reports = {r.id: r for r in p.reports}
     tests = catalog.tests()
@@ -219,7 +263,9 @@ def trends(pid: int, u: User = Depends(security.current_user), db: Session = Dep
             pts.append({"date": r.date.isoformat(), "value": r.value, "lab": lab, "result_id": r.id, "flag": r.flag,
                         "value_raw": r.value_raw, "unit_raw": r.unit_raw})
         series.append({"code": code, "name": t["name"], "unit": t["unit"], "category": t["category"], "ref_low": lo, "ref_high": hi,
-                       "points": pts, "lab_changes": changes, "latest_flag": rs[-1].flag, "simple": t["simple"]})
+                       "points": pts, "lab_changes": changes, "latest_flag": rs[-1].flag, "simple": t["simple"],
+                       "latest_flag_computed": flags.flag_for(code, rs[-1].value, rs[-1].ref_low, rs[-1].ref_high),
+                       **trend_change(t["name"], t["unit"], rs[0].value, rs[-1].value, rs[0].date, rs[-1].date, lang)})
     order = ["Diabetes", "Kidney", "Liver", "Blood count", "Heart", "Thyroid", "Vitamins"]
     series.sort(key=lambda s: (order.index(s["category"]) if s["category"] in order else 99, -len(s["points"])))
     analysis = records.analyze(p)
@@ -230,7 +276,12 @@ def trends(pid: int, u: User = Depends(security.current_user), db: Session = Dep
 
 @router.get("/profiles/{pid}/timeline")
 def timeline(pid: int, u: User = Depends(security.current_user), db: Session = Depends(get_db)):
-    p = security.owned_profile(pid, u, db)
+    return timeline_events(security.owned_profile(pid, u, db))
+
+
+def timeline_events(p, include_insights: bool = True) -> list[dict]:
+    """Reports, medicines, symptoms, checkups and insight milestones, newest first. Works on a Profile
+    or on a permission-filtered view of one (family sharing)."""
     events = []
     for r in p.reports:
         if r.report_date:
@@ -245,7 +296,12 @@ def timeline(pid: int, u: User = Depends(security.current_user), db: Session = D
                            "subtitle": f"{m.generic or ''} {m.dose or ''} {m.frequency or ''}".strip() + (f": {m.reason}" if m.reason else "")})
     for s in p.symptoms:
         events.append({"date": s.onset_date.isoformat(), "type": "symptom", "title": s.label, "subtitle": s.notes or ""})
-    analysis = records.analyze(p)
+    for c in getattr(p, "checkups", []):
+        when = c.done_date or c.due_date
+        if when:
+            events.append({"date": when.isoformat(), "type": "checkup", "title": ("Done: " if c.done_date else "Due: ") + c.title,
+                           "subtitle": c.provider or c.kind})
+    analysis = records.analyze(p) if include_insights else {"hidden_risks": []}
     for r in analysis["hidden_risks"]:
         first_bad = next((h for h in r["history"] if h["status"] != "green"), None)
         if first_bad:

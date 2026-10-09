@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Pill, IndianRupee, Plus, Thermometer, Trash2, Ban, GitPullRequestArrow, Droplet, FlaskConical, Clock, BookOpen } from "lucide-react";
+import { Pill, IndianRupee, Plus, Thermometer, Trash2, Ban, GitPullRequestArrow, Droplet, FlaskConical, Clock, BookOpen, ShieldCheck, ChevronDown, Utensils, Copy, Layers, AlertTriangle, Info } from "lucide-react";
 import { api } from "../lib/api";
 import { useApp, useFetch } from "../lib/store";
 import { fmtDate } from "../lib/format";
@@ -21,6 +21,121 @@ const TYPE_META: Record<string, { icon: typeof Pill; label: string }> = {
   side_effect: { icon: Clock, label: "Side-effect timing" },
   iron: { icon: Droplet, label: "Not working?" },
 };
+
+// ---------------------------------------------------------------- medicine safety check (rule knowledge base, not AI)
+interface FoodNote { medicine: string; medicine_id: number; generic: string; text: string; level: string; source?: string | null }
+interface Interaction { id: string; level: string; medicines: string[]; medicine_ids: number[]; text: string; source?: string | null }
+interface PairNote { medicines: string[]; medicine_ids: number[]; text: string; generic?: string; class?: string }
+interface LabCaution { id: string; test: string; flag: string; medicines: string[]; level: string; text: string; source?: string | null }
+interface Safety {
+  food_notes: FoodNote[]; interactions: Interaction[]; duplicates: PairNote[]; same_class: PairNote[]; lab_cautions: LabCaution[];
+  checked: { brand: string; generics: string[] }[]; source: string; disclaimer: string;
+}
+
+const TONE = {
+  red: { box: "border-red-200 bg-red-50/60 dark:border-red-500/30 dark:bg-red-500/5", icon: "text-red-500" },
+  amber: { box: "border-amber-200 bg-amber-50/60 dark:border-amber-500/30 dark:bg-amber-500/5", icon: "text-amber-500" },
+};
+
+function SafetyItem({ tone, icon: Icon, title, text, source }: { tone: keyof typeof TONE; icon: typeof Pill; title: string; text: string; source?: string | null }) {
+  return (
+    <div className={`rounded-xl border p-4 ${TONE[tone].box}`}>
+      <p className="flex items-start gap-2 font-semibold"><Icon className={`mt-0.5 h-4 w-4 shrink-0 ${TONE[tone].icon}`} />{title}</p>
+      <p className="mt-1 text-sm muted">{text}</p>
+      {source && <p className="mt-2 flex gap-1 text-[11px] muted"><BookOpen className="mt-0.5 h-3 w-3 shrink-0" />{source}</p>}
+    </div>
+  );
+}
+
+function MedSafety({ pid }: { pid: number }) {
+  const { data, error } = useFetch<Safety>(`/profiles/${pid}/medicines/safety`);
+  const [open, setOpen] = useState<boolean | null>(null);
+  if (error) return <section className="mb-8"><ErrorBox msg={error} /></section>;
+  if (!data || !data.checked.length) return null;
+  const foodBy = data.food_notes.reduce<Record<string, FoodNote[]>>((acc, n) => { (acc[n.medicine] ??= []).push(n); return acc; }, {});
+  const issues = data.interactions.length + data.duplicates.length + data.same_class.length + data.lab_cautions.length;
+  const total = issues + data.food_notes.length;
+  const major = data.interactions.filter((i) => i.level === "major").length;
+  const expanded = open ?? total <= 4;
+
+  return (
+    <section className="mb-8">
+      <button type="button" onClick={() => setOpen(!expanded)} aria-expanded={expanded} className="mb-3 flex w-full flex-wrap items-center justify-between gap-2 text-left">
+        <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider muted"><ShieldCheck className="h-4 w-4" /> Medicine safety check</h2>
+        <span className="flex items-center gap-2">
+          {major > 0 && <span className="chip bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300">{major} major</span>}
+          <span className={`chip ${issues ? "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300" : "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300"}`}>{issues ? `${issues} worth discussing` : "No clashes found"}</span>
+          {!!data.food_notes.length && <span className="chip bg-slate-100 text-slate-700 dark:bg-white/10 dark:text-slate-200">{data.food_notes.length} food notes</span>}
+          <ChevronDown className={`h-4 w-4 text-slate-400 transition ${expanded ? "rotate-180" : ""}`} />
+        </span>
+      </button>
+      {expanded && (
+        <div className="card space-y-5 p-5">
+          <p className="text-xs muted">Checked together: {data.checked.map((c) => c.brand + (c.generics.length ? ` (${c.generics.join(" + ")})` : "")).join(", ")}</p>
+
+          {!!data.interactions.length && (
+            <div>
+              <h3 className="mb-2 font-bold">Medicines that may interact</h3>
+              <div className="grid gap-3 lg:grid-cols-2">
+                {data.interactions.map((i) => (
+                  <SafetyItem key={i.id + i.medicine_ids.join("-")} tone={i.level === "major" ? "red" : "amber"} icon={i.level === "major" ? AlertTriangle : Info}
+                    title={`${i.medicines.join(" + ")} · ${i.level === "major" ? "Major" : i.level === "moderate" ? "Moderate" : i.level}`} text={i.text} source={i.source} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {!!(data.duplicates.length || data.same_class.length) && (
+            <div>
+              <h3 className="mb-2 font-bold">Possible double-ups</h3>
+              <div className="grid gap-3 lg:grid-cols-2">
+                {data.duplicates.map((d) => <SafetyItem key={"d" + d.medicine_ids.join("-")} tone="red" icon={Copy} title={`${d.medicines.join(" + ")} · same salt${d.generic ? ` (${d.generic})` : ""}`} text={d.text} />)}
+                {data.same_class.map((d) => <SafetyItem key={"c" + d.medicine_ids.join("-")} tone="amber" icon={Layers} title={`${d.medicines.join(" + ")} · same type${d.class ? ` (${d.class.replace(/_/g, " ")})` : ""}`} text={d.text} />)}
+              </div>
+            </div>
+          )}
+
+          {!!data.lab_cautions.length && (
+            <div>
+              <h3 className="mb-2 font-bold">Linked to your latest test results</h3>
+              <div className="grid gap-3 lg:grid-cols-2">
+                {data.lab_cautions.map((l) => <SafetyItem key={l.id} tone="amber" icon={FlaskConical} title={`${l.test} ${l.flag.replace(/_/g, " ")} · ${l.medicines.join(", ")}`} text={l.text} source={l.source} />)}
+              </div>
+            </div>
+          )}
+
+          {!!data.food_notes.length && (
+            <div>
+              <h3 className="mb-2 font-bold">Food & timing notes</h3>
+              <div className="grid gap-3 md:grid-cols-2">
+                {Object.entries(foodBy).map(([med, notes]) => (
+                  <div key={med} className="rounded-xl bg-slate-50 p-4 dark:bg-white/5">
+                    <p className="mb-2 flex items-center gap-2 font-semibold"><Utensils className="h-4 w-4 text-brand-600" />{med}</p>
+                    <ul className="space-y-2 text-sm">
+                      {notes.map((n, i) => (
+                        <li key={i} className="flex gap-2">
+                          {n.level === "caution" ? <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" /> : <Info className="mt-0.5 h-4 w-4 shrink-0 text-sky-500" />}
+                          <span>{n.text}{n.source && <span className="block text-[11px] muted">{n.source}</span>}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {!total && <p className="text-sm muted">No known interactions, double-ups or food notes were found for these medicines in our rule list. That doesn't rule everything out; your pharmacist can double-check.</p>}
+
+          <div className="space-y-1 border-t border-slate-100 pt-3 text-[11px] muted dark:border-white/5">
+            <p className="flex gap-1"><BookOpen className="mt-0.5 h-3 w-3 shrink-0" />{data.source}</p>
+            <p className="flex gap-1"><Info className="mt-0.5 h-3 w-3 shrink-0" />{data.disclaimer}</p>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
 
 export default function Medicines() {
   const { profile, lang, bump } = useApp();
@@ -120,6 +235,8 @@ export default function Medicines() {
         {!active.length && <p className="text-sm muted">No active medicines. Upload a prescription or add one.</p>}
         {!!past.length && <p className="mt-3 text-xs muted">Stopped: {past.map((m) => m.brand).join(", ")}</p>}
       </section>
+
+      <MedSafety pid={profile.id} />
 
       <section>
         <div className="mb-3 flex items-center justify-between">

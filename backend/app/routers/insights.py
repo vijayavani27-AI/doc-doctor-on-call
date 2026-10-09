@@ -75,7 +75,26 @@ def dashboard(pid: int, u: User = Depends(security.current_user), db: Session = 
                        "label": r["label"], "value": r["current"]["value"], "organ": r["organ"],
                        "reports_combined": r["current"]["reports_combined"]} for r in risks],
             "drifts": a["drifts"][:3], "next_tests": a["next_tests"], "metrics": metrics,
-            "recent_reports": [_report_out(r) for r in recent], "pending_reviews": sum(1 for r in p.reports if r.status == "review")}
+            "recent_reports": [_report_out(r) for r in recent], "pending_reviews": sum(1 for r in p.reports if r.status == "review"),
+            **_dashboard_extras(p, u, db)}
+
+
+def _dashboard_extras(p, u: User, db: Session) -> dict:
+    """Care plan, family requests and the code-rule urgent banner for the dashboard."""
+    from sqlalchemy import or_
+
+    from ..models import FamilyLink
+    from ..services import safety
+    from .care import due_items
+
+    due = due_items(p)
+    links = db.query(FamilyLink).filter(or_(FamilyLink.owner_id == u.id, FamilyLink.requester_id == u.id)).all()
+    return {"urgent": safety.urgent_banner(p),
+            "today": {"pending": due["pending"], "slots": due["slots"][:6], "checkups": due["checkups"][:3]},
+            "family": {"pending_requests": sum(1 for x in links if x.owner_id == u.id and x.status == "pending"),
+                       "i_can_view": sum(1 for x in links if x.requester_id == u.id and x.status == "approved"),
+                       "can_view_me": sum(1 for x in links if x.owner_id == u.id and x.status == "approved")},
+            "needs_review": sum(1 for r in p.results if not r.confirmed and r.confidence < 0.75)}
 
 
 def _doses_per_day(freq: str | None) -> float:

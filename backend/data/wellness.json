@@ -18,6 +18,10 @@
     "steps": {"label": "Daily steps", "unit": "steps", "plausible": [0, 100000], "target": "7,000+ a day",
               "citation": "Paluch AE et al. Lancet Public Health 2022: mortality benefit plateaus around 6,000–8,000 steps/day for adults over 60"},
     "sleep": {"label": "Sleep", "unit": "hours", "plausible": [0, 24], "target": "7–9 hours",
-              "citation": "AASM/SRS consensus: adults need 7 or more hours of sleep per night"}
+              "citation": "AASM/SRS consensus: adults need 7 or more hours of sleep per night"},
+    "water": {"label": "Water", "unit": "mL", "plausible": [0, 10000], "target": "about 2–3 litres a day unless your doctor set a limit",
+              "citation": "EFSA 2010 adequate intake (women 2.0 L, men 2.5 L total water/day); kidney or heart patients may have a fluid limit from their doctor"},
+    "calories": {"label": "Calories eaten", "unit": "kcal", "plausible": [0, 8000], "target": "depends on age, size and activity",
+              "citation": "ICMR-NIN Dietary Guidelines for Indians 2024 (energy needs vary by age, sex and activity)"}
   }
 }

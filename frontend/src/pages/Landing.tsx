@@ -26,7 +26,7 @@ const FAQ = [
   ["What does “hidden risk” mean?", "Each lab report checks one number at a time. Some problems only show up when numbers from different reports are combined. For example, a liver test from one lab and a blood count from another give the FIB-4 liver score. DOC does that joining for you, using published medical formulas."],
   ["Which reports can I upload?", "Lab reports (PDF or photo), prescriptions, even handwritten ones. Old reports are useful too, because trends need history."],
   ["How do I know the results are right?", "Every number links to the exact line of the report it came from, and every score shows its formula and research source. You can also try the test kit with its answer key, or check any score in a free online calculator."],
-  ["Is my data safe?", "Login uses a password plus a 6-digit code (2FA). Files are stored encrypted, names and phone numbers are removed before AI reading, and you can export or delete everything anytime."],
+  ["Is my data safe?", "Sign-in is by Google Firebase. Files are encrypted before they are stored, only our server can reach the database, family members see only what you approve, and you can export or delete everything anytime."],
   ["Does it work in Hindi or Tamil?", "Yes. Explanations and chat answers can be in English, हिन्दी or தமிழ் (with AI turned on)."],
   ["Does it cost money?", "DOC is free for families in this hackathon version. The ₹ prices shown for tests and generic medicines are only estimates to help you plan."],
 ];
@@ -149,7 +149,7 @@ export default function Landing() {
             <p className="mt-2 muted">The AI reads and explains. Medical maths is done by tested code using published equations, so results are repeatable and auditable.</p>
           </div>
           <ul className="space-y-3 text-sm">
-            {["Every number links to its source report line", "A second AI fact-checks every chat answer", "Says “I don't know” instead of guessing", "Time-based 2FA, backup codes, rate-limited login", "Encrypted uploads; personal details removed before AI", "Share links that expire; full access log; delete anytime"].map((x) => (
+            {["Every number links to its source report line", "A second AI fact-checks every chat answer", "Says “I don't know” instead of guessing", "Google / email sign-in by Firebase; consent-based family sharing", "Encrypted uploads; personal details removed before AI", "Share links that expire; full access log; delete anytime"].map((x) => (
               <li key={x} className="flex gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-brand-600" />{x}</li>
             ))}
           </ul>

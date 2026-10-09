@@ -1,6 +1,6 @@
 import { useRef, useState, type FormEvent } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, ReferenceLine, CartesianGrid } from "recharts";
-import { HeartPulse, Plus, Upload, Download, Trash2, Activity, Droplets, Scale, Footprints, Moon, Wind, Heart, BookOpen, CheckCircle2 } from "lucide-react";
+import { HeartPulse, Plus, Upload, Download, Trash2, Activity, Droplets, Scale, Footprints, Moon, Wind, Heart, BookOpen, CheckCircle2, Watch, RefreshCw, Link2, Loader2 } from "lucide-react";
 import { api } from "../lib/api";
 import { useApp, useFetch } from "../lib/store";
 import { fmtDate, fmtNum, statusStyles } from "../lib/format";
@@ -77,6 +77,89 @@ function CardView({ c }: { c: Card }) {
       {c.note && <p className="mt-2 text-xs muted">{c.note}{c.change_6m_pct !== undefined ? ` · ${c.change_6m_pct > 0 ? "+" : ""}${c.change_6m_pct}% in 6 months` : ""}</p>}
       <p className="mt-2 flex gap-1 text-[10px] muted"><BookOpen className="mt-0.5 h-3 w-3 shrink-0" />{c.citation}</p>
     </div>
+  );
+}
+
+// ---------------------------------------------------------------- simulated devices (demo)
+interface Device { id: number; kind: string; name: string; reads: string[]; connected_at: string; last_sync_at: string | null; is_demo: boolean; note: string }
+interface DeviceKind { kind: string; name: string; reads: string[] }
+const DEVICE_ICON: Record<string, typeof Heart> = { bp_monitor: Activity, glucometer: Droplets, fitness_band: Watch, smart_scale: Scale, pulse_oximeter: Wind };
+
+function Devices({ pid, kinds }: { pid: number; kinds: Record<string, Kind> }) {
+  const { bump } = useApp();
+  const { data, error, reload } = useFetch<{ items: Device[]; available: DeviceKind[] }>(`/profiles/${pid}/devices`);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [msg, setMsg] = useState<string | null>(null);
+  const reads = (r: string[]) => r.map((x) => kinds[x]?.label ?? x.replace(/_/g, " ")).join(", ");
+
+  async function run(key: string, fn: () => Promise<void>) {
+    setBusy(key);
+    setMsg(null);
+    try { await fn(); } catch (x) { setMsg((x as Error).message); } finally { setBusy(null); }
+  }
+  const sync = (d: Device) => run(`s${d.id}`, async () => {
+    const r = await api.post<{ added: number }>(`/devices/${d.id}/sync`);
+    setMsg(`${d.name}: added ${r.added} simulated reading(s).`);
+    bump();
+  });
+  const connect = (k: DeviceKind) => run(`c${k.kind}`, async () => { await api.post(`/profiles/${pid}/devices`, { kind: k.kind }); reload(); });
+  const remove = (d: Device) => run(`r${d.id}`, async () => {
+    if (!confirm(`Remove ${d.name}? Readings already added stay.`)) return;
+    await api.del(`/devices/${d.id}`);
+    reload();
+  });
+
+  if (error) return <section className="mt-6"><ErrorBox msg={error} /></section>;
+  if (!data) return null;
+  const connected = new Set(data.items.map((d) => d.kind));
+  const available = data.available.filter((k) => !connected.has(k.kind));
+
+  return (
+    <section className="card mt-6 p-5">
+      <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+        <h2 className="font-bold">Devices (demo)</h2>
+        <span className="chip bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300">Simulated device — demo data</span>
+      </div>
+      <p className="mb-4 text-xs muted">These devices are simulated for the demo. Synced readings are marked “device_demo” so they are never mixed up with real measurements.</p>
+      {msg && <p className="mb-3 flex items-center gap-2 rounded-xl bg-brand-50 p-3 text-sm dark:bg-brand-500/10"><CheckCircle2 className="h-4 w-4 text-brand-600" />{msg}</p>}
+
+      {!!data.items.length && (
+        <div className="mb-4 divide-y divide-slate-100 dark:divide-white/5">
+          {data.items.map((d) => {
+            const I = DEVICE_ICON[d.kind] ?? HeartPulse;
+            return (
+              <div key={d.id} className="flex flex-wrap items-center gap-3 py-2.5">
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-brand-50 text-brand-600 dark:bg-brand-500/10"><I className="h-5 w-5" /></div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold">{d.name}</p>
+                  <p className="text-xs muted">Reads {reads(d.reads)} · {d.last_sync_at ? `last synced ${fmtDate(d.last_sync_at, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}` : "not synced yet"}</p>
+                </div>
+                <button className="btn-outline py-2 text-xs" disabled={!!busy} onClick={() => sync(d)}>
+                  {busy === `s${d.id}` ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />} Sync now
+                </button>
+                <button className="btn-ghost p-2 hover:text-red-600" aria-label={`Remove ${d.name}`} disabled={!!busy} onClick={() => remove(d)}><Trash2 className="h-4 w-4" /></button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {!!available.length && (
+        <div>
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide muted">Connect a simulated device</p>
+          <div className="flex flex-wrap gap-2">
+            {available.map((k) => {
+              const I = DEVICE_ICON[k.kind] ?? HeartPulse;
+              return (
+                <button key={k.kind} className="chip bg-slate-100 px-3 py-2 text-slate-700 hover:bg-brand-50 hover:text-brand-700 dark:bg-white/10 dark:text-slate-200" disabled={!!busy} onClick={() => connect(k)} title={`Reads ${reads(k.reads)}`}>
+                  {busy === `c${k.kind}` ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <I className="h-3.5 w-3.5" />} {k.name} <Link2 className="h-3 w-3 opacity-60" />
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -171,6 +254,8 @@ export default function Wellness() {
           </div>
         </section>
       )}
+
+      <Devices pid={profile.id} kinds={data.kinds} />
 
       <Modal open={adding} onClose={() => setAdding(false)} title="Add a home reading">
         <form onSubmit={save} className="space-y-3">

@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { api, getToken, setToken, setUnauthorizedHandler } from "./api";
+import { firebaseSignOut } from "./firebase";
 import type { Lang, Profile, User } from "./types";
 
 interface AppState {
@@ -56,6 +57,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [dark]);
 
   const logout = useCallback(() => {
+    firebaseSignOut();
     setToken(null);
     setUser(null);
     setProfiles([]);

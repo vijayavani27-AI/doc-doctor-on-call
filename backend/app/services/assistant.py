@@ -11,7 +11,7 @@ import re
 from datetime import date
 
 from ..models import Profile
-from . import ai, catalog, normalizer
+from . import ai, catalog, normalizer, templates
 
 LANGS = {"en": "English", "hi": "Hindi", "ta": "Tamil"}
 
@@ -92,11 +92,15 @@ Rules:
 - Reply in {LANGS.get(language, 'English')}. Keep record IDs in square brackets unchanged."""
 
 
-def chat(profile: Profile, analysis: dict, message: str, history: list[dict], language: str = "en") -> dict:
+def chat(profile: Profile, analysis: dict, message: str, history: list[dict], language: str = "en",
+         retrieved: list[dict] | None = None) -> dict:
     context = build_context(profile, analysis)
+    retrieved = retrieved or []
     if ai.enabled():
         convo = "\n".join(f"{h['role'].upper()}: {h['content']}" for h in history[-6:])
-        prompt = f"<records>\n{context}\n</records>\n\n<conversation>\n{convo}\n</conversation>\n\nQuestion: {message}"
+        focus = "\n".join(f"[{h['id']}] {h['text']}" for h in retrieved)
+        prompt = (f"<records>\n{context}\n</records>\n\n<most_relevant_records>\n{focus or '(none)'}\n</most_relevant_records>\n\n"
+                  f"<conversation>\n{convo}\n</conversation>\n\nQuestion: {message}")
         import time
 
         t0 = time.monotonic()
@@ -122,10 +126,10 @@ def chat(profile: Profile, analysis: dict, message: str, history: list[dict], la
             res["engine"] = ai.engine_label(ai.last_engine)
             res["citations"] = sorted(set(res.get("citations", [])) | set(re.findall(r"\[((?:R|M|S)\d+|I:[\w-]+|A:[\w:.-]+|V:\w+)\]", res["answer"])))
             return res
-    return offline_chat(profile, analysis, message)
+    return offline_chat(profile, analysis, message, retrieved)
 
 
-def offline_chat(profile: Profile, analysis: dict, message: str) -> dict:
+def offline_chat(profile: Profile, analysis: dict, message: str, retrieved: list[dict] | None = None) -> dict:
     """Keyword answers so the demo works without an API key."""
     q = message.lower()
     tests = catalog.tests()
@@ -171,14 +175,19 @@ def offline_chat(profile: Profile, analysis: dict, message: str) -> dict:
         meds = [m for m in profile.medications if m.active]
         parts.append("Current medicines: " + "; ".join(f"{m.brand} ({m.generic or '?'}) {m.frequency or ''} [M{m.id}]" for m in meds) + ".")
         cites += [f"M{m.id}" for m in meds]
+    if not parts and retrieved:
+        # our own retrieval model (1024-d hashed embeddings): show the closest facts, each with its citation
+        top = [h for h in retrieved if h["score"] >= 0.08][:4]
+        if top:
+            parts.append("Here is what I found in the records that matches your question:\n" + "\n".join(f"• {h['text']} [{h['id']}]" for h in top))
+            cites += [h["id"] for h in top]
     if not parts:
-        parts.append("I can answer questions about your test results, trends, hidden risks and medicines, for example: "
-                     "'Is my sugar improving?', 'How are my kidneys?', 'What hidden risks did you find?'. "
-                     "(Running in offline mode: for free-form questions, add an Anthropic API key.)")
+        parts.append("I can answer questions about test results, trends, hidden risks, home readings and medicines, for example: "
+                     "'Is my sugar improving?', 'How are my kidneys?', 'What hidden risks did you find?'.")
     return {"answer": "\n\n".join(parts), "citations": cites, "confidence": "high" if cites else "low",
             "see_doctor": any(r["status"] == "red" for r in analysis["hidden_risks"] if r["id"] in wanted),
             "follow_ups": ["What hidden risks did you find?", "How are my kidneys?", "Which test should I do next?"],
-            "verified": None, "mode": "offline"}
+            "verified": None, "mode": "offline", "engine": "DOC offline (rules + own retrieval model)"}
 
 
 # ---------------------------------------------------------------- explanations
@@ -218,5 +227,6 @@ def explain(subject: str, facts: str, simple: str, language: str = "en") -> dict
                "what_to_do": ["Keep this report safe and bring it to your next doctor visit.", "Ask your doctor what this result means for you."],
                "check_understanding": None, "mode": "offline",
                "note": None if language == "en" else "Translation to Hindi/Tamil needs AI. Add an Anthropic API key to enable it."}
+    out["disclaimer"] = templates.disclaimer(language)
     _cache[key] = out
     return out

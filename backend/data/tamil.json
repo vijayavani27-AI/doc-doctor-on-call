@@ -1,0 +1,120 @@
+{
+  "_about": "Curated plain-language sentence templates in English (en), Tamil (ta) and Hindi (hi) for DOC's code-generated text. Keys are template ids. In each template the {placeholders} are the same in every language, so fill them with str.format(**values). Test names such as HbA1c may stay in English inside {test}. Wording is neutral. It never diagnoses or tells anyone to change a medicine, and urgent messages point to 112 (emergency) or 108 (ambulance).",
+  "templates": {
+    "flag.normal": {
+      "en": "{test} is {value} {unit}, within the usual range.",
+      "ta": "{test} அளவு {value} {unit}. இது வழக்கமான அளவுக்குள் உள்ளது.",
+      "hi": "{test} {value} {unit} है, जो सामान्य सीमा के अंदर है।"
+    },
+    "flag.low": {
+      "en": "{test} is {value} {unit}, lower than the usual range. This is worth discussing with your doctor.",
+      "ta": "{test} அளவு {value} {unit}. இது வழக்கமான அளவை விடக் குறைவாக உள்ளது. இதைப் பற்றி உங்கள் மருத்துவரிடம் பேசுவது நல்லது.",
+      "hi": "{test} {value} {unit} है, जो सामान्य सीमा से कम है। इसके बारे में अपने डॉक्टर से बात करना अच्छा रहेगा।"
+    },
+    "flag.high": {
+      "en": "{test} is {value} {unit}, higher than the usual range. This is worth discussing with your doctor.",
+      "ta": "{test} அளவு {value} {unit}. இது வழக்கமான அளவை விட அதிகமாக உள்ளது. இதைப் பற்றி உங்கள் மருத்துவரிடம் பேசுவது நல்லது.",
+      "hi": "{test} {value} {unit} है, जो सामान्य सीमा से ज़्यादा है। इसके बारे में अपने डॉक्टर से बात करना अच्छा रहेगा।"
+    },
+    "flag.critical_low": {
+      "en": "{test} is {value} {unit}, much lower than the usual range. Please see a doctor today. If you feel very unwell, call 112.",
+      "ta": "{test} அளவு {value} {unit}. இது வழக்கமான அளவை விட மிகவும் குறைவாக உள்ளது. இன்றே மருத்துவரைப் பாருங்கள். உடல்நிலை மிகவும் மோசமாக இருந்தால், உடனே 112-ஐ அழையுங்கள்.",
+      "hi": "{test} {value} {unit} है, जो सामान्य सीमा से बहुत कम है। कृपया आज ही डॉक्टर को दिखाएँ। अगर तबीयत बहुत खराब लगे, तो तुरंत 112 पर कॉल करें।"
+    },
+    "flag.critical_high": {
+      "en": "{test} is {value} {unit}, much higher than the usual range. Please see a doctor today. If you feel very unwell, call 112.",
+      "ta": "{test} அளவு {value} {unit}. இது வழக்கமான அளவை விட மிகவும் அதிகமாக உள்ளது. இன்றே மருத்துவரைப் பாருங்கள். உடல்நிலை மிகவும் மோசமாக இருந்தால், உடனே 112-ஐ அழையுங்கள்.",
+      "hi": "{test} {value} {unit} है, जो सामान्य सीमा से बहुत ज़्यादा है। कृपया आज ही डॉक्टर को दिखाएँ। अगर तबीयत बहुत खराब लगे, तो तुरंत 112 पर कॉल करें।"
+    },
+    "trend.up": {
+      "en": "{test} went up from {from_value} to {to_value} {unit} ({change_percent}%) between {from_date} and {to_date}. This is worth discussing with your doctor.",
+      "ta": "{from_date} முதல் {to_date} வரை, {test} அளவு {from_value} இலிருந்து {to_value} {unit} ஆக உயர்ந்துள்ளது ({change_percent}%). இதைப் பற்றி உங்கள் மருத்துவரிடம் பேசுவது நல்லது.",
+      "hi": "{from_date} से {to_date} के बीच {test} {from_value} से बढ़कर {to_value} {unit} हो गया ({change_percent}%)। इसके बारे में अपने डॉक्टर से बात करना अच्छा रहेगा।"
+    },
+    "trend.down": {
+      "en": "{test} went down from {from_value} to {to_value} {unit} ({change_percent}%) between {from_date} and {to_date}. This is worth discussing with your doctor.",
+      "ta": "{from_date} முதல் {to_date} வரை, {test} அளவு {from_value} இலிருந்து {to_value} {unit} ஆகக் குறைந்துள்ளது ({change_percent}%). இதைப் பற்றி உங்கள் மருத்துவரிடம் பேசுவது நல்லது.",
+      "hi": "{from_date} से {to_date} के बीच {test} {from_value} से घटकर {to_value} {unit} हो गया ({change_percent}%)। इसके बारे में अपने डॉक्टर से बात करना अच्छा रहेगा।"
+    },
+    "trend.stable": {
+      "en": "{test} stayed about the same, from {from_value} to {to_value} {unit} ({change_percent}%), between {from_date} and {to_date}.",
+      "ta": "{from_date} முதல் {to_date} வரை, {test} அளவு ஏறக்குறைய அதே நிலையில் உள்ளது: {from_value} இலிருந்து {to_value} {unit} ({change_percent}%).",
+      "hi": "{from_date} से {to_date} के बीच {test} लगभग एक जैसा रहा: {from_value} से {to_value} {unit} ({change_percent}%)।"
+    },
+    "summary.header": {
+      "en": "Report summary for {name}, dated {date}",
+      "ta": "{name} அவர்களின் பரிசோதனை அறிக்கைச் சுருக்கம் – தேதி {date}",
+      "hi": "{name} की रिपोर्ट का सारांश – तारीख {date}"
+    },
+    "summary.no_abnormal": {
+      "en": "All {count} values are within the usual range.",
+      "ta": "அனைத்து {count} அளவுகளும் வழக்கமான அளவுக்குள் உள்ளன.",
+      "hi": "सभी {count} नतीजे सामान्य सीमा के अंदर हैं।"
+    },
+    "summary.n_abnormal": {
+      "en": "{abnormal} of {count} values are outside the usual range. These are worth discussing with your doctor.",
+      "ta": "{count} அளவுகளில் {abnormal} அளவுகள் வழக்கமான அளவுக்கு வெளியே உள்ளன. இவற்றைப் பற்றி உங்கள் மருத்துவரிடம் பேசுவது நல்லது.",
+      "hi": "{count} में से {abnormal} नतीजे सामान्य सीमा से बाहर हैं। इनके बारे में अपने डॉक्टर से बात करना अच्छा रहेगा।"
+    },
+    "needs_review": {
+      "en": "We could not read {test} clearly. Please check this value against your printed report.",
+      "ta": "{test} அளவைத் தெளிவாகப் படிக்க முடியவில்லை. உங்கள் அச்சிடப்பட்ட அறிக்கையுடன் இந்த அளவைச் சரிபார்க்கவும்.",
+      "hi": "हम {test} को साफ़ नहीं पढ़ पाए। कृपया इसे अपनी छपी हुई रिपोर्ट से मिलाकर देखें।"
+    },
+    "disclaimer": {
+      "en": "This is general health information, not a diagnosis. Always talk to your doctor before making any health decision, and do not stop or change any medicine on your own. In an emergency, call 112.",
+      "ta": "இது பொதுவான உடல்நலத் தகவல் மட்டுமே; இது நோய் கண்டறிதல் அல்ல. எந்த உடல்நல முடிவையும் எடுக்கும் முன் உங்கள் மருத்துவரிடம் பேசுங்கள். எந்த மருந்தையும் நீங்களாகவே நிறுத்தவோ மாற்றவோ வேண்டாம். அவசர நிலையில் 112-ஐ அழையுங்கள்.",
+      "hi": "यह सामान्य स्वास्थ्य जानकारी है, बीमारी की पहचान (डायग्नोसिस) नहीं। कोई भी स्वास्थ्य फ़ैसला लेने से पहले अपने डॉक्टर से बात करें, और कोई भी दवा अपने आप बंद न करें या न बदलें। इमरजेंसी में 112 पर कॉल करें।"
+    },
+    "urgent.banner": {
+      "en": "Some values need urgent attention. Please see a doctor now or call 112.",
+      "ta": "சில அளவுகளுக்கு உடனடி கவனம் தேவை. இப்போதே மருத்துவரைப் பாருங்கள் அல்லது 112-ஐ அழையுங்கள்.",
+      "hi": "कुछ नतीजों पर तुरंत ध्यान देने की ज़रूरत है। कृपया अभी डॉक्टर को दिखाएँ या 112 पर कॉल करें।"
+    },
+    "risk.low": {
+      "en": "Your {risk} score is {value}. This usually means a low risk.",
+      "ta": "உங்கள் {risk} மதிப்பெண் {value}. இது பொதுவாகக் குறைந்த அபாயத்தைக் குறிக்கிறது.",
+      "hi": "आपका {risk} स्कोर {value} है। इसका मतलब आमतौर पर कम जोखिम होता है।"
+    },
+    "risk.moderate": {
+      "en": "Your {risk} score is {value}. This can indicate a moderate risk. It is worth discussing with your doctor.",
+      "ta": "உங்கள் {risk} மதிப்பெண் {value}. இது மிதமான அபாயத்தைக் குறிக்கலாம். இதைப் பற்றி உங்கள் மருத்துவரிடம் பேசுவது நல்லது.",
+      "hi": "आपका {risk} स्कोर {value} है। यह मध्यम जोखिम का संकेत हो सकता है। इसके बारे में अपने डॉक्टर से बात करना अच्छा रहेगा।"
+    },
+    "risk.high": {
+      "en": "Your {risk} score is {value}. This can indicate a high risk. Please see your doctor soon.",
+      "ta": "உங்கள் {risk} மதிப்பெண் {value}. இது அதிக அபாயத்தைக் குறிக்கலாம். விரைவில் உங்கள் மருத்துவரைப் பாருங்கள்.",
+      "hi": "आपका {risk} स्कोर {value} है। यह ज़्यादा जोखिम का संकेत हो सकता है। कृपया जल्द ही अपने डॉक्टर को दिखाएँ।"
+    },
+    "reminder.medicine": {
+      "en": "{time}: time to take {medicine}, as your doctor prescribed.",
+      "ta": "{time}: உங்கள் மருத்துவர் பரிந்துரைத்தபடி {medicine} எடுத்துக்கொள்ளும் நேரம்.",
+      "hi": "{time}: डॉक्टर की सलाह के अनुसार {medicine} लेने का समय।"
+    },
+    "reminder.checkup": {
+      "en": "Your {test} test is due around {due_date}. Book the test and share the result with your doctor.",
+      "ta": "உங்கள் {test} பரிசோதனை சுமார் {due_date} அன்று செய்ய வேண்டும். பரிசோதனைக்கு முன்பதிவு செய்து, முடிவை உங்கள் மருத்துவரிடம் காட்டுங்கள்.",
+      "hi": "आपकी {test} जाँच लगभग {due_date} तक होनी है। जाँच बुक करें और नतीजा अपने डॉक्टर को दिखाएँ।"
+    },
+    "sos.call": {
+      "en": "Emergency? Call 112 now. For an ambulance, call 108.",
+      "ta": "அவசரமா? உடனே 112-ஐ அழையுங்கள். ஆம்புலன்ஸுக்கு 108-ஐ அழையுங்கள்.",
+      "hi": "इमरजेंसी है? अभी 112 पर कॉल करें। एम्बुलेंस के लिए 108 पर कॉल करें।"
+    },
+    "sos.message": {
+      "en": "{name} needs urgent help. Location: {location}. Please call them now. If you cannot reach them, call 112.",
+      "ta": "{name} அவர்களுக்கு உடனடி உதவி தேவை. இருப்பிடம்: {location}. உடனே அவர்களை அழையுங்கள். தொடர்பு கொள்ள முடியவில்லை என்றால், 112-ஐ அழையுங்கள்.",
+      "hi": "{name} को तुरंत मदद चाहिए। जगह: {location}। कृपया अभी उन्हें कॉल करें। अगर बात न हो पाए, तो 112 पर कॉल करें।"
+    },
+    "med.duplicate": {
+      "en": "{brand_a} and {brand_b} both contain {generic}. Please check with your doctor or pharmacist. Do not stop or change any medicine on your own.",
+      "ta": "{brand_a} மற்றும் {brand_b} இரண்டிலும் {generic} உள்ளது. உங்கள் மருத்துவர் அல்லது மருந்தாளரிடம் சரிபார்க்கவும். எந்த மருந்தையும் நீங்களாகவே நிறுத்தவோ மாற்றவோ வேண்டாம்.",
+      "hi": "{brand_a} और {brand_b} दोनों में {generic} है। कृपया अपने डॉक्टर या फ़ार्मासिस्ट से पूछें। कोई भी दवा अपने आप बंद न करें या न बदलें।"
+    },
+    "med.interaction": {
+      "en": "{med_a} and {med_b} may interact. This is worth discussing with your doctor or pharmacist. Do not stop either medicine on your own.",
+      "ta": "{med_a} மற்றும் {med_b} ஒன்றுக்கொன்று பாதிப்பை ஏற்படுத்தலாம். இதைப் பற்றி உங்கள் மருத்துவர் அல்லது மருந்தாளரிடம் பேசுவது நல்லது. எந்த மருந்தையும் நீங்களாகவே நிறுத்த வேண்டாம்.",
+      "hi": "{med_a} और {med_b} एक-दूसरे पर असर डाल सकती हैं। इसके बारे में अपने डॉक्टर या फ़ार्मासिस्ट से बात करना अच्छा रहेगा। कोई भी दवा अपने आप बंद न करें।"
+    }
+  }
+}

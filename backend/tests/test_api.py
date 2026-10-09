@@ -1,6 +1,5 @@
 import io
 
-import pyotp
 from fpdf import FPDF
 
 
@@ -72,31 +71,41 @@ def test_offline_chat_cites_records(client, demo):
     assert r["mode"] == "offline" and r["citations"] and "[R" in r["answer"]
 
 
-# ------------------------------------------------------------ auth + 2FA
-def test_register_login_and_2fa_flow(client):
+# ------------------------------------------------------------ auth (local dev mode + Firebase exchange)
+def test_register_login_local_mode(client):
+    assert client.get("/api/auth/config").json()["mode"] == "local"
     r = client.post("/api/auth/register", json={"name": "Asha", "email": "asha@example.com", "password": "short"})
-    assert r.status_code == 422
+    assert r.status_code == 422 and r.json()["error"] == "unprocessable_entity"
     r = client.post("/api/auth/register", json={"name": "Asha", "email": "asha@example.com", "password": "Secure123"})
     assert r.status_code == 200
-    token = r.json()["access_token"]
-    setup = client.post("/api/auth/2fa/setup", headers=_auth(token)).json()
-    assert setup["qr"].startswith("data:image/svg+xml")
-    assert client.post("/api/auth/2fa/enable", json={"code": "000000"}, headers=_auth(token)).status_code == 401
-    en = client.post("/api/auth/2fa/enable", json={"code": pyotp.TOTP(setup["secret"]).now()}, headers=_auth(token)).json()
-    assert len(en["backup_codes"]) == 8
+    ok = client.post("/api/auth/login", json={"email": "asha@example.com", "password": "Secure123"})
+    assert ok.status_code == 200 and ok.json()["user"]["email"] == "asha@example.com"
+    assert client.get("/api/auth/me", headers=_auth("not-a-token")).status_code == 401
 
-    step1 = client.post("/api/auth/login", json={"email": "asha@example.com", "password": "Secure123"}).json()
-    assert step1["requires_2fa"] and "access_token" not in step1
-    # challenge token cannot be used as a session
-    assert client.get("/api/auth/me", headers=_auth(step1["challenge_token"])).status_code == 401
-    ok = client.post("/api/auth/2fa/verify", json={"challenge_token": step1["challenge_token"], "code": pyotp.TOTP(setup["secret"]).now()})
-    assert ok.status_code == 200 and ok.json()["user"]["totp_enabled"]
-    # backup code works once
-    step1 = client.post("/api/auth/login", json={"email": "asha@example.com", "password": "Secure123"}).json()
-    code = en["backup_codes"][0]
-    assert client.post("/api/auth/2fa/verify", json={"challenge_token": step1["challenge_token"], "code": code}).status_code == 200
-    step1 = client.post("/api/auth/login", json={"email": "asha@example.com", "password": "Secure123"}).json()
-    assert client.post("/api/auth/2fa/verify", json={"challenge_token": step1["challenge_token"], "code": code}).status_code == 401
+
+def test_firebase_sign_in_exchange(client, monkeypatch):
+    from app import config
+    from app.services import firebase_auth
+
+    monkeypatch.setattr(config, "AUTH_MODE", "firebase")
+    seen = {}
+
+    def fake_verify(token):
+        seen["token"] = token
+        if token == "x" * 30:
+            raise firebase_auth.FirebaseTokenError("Invalid sign-in token")
+        return firebase_auth.FirebaseIdentity(uid="fb-uid-123", email="gita@gmail.com", email_verified=True, name="Gita", provider="google.com")
+
+    monkeypatch.setattr(firebase_auth, "verify", fake_verify)
+    assert client.post("/api/auth/firebase", json={"id_token": "x" * 30}).status_code == 401
+    r = client.post("/api/auth/firebase", json={"id_token": "y" * 40, "sex": "F"})
+    assert r.status_code == 200 and r.json()["created"] and r.json()["user"]["auth_provider"] == "google.com"
+    again = client.post("/api/auth/firebase", json={"id_token": "y" * 40}).json()
+    assert not again["created"] and again["user"]["id"] == r.json()["user"]["id"]  # same account, no duplicate
+    # local password endpoints are switched off in Firebase mode
+    assert client.post("/api/auth/login", json={"email": "gita@gmail.com", "password": "Secure123"}).status_code == 410
+    me = client.get("/api/me", headers=_auth(again["access_token"])).json()
+    assert me["profile"]["sex"] == "F" and not me["profile"]["profile_incomplete"]
 
 
 def test_login_rate_limit(client):

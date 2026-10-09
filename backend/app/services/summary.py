@@ -3,6 +3,7 @@ from datetime import date, datetime
 
 from fpdf import FPDF
 
+from .. import config
 from ..models import Profile
 from . import catalog
 
@@ -78,10 +79,10 @@ class _PDF(FPDF):
         self.set_y(-12)
         self.set_font("Helvetica", "I", 7)
         self.set_text_color(110, 110, 110)
-        self.multi_cell(0, 3.5, _t("Generated from the patient's own uploaded records. Risk scores use published, validated formulas and are decision support only - not a diagnosis. Page ") + str(self.page_no()))
+        self.multi_cell(0, 3.5, _t("Generated from the patient's own uploaded records. Risk scores use published, validated formulas and are decision support only - not a diagnosis. Page ") + str(self.page_no() + getattr(self, "page_offset", 0)))
 
 
-def pdf_bytes(s: dict) -> bytes:
+def pdf_bytes(s: dict, local: dict | None = None) -> bytes:
     pdf = _PDF()
     pdf.set_auto_page_break(True, margin=16)
     pdf.add_page()
@@ -161,4 +162,75 @@ def pdf_bytes(s: dict) -> bytes:
         section("Questions for the doctor")
         for i, q in enumerate(s["questions"], 1):
             pdf.multi_cell(0, 4.6, _t(f"{i}. {q}"), new_x="LMARGIN", new_y="NEXT")
-    return bytes(pdf.output())
+    english = bytes(pdf.output())
+    if not local:
+        return english
+    # The Tamil page is rendered in its own document (fpdf2 can mis-map shaped glyphs when core fonts and
+    # shaped TTF fonts share one document) and then appended with PyMuPDF.
+    import pymupdf
+
+    doc = pymupdf.open(stream=english, filetype="pdf")
+    tamil = _PDF()
+    tamil.page_offset = doc.page_count
+    tamil.set_auto_page_break(True, margin=16)
+    _local_page(tamil, local)
+    with pymupdf.open(stream=bytes(tamil.output()), filetype="pdf") as extra:
+        doc.insert_pdf(extra)
+    out = doc.tobytes(garbage=3, deflate=True)
+    doc.close()
+    return out
+
+
+# ---------------------------------------------------------------- family page in Tamil (code templates, no AI)
+_STATUS_TA = {"red": "கவனம் தேவை", "yellow": "கண்காணிக்கவும்", "green": "சரியான அளவில்"}
+_TITLE = {"ta": "குடும்பத்தினருக்கான சுருக்கம் (தமிழ்)"}
+
+
+def local_summary(s: dict, lang: str) -> dict | None:
+    """Plain-language lines for the family in Tamil, built from curated templates."""
+    if lang != "ta":
+        return None
+    from . import templates
+
+    flag_word = {"L": "low", "H": "high", "N": "normal"}
+    lines = [templates.t(f"flag.{flag_word.get(lab['flag'] or 'N', 'normal')}", lang, test=lab["name"], value=lab["value"], unit=lab["unit"] or "")
+             for lab in s["labs"]]
+    risks = [f"{r['name']} ({r['condition']}): {r['value']} - {_STATUS_TA.get(r['status'], r['label'])}" for r in s["risks"]]
+    meds = [f"{m['brand']} {m['dose'] or ''} {m['frequency'] or ''}".strip() for m in s["medicines"]]
+    urgent = templates.t("urgent.banner", lang) if any(r["status"] == "red" for r in s["risks"]) or any(a["level"] == "red" for a in s["alerts"]) else None
+    return {"title": _TITLE[lang], "patient": f"{s['patient']['name']}  |  {s['patient']['age'] or '-'}", "urgent": urgent,
+            "sections": [("சோதனை முடிவுகள்", lines), ("மறைந்திருக்கும் அபாயங்கள்", risks), ("தற்போதைய மருந்துகள்", meds)],
+            "footer": [templates.disclaimer(lang), templates.t("sos.call", lang)]}
+
+
+def _local_page(pdf: FPDF, local: dict):
+    fonts = config.DATA_DIR / "fonts"
+    pdf.add_font("NotoTamil", "", str(fonts / "NotoSansTamil-Regular.ttf"))
+    pdf.add_font("NotoTamil", "B", str(fonts / "NotoSansTamil-Bold.ttf"))
+    pdf.add_font("NotoSans", "", str(fonts / "NotoSans-Regular.ttf"))
+    pdf.add_font("NotoSans", "B", str(fonts / "NotoSans-Bold.ttf"))
+    pdf.set_fallback_fonts(["NotoSans"])
+    pdf.set_text_shaping(True)
+    pdf.add_page()
+    pdf.set_font("NotoTamil", "B", 13)
+    pdf.multi_cell(0, 8, local["title"], new_x="LMARGIN", new_y="NEXT")
+    pdf.set_font("NotoTamil", "", 10)
+    pdf.multi_cell(0, 6, local["patient"], new_x="LMARGIN", new_y="NEXT")
+    if local.get("urgent"):
+        pdf.set_text_color(185, 28, 28)
+        pdf.set_font("NotoTamil", "B", 10.5)
+        pdf.multi_cell(0, 6.5, local["urgent"], new_x="LMARGIN", new_y="NEXT")
+        pdf.set_text_color(0, 0, 0)
+    for title, lines in local["sections"]:
+        if not lines:
+            continue
+        pdf.ln(2)
+        pdf.set_font("NotoTamil", "B", 11)
+        pdf.multi_cell(0, 7, title, new_x="LMARGIN", new_y="NEXT")
+        pdf.set_font("NotoTamil", "", 9.5)
+        for ln in lines:
+            pdf.multi_cell(0, 5.6, "• " + ln, new_x="LMARGIN", new_y="NEXT")
+    pdf.ln(3)
+    pdf.set_font("NotoTamil", "", 8.5)
+    for ln in local["footer"]:
+        pdf.multi_cell(0, 5, ln, new_x="LMARGIN", new_y="NEXT")

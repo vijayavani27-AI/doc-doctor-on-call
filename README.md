@@ -5,13 +5,15 @@
 # DOC: Doctor On Call
 ### AI-Powered Personal Health Copilot that finds the disease hiding *between* your reports
 
-**DOC reads medical reports, prescriptions and home wellness data, puts every lab on one scale, and joins values across labs, dates and medicines to run 8 published clinical formulas. It then explains what it finds in English, हिन्दी or தமிழ், with a source for every number.**
+**DOC reads medical reports, prescriptions and home wellness data with its own OCR and models, puts every lab on one scale, and joins values across labs, dates and medicines to run 8 published clinical formulas. It explains what it finds in English, हिन्दी or தமிழ், with a source for every number. Families can share records only with explicit, revocable consent.**
 
-![tests](https://img.shields.io/badge/tests-47%20passing-brightgreen) ![lint](https://img.shields.io/badge/lint-ruff%20clean-brightgreen) ![formulas](https://img.shields.io/badge/clinical%20formulas-8%20validated-teal) ![AI](https://img.shields.io/badge/AI-Gemini%20%2B%20Claude-blueviolet) ![PWA](https://img.shields.io/badge/mobile-installable%20PWA-orange) ![license](https://img.shields.io/badge/license-MIT-blue)
+![tests](https://img.shields.io/badge/tests-92%20passing-brightgreen) ![lint](https://img.shields.io/badge/lint-ruff%20clean-brightgreen) ![formulas](https://img.shields.io/badge/clinical%20formulas-8%20validated-teal) ![models](https://img.shields.io/badge/own%20models-OCR%20%C2%B7%20XGBoost%20%C2%B7%20RAG-blueviolet) ![FHIR](https://img.shields.io/badge/FHIR-R4%20export-red) ![PWA](https://img.shields.io/badge/mobile-installable%20PWA-orange) ![license](https://img.shields.io/badge/license-MIT-blue)
 
 `Altrix Labs Hackathon · Challenge 1 · AI-Powered Personal Health Copilot`
 
-**▶ Try it:** open the app and click **"Try the live demo"**, or go straight to `/demo`. No sign-up needed.
+**▶ Live app: https://doc-doctor-on-call.onrender.com** · **one-click demo (no sign-up): https://doc-doctor-on-call.onrender.com/demo**
+
+<sub>Free hosting sleeps when idle, so the first visit may take ~50 seconds to wake up.</sub>
 
 </div>
 
@@ -21,27 +23,20 @@
 
 | Criterion | What DOC does | Evidence |
 |---|---|---|
-| **Problem fit** | Covers all four inputs named in the brief: **medical records, prescriptions, diagnostic reports and wellness data**. Turns them into understanding, organisation and management. | §2, §5; [User guide](USER_GUIDE.md) |
-| **Innovation** | **Hidden Disease Finder**: joins values *across* reports, labs and dates (time-window pairing) to compute 8 validated scores that no single report shows. It also finds prescribing cascades and links wellness data to medicines (e.g. *home BP rose after an NSAID was started*). | `backend/app/services/engine.py`, `wellness.py`; §3 |
-| **Technical depth** | FastAPI + React PWA, 2 AI engines with automatic fallback, structured JSON outputs, LOINC normalisation, unit harmonisation across 4 unit systems, a personal-baseline trend model, a rules engine with citations, PDF generation, TOTP 2FA, encryption at rest. | §6, [Architecture](docs/ARCHITECTURE.md) |
-| **Responsible AI use** | **AI reads and explains; tested code does all medical maths.** Every chat answer cites record IDs, and a second AI pass fact-checks it. The model abstains when unsure, and the confirm step catches reading errors. | §7, [Safety](docs/SAFETY.md) |
-| **Measured quality** | 47/47 tests · 9/9 formulas match hand calculations · offline reader 100% on 782 values · **Gemini vision 37/37 values from synthetic phone photos, 0 hallucinations** | §8, [Evaluation](docs/EVALUATION.md) |
-| **Impact** | Earlier detection of liver scarring, silent kidney decline, thalassaemia trait and insulin resistance. Catches risky drug combinations, avoids repeat tests, and suggests generic savings (demo family: ~₹17k/year). | §3, §4 |
-| **UX & accessibility** | Simple-language explanations in 3 languages, teach-back quiz, 8-slide onboarding tour, voice input/read-aloud, dark mode, mobile layout, reduced-motion support | Screenshots below |
-| **Privacy & security** | TOTP 2FA + backup codes, bcrypt, Fernet-encrypted uploads, PII redaction before AI, CSP and security headers, expiring share links, full audit log, export/delete (DPDP Act 2023 principles) | §9 |
-| **Completeness** | Public site (Home/Features/About/FAQ/Contact/Legal), app with 12 pages, family profiles, test kit with answer key, CI, Docker, one-click Render blueprint | §10, §11 |
+| **Problem fit** | Covers all four inputs in the brief: **medical records, prescriptions, diagnostic reports and wellness data**, and turns them into understanding (plain language, 3 languages), organisation (records, timeline, FHIR) and management (care plan, reminders, medicine safety, family care). | §2, §5; [User guide](USER_GUIDE.md) |
+| **Innovation** | **Hidden Disease Finder**: joins values *across* reports, labs and dates to compute 8 validated scores that no single report shows. Also prescribing cascades, wellness × medicine links (*BP rose after a painkiller was started*), and **consent-based family care** (a son can follow his mother's sugar trend only after she approves exactly what he may see). | `engine.py`, `family.py`; §3 |
+| **Own models** | Not an API wrapper: **Tesseract OCR (English + Tamil)** + dictionary NER parser, **two XGBoost risk models trained on public datasets** (diabetes AUC 0.83, heart AUC 0.91) with exact **TreeSHAP** explanations, our own **1024-d embedding + pgvector RAG**, colour-analysis **wound model**, rule KBs for medicines and diet, curated Tamil templates. Gemini/Claude are an *optional boost*. | §7, [Evaluation](docs/EVALUATION.md) |
+| **Responsible AI** | Flags (normal/low/high/**critical**) computed in code from numbers + ranges, never by an LLM. Medicine interactions from a deterministic KB. Every answer has a disclaimer and citations; **urgent code rules force a "see a doctor now / call 112" banner**. Items under 0.75 confidence go to a review list. Never diagnoses or prescribes. | §7, [Safety](docs/SAFETY.md) |
+| **Measured quality** | **92/92 tests** (incl. 4 required consent tests + FHIR R4 validation) · 9/9 formulas match hand calculations · reader 100% on 782 values · Gemini vision 37/37 with 0 hallucinations · risk models 5-fold CV AUC 0.834 / 0.913 | §8 |
+| **Interoperability** | **FHIR R4 Bundle** (Patient + ABHA, DocumentReference, DiagnosticReport, Observation with LOINC + UCUM + referenceRange + interpretation, MedicationRequest, Condition, vital signs), validated against R4 models. ABHA link/import (mock). | `fhir.py`, `/api/fhir` |
+| **Privacy & security** | **Firebase** Google/email sign-in, backend-only access to **Supabase** (service role, RLS deny-all), files **Fernet-encrypted before upload** to a private bucket, 5-minute signed file URLs, CORS allow-list, rate limits, uniform errors, PHI-free structured logs, full audit log visible to the data owner, export/delete-all (DPDP Act 2023 principles). | §9 |
+| **Impact** | Earlier detection of liver scarring, silent kidney decline, thalassaemia trait and insulin resistance; risky drug combinations caught; missed checkups and doses reduced; families coordinate care without sharing passwords. | §3, §4 |
+| **UX & accessibility** | Plain language at Class 6–8 level, English/Hindi/Tamil, voice input + read-aloud, Tamil PDF page, SOS button on every screen, nearby hospitals map data, dark mode, installable mobile PWA | Screenshots |
+| **Completeness** | 103 API endpoints, 27 app pages, demo family with linked family accounts (all `is_demo`), test kit with answer key, CI, Docker (with Tesseract), Render blueprint, `schema.sql`, [API reference](docs/API.md) | §10, §11 |
 
 **One-command verification (no API key needed):**
 ```bash
 cd backend && python scripts/verify.py
-```
-```
-Lint (ruff)                         PASS
-Automated tests                     PASS (47 passed)
-Report reader (100 synthetic PDFs)  names 100.0% | values 100.0%
-Formulas vs hand calculations       9/9
-Frontend build present              PASS
-ALL CHECKS PASSED
 ```
 
 ## Screenshots
@@ -51,8 +46,10 @@ ALL CHECKS PASSED
 | ![Hidden risks](docs/screenshots/03-hidden-risks.png) | ![Wellness](docs/screenshots/04-wellness.png) |
 | **Dashboard** | **Doctor visit summary** |
 | ![Dashboard](docs/screenshots/02-dashboard.png) | ![Doctor summary](docs/screenshots/06-doctor-summary.png) |
-| **Medicine safety net** | **Home page** |
-| ![Medicines](docs/screenshots/05-medicines.png) | ![Landing](docs/screenshots/01-landing.png) |
+| **Family sharing with consent** | **Risk check (XGBoost + SHAP)** |
+| ![Family](docs/screenshots/09-family.png) | ![Risk check](docs/screenshots/10-screening.png) |
+| **SOS & nearby hospitals** | **Care plan** |
+| ![SOS](docs/screenshots/11-sos.png) | ![Care plan](docs/screenshots/12-care-plan.png) |
 
 <p align="center"><img src="docs/screenshots/07-mobile-risks.png" width="260" alt="Mobile view" /> <img src="docs/screenshots/08-timeline-trends.png" width="560" alt="Trends across labs" /></p>
 
@@ -63,7 +60,7 @@ Indian families managing chronic illness (diabetes, BP, thyroid, kidney disease)
 - Each lab report checks **one number at a time**. "Normal" on every page can hide a dangerous **combination**.
 - Different labs print the same test differently (`2.5 lakhs/cumm`, `250 ×10³/µL`, `250000 /cumm`), so trends across years are invisible.
 - Prescriptions from several doctors are never checked together against the kidneys, against each other, or against home BP and sugar readings.
-- A specialist visit lasts about 5 minutes, which is too short for anyone to do this maths.
+- Grown-up children help ageing parents by sharing passwords and WhatsApp photos, with no control over who sees what.
 
 Existing apps mostly **store** records or **summarise one report at a time**. They don't **reason across** them.
 
@@ -77,6 +74,7 @@ Existing apps mostly **store** records or **summarise one report at a time**. Th
           FIB-4 = (Age 58.3 × AST 55) ÷ (Platelets 155 × √ALT 50) = 2.93  🔴 high
           was 1.15 in 2023 → rising every year → "Ask your doctor about a FibroScan"
           + home BP 148/91 since starting a painkiller → "Could Zerodol-P be raising your BP?"
+          + son (approved: summary + records) sees the same trend → books the visit
 ```
 
 ## 3. Core innovation: Hidden Disease Finder
@@ -91,166 +89,145 @@ Existing apps mostly **store** records or **summarise one report at a time**. Th
 | **Non-HDL cholesterol** | Heart & artery risk | Total cholesterol, HDL | NCEP ATP III; Lipid Association of India |
 | **Corrected calcium** | Calcium problem masked by low albumin | Calcium + albumin | Payne 1973, *BMJ* |
 
-**How a score is computed** (`engine.py`, `formulas.py`):
-1. Values are normalised to canonical units and LOINC-mapped codes.
-2. The engine anchors on one input and pairs the **nearest value of every other input within a validated window** (FIB-4 120 days, TyG 14 days, Mentzer same sample), preferring the same report.
-3. Deterministic, unit-tested code computes the score.
-4. Published cut-offs map it to 🟢/🟡/🔴.
-5. The history is recomputed for every past date, and a least-squares slope gives the trend.
-6. Each result carries **full provenance**: lab, date and printed line for every input, plus whether each input individually looked "normal".
-
-**Built on top:**
-- a **personal-baseline model**: values still inside the range but drifting, with months-to-limit
-- **Next Best Test**: insight unlocked per rupee
-- a **medicine safety net**: prescribing cascades, eGFR dose rules, the NSAID "triple whammy", B12 monitoring on metformin, side-effect timing from the symptom diary
-- **wellness × medicine links**: BP rise after an NSAID, sugar above target, low-sugar episodes, unplanned weight loss, low SpO₂
+Values are normalised to canonical units and LOINC codes; the engine pairs the nearest value of every other input within a validated window, computes the score in unit-tested code, maps it to 🟢/🟡/🔴 with published cut-offs, recomputes the history and fits a trend. Every result carries full provenance (lab, date, printed line).
 
 ## 4. Features
 | Area | Features |
 |---|---|
-| 🔐 Login & security | Email + password (bcrypt), **TOTP 2FA** with QR + 8 one-time backup codes, rate-limited login/OTP, 5-minute 2FA challenge tokens |
-| 👨‍👩‍👧 Family | Up to 10 profiles per account (parents, children), conditions, DOB, BMI |
-| 📤 Upload & confirm | PDF / photo / camera, magic-byte check, **encrypted at rest**. AI reading with per-value confidence + source line; low-confidence values highlighted; nothing is used until confirmed. Offline parser for text PDFs. |
-| 🗂️ Records & trends | All reports & values (LOINC codes, as-printed vs stored), cross-lab trend charts with normal bands and lab-change markers, event timeline |
-| 🎯 Hidden Disease Finder ★ | 8 formulas, gauges, plugged-in equations, source chips, trends, "why nobody noticed", next step, citations |
-| ❤️ **Wellness data** | Home BP, sugar (fasting/after meal), weight & BMI (Asian cut-offs), heart rate, SpO₂, steps, sleep. Manual entry or **CSV import** (template provided). Guideline targets (ISH 2020, ADA, WHO Asia-Pacific) and links to medicines. |
-| 💊 Medicines | 45 Indian brands → 30 generics, yearly generic savings, kidney dose checks, cascades, monitoring due, symptom diary |
-| 💬 Ask AI | Grounded chat over the person's own records (labs, medicines, symptoms, wellness, insights). Every fact cites an ID, a verifier pass fact-checks it, it says "I don't know" when unsure. Voice in/out. |
-| 🗣️ Explain simply | 6th-grade-level explanations in English/Hindi/Tamil + teach-back quiz |
-| 🩺 Doctor visit | One-page summary (risks, alerts, meds, labs, **home readings**, questions to ask). PDF, print, expiring share links (24 h–7 d), WhatsApp share. |
-| 🌐 Public site | Home with interactive heartbeat waves and cursor effects, 8-slide onboarding tour, Features, How it works, FAQ, About, Contact (working form), Legal (privacy/terms/medical disclaimer), 404 |
-| 📱 Mobile | Responsive with bottom tab bar, installable PWA, camera upload, dark mode |
+| 🔐 Sign-in | **Firebase**: Continue with Google, email + password, email verification, password reset. One-click demo. Backend verifies every token; all authorisation in backend code. |
+| 📤 Records pipeline | PDF/photo/camera (jpg/png/webp/pdf ≤15 MB, first 4 PDF pages). **Own reader**: PDF text layer → or **PyMuPDF page images + Tesseract OCR (eng+tam)** → dictionary NER → LOINC normaliser → unit converter → ISO dates. Per-item confidence + source line; <0.75 → "check this" list; brand → generic. AI boost only when our reading is weak. Corrections after saving re-normalise and re-flag in code (`user_verified`). |
+| 🗂️ Records & trends | Flags normal/low/high/**critical_low/critical_high** (code), plain-language summary (English + **Tamil** templates), trends with `change_percent`, direction and a neutral sentence, timeline, FHIR R4 export per record or combined |
+| 🎯 Hidden Disease Finder ★ | 8 formulas, gauges, plugged-in equations, source chips, trends, next step, citations |
+| 🧪 Risk check (ML) | XGBoost diabetes (Pima) + heart (Cleveland) screening, **TreeSHAP top 3 factors**, imputed features listed, bands, model cards, "screening estimate, not a diagnosis" |
+| ❤️ Wellness & devices | BP, sugar (fasting/post-meal), weight, heart rate, SpO₂, steps, sleep, water, calories; CSV import; simulated BP monitor / glucometer / band / scale (`source=device_demo`) |
+| 👨‍👩‍👧 Family | Managed profiles (up to 10) **plus consent-based sharing between accounts**: request → owner approves chosen permissions (records, timeline, summary, vitals, medicines, chat) → revoke anytime; every access in the owner's audit log; family chat uses only permitted data |
+| 💊 Medicines | 45 Indian brands → 30 generics, savings, kidney dose checks, cascades, monitoring; **safety KB**: 57 food notes, 18 interactions, duplicate salts, same-type warnings, lab cautions |
+| 📅 Care plan | Checkups (overdue / due soon, auto-repeat, suggestions from care gaps), reminders (medicine times from "1-0-1", readings, water) with today's checklist and browser notifications |
+| 🍛 Food & diet | 65 Indian foods (IFCT 2017 / USDA), "2 idli, sambar and coffee" → nutrition (own parser), photo scan (AI boost), 7-day chart, rule-based tips that cite your own values |
+| 🩹 Wound check | Own colour-analysis model (redness / slough / dark tissue / area) + safety questionnaire rules (diabetic foot, bites, fever + spreading redness → emergency) + healing comparison |
+| 🏠 Home care | 15 common problems with safe self-care, what to avoid and red flags (WHO/NHS/CDC/ICMR sources) |
+| 🚨 SOS | SOS button on every screen, tap-to-call 112 / 108 / Tele-MANAS 14416, emergency card (blood group, allergies, medicines, contact), share with location, **nearby hospitals from OpenStreetMap** |
+| 💬 Ask AI | RAG over the person's own records (own embeddings; pgvector), citations, verifier pass, urgent-word rules, voice input + read-aloud (en-IN / hi-IN / ta-IN), scope "me" or an approved family member |
+| 🩺 Doctor visit | One-page summary, PDF (+ **Tamil family page**), expiring share links |
+| 🆔 ABHA | Link ABHA number (12-3456-7890-1234) / address (name@abdm), mock import, ABHA in FHIR Patient |
+| 🌐 Site & app | Public site, onboarding tour, guide, 27 pages, mobile bottom bar, installable PWA, dark mode |
 
 ## 5. Mapping to the challenge brief
 | Brief says… | DOC |
 |---|---|
-| *understand* | Explain-simply in 3 languages, teach-back quiz, grounded chat with sources, "why nobody noticed" |
-| *organize* | AI reading + confirm, LOINC normalisation, unit harmonisation, family profiles, timeline |
-| *manage* | Next Best Test, care-gap reminders, medicine safety net, wellness targets, doctor summary & sharing |
-| *medical records, prescriptions, diagnostic reports* | Upload → structured, confirmed, linked records |
-| *wellness data* | Home BP / sugar / weight / HR / SpO₂ / steps / sleep with CSV import and medicine links |
-| *actionable insights* | Every alert ends with the exact question to ask the doctor |
+| *understand* | Plain-language summaries (EN/HI/TA), explain-simply + teach-back, grounded chat, voice |
+| *organize* | Own OCR + parser + confirm, LOINC/UCUM normalisation, timeline, FHIR R4, ABHA |
+| *manage* | Care plan, reminders, medicine safety KB, diet tips, wound check, SOS, family care with consent |
+| *medical records, prescriptions, diagnostic reports* | Upload → structured, confirmed, corrected, linked records |
+| *wellness data* | Vitals, devices, meals, risk screening |
+| *actionable insights* | Every alert ends with the question to ask the doctor; urgent rules force "see a doctor now" |
 
 ## 6. Architecture
 ```mermaid
 flowchart LR
-  UI[React PWA<br/>public site + 12 app pages] -->|JSON / HTTPS| API[FastAPI]
-  API --> AUTH[Auth: bcrypt · JWT · TOTP 2FA · rate limits]
-  API --> UP[Upload: magic bytes · Fernet encryption]
-  UP --> EXT[Extraction]
-  EXT --> PII[PII redaction] --> AI{{AI engines<br/>Claude ⇄ Gemini fallback}}
-  EXT --> NORM[Normaliser: aliases→LOINC · unit converter]
-  NORM --> DB[(SQLite / Postgres)]
-  API --> ENG[Insight engine: 8 formulas · pairing windows · trends · rules · wellness]
-  ENG --> DATA[[Curated datasets JSON]]
-  API --> ASSIST[Assistant: grounded chat · verifier · explanations] --> AI
-  ASSIST --> ENG
-  API --> SUM[Doctor summary · PDF · share links] --> ENG
+  UI[React PWA<br/>27 pages] -->|HTTPS JSON only| API[FastAPI · 103 endpoints]
+  UI -->|Google / email| FB[Firebase Auth]
+  FB -. ID token .-> API
+  API --> SEC[Token verify · ownership + consent checks · rate limits · audit]
+  API --> PIPE[Records pipeline: PyMuPDF · Tesseract OCR · NER parser · normaliser · flags]
+  PIPE -. weak reading only .-> AI{{Optional AI boost<br/>Gemini ⇄ Claude}}
+  API --> ENG[Insight engine: 8 formulas · trends · rules · wellness]
+  API --> ML[XGBoost + TreeSHAP · own embeddings RAG · wound model]
+  API --> KB[[Rule KBs: medicines · diet · remedies · Tamil templates]]
+  API --> DB[(Supabase Postgres + pgvector<br/>RLS deny-all)]
+  API --> ST[(Supabase Storage<br/>private bucket, Fernet-encrypted files)]
+  API --> FHIR[FHIR R4 export · ABHA mock]
 ```
-Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+The browser never talks to Supabase; only the API holds the service-role key. Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · [API reference](docs/API.md) · [schema.sql](backend/schema.sql)
 
 **Stack:**
-- Frontend: React 18 · TypeScript · Vite · Tailwind CSS v4 · Recharts · vite-plugin-pwa · Canvas
-- Backend: FastAPI · SQLAlchemy 2 · Pydantic · PyJWT · bcrypt · pyotp · cryptography · pypdf · fpdf2
-- AI SDKs: **Google Gen AI SDK (Gemini Flash)** · **Anthropic SDK (Claude Opus 5.5)**
-- Tooling: pytest · ruff · GitHub Actions · Docker · Render
+- Frontend: React 18 · TypeScript · Vite · Tailwind CSS v4 · Recharts · Firebase JS SDK · vite-plugin-pwa · Web Speech API
+- Backend: FastAPI · SQLAlchemy 2 · Pydantic · PyJWT (Firebase token verification) · cryptography · httpx · PyMuPDF · pytesseract · fpdf2 + HarfBuzz (Tamil) · NumPy · XGBoost
+- Data: Supabase Postgres + pgvector + Storage (SQLite + local encrypted files for development)
+- Optional AI boost: Google Gen AI SDK (Gemini Flash) · Anthropic SDK (Claude Opus 5.5)
+- Tooling: pytest · ruff · fhir.resources · GitHub Actions · Docker · Render
 
-## 7. AI design: what the AI does and doesn't do
+## 7. AI design: our own models first
 | Task | Done by | Why |
 |---|---|---|
-| Reading photos, scans, handwriting | **AI vision** (Gemini or Claude), strict JSON schema | Robust to messy reports; returns confidence + source line per value |
-| Test names → LOINC codes, unit conversion | **Deterministic code** + curated catalogue | Must be exact and auditable |
-| Formulas, trends, rules, wellness targets | **Deterministic, unit-tested code** | Reproducible; no hallucinated numbers |
-| Simple explanations, translation, quiz | **AI** | Language and empathy |
-| Q&A | **AI** answers from ID-tagged records only, then **a second AI pass verifies every claim** | Grounding + hallucination control |
-
-**Engines:** `AI_PROVIDER=auto` uses Claude first if its key is set, otherwise Gemini.
-- Gemini tries `gemini-3.8-flash → 3.7 → 3.6 → 3.5 → flash-latest` and skips busy or rate-limited models.
-- Per-request timeouts and a 50-second budget keep the app responsive.
-- Claude has server-side refusal fallback.
-- With no key at all, **offline mode** still runs the full engine, the text-PDF parser, template explanations and keyword chat.
+| Reading PDFs and photos | **Own**: PDF text / Tesseract OCR + dictionary NER parser. **Boost**: Gemini/Claude vision only when our reading is weak | Works offline and free; boost for messy handwriting |
+| Lab flags incl. critical | **Code** from value + reference range + catalogue critical limits | Never decided by an LLM |
+| Formulas, trends, rules, wellness targets | **Unit-tested code** | Reproducible, no hallucinated numbers |
+| Diabetes / heart screening | **Own XGBoost** models + exact TreeSHAP | Explainable, measurable (CV AUC) |
+| Chat retrieval | **Own 1024-d hashed embeddings** + pgvector cosine search | No external embedding API |
+| Medicine safety, diet tips, remedies | **Deterministic knowledge bases** with sources | Auditable |
+| Tamil/Hindi sentences | **Curated templates** (AI only for free-form chat) | Predictable wording |
+| Wound photo | **Own colour analysis** + safety questionnaire rules | Conservative, explainable |
+| Free-form answers | AI (when enabled) from ID-tagged records + retrieved chunks, then a verifier pass; offline answers from rules + retrieval | Grounding + hallucination control |
 
 ## 8. Evaluation (reproducible)
 | Check | Result | Command |
 |---|---|---|
-| Automated tests (formulas, units, parser, PII, 2FA, access control, API, upload→confirm, wellness, **test-kit answer key**) | **47 / 47** | `pytest -q` |
-| Formulas vs hand calculations (incl. eGFR vs NKF calculator) | **9 / 9** | `python scripts/evaluate.py` |
-| Offline reader, 100 synthetic Indian-style PDFs (782 values, 4 unit systems) | names **100%**, values **100%**, dates **100%** | `python scripts/evaluate.py 100` |
-| **AI vision (Gemini) on 6 synthetic phone photos** (rotated, blurred, noisy, 37 values) | recall **100%**, values **100%**, dates 6/6, **hallucinated tests 0** | `python scripts/eval_ai.py 6` |
-| Test kit (6 PDFs, 3 labs, 2 prescriptions) vs answer key | FIB-4 2.70 · eGFR 65.4 rapid decline · TyG 9.31 · triple whammy · cascade, **all match** | `pytest -k test_kit` |
+| Automated tests (formulas, units, parser, flags incl. critical, **FHIR R4 validation**, **family consent: unapproved can't read, approved is filtered, revoke blocks instantly, requester can't self-approve**, records corrections, signed URLs, vitals, care plan, risk, RAG, urgent rules, meals, wound, test-kit answer key) | **92 / 92** | `pytest -q` |
+| Formulas vs hand calculations | **9 / 9** | `python scripts/evaluate.py` |
+| Own reader, 100 synthetic Indian-style PDFs (782 values, 4 unit systems) | names **100%**, values **100%**, dates **100%** | `python scripts/evaluate.py 100` |
+| AI boost (Gemini) on 6 synthetic phone photos (37 values) | recall **100%**, **0 hallucinated tests** | `python scripts/eval_ai.py 6` |
+| XGBoost diabetes (Pima, n=768) | 5-fold CV AUC **0.834 ± 0.039**, Brier 0.157, calibration slope 1.00 | `python -I scripts/train_risk.py ...` |
+| XGBoost heart (Cleveland, n=303) | 5-fold CV AUC **0.913 ± 0.032**, Brier 0.122, calibration slope 1.00 | same |
 
-Honest limits are in [docs/EVALUATION.md](docs/EVALUATION.md). Synthetic data is cleaner than real scans, which is why the confirm step is mandatory.
+Honest limits are in [docs/EVALUATION.md](docs/EVALUATION.md).
 
 ## 9. Security, privacy & safety
-- **Auth:** bcrypt (cost 12), JWT, TOTP 2FA (RFC 6238) with hashed one-time backup codes, rate limits, and a separate short-lived 2FA challenge token.
-- **Data:** uploads and TOTP secrets are encrypted with Fernet. Personal identifiers are regex-redacted before text reaches an AI. Every object has an ownership check (tested). There are CSP, X-Frame-Options, nosniff and no-store headers.
-- **User control:** expiring/revocable share links (first name only, views audited), full access log, JSON export, account deletion (DPDP Act 2023 principles).
-- **Clinical safety:** decision support only. It never changes medicines, cites a guideline for every rule, shows each formula's limits (e.g. FIB-4 not validated under 35), and gives emergency guidance for critical values.
+- **Auth:** Firebase ID tokens verified on the server (signature, audience, issuer, expiry); short session JWTs; rate-limited sign-in; local email/password only in development mode.
+- **Data access:** the frontend talks only to the API. The API uses the Supabase service role (env var only); every table has row-level security ON with no policies (deny-all for anon/authenticated). Ownership and family-consent checks run on **every request**.
+- **Files:** Fernet-encrypted on the server, then stored at `{uid}/{uuid}-{filename}` in a private bucket; downloads via 5-minute signed URLs to our API.
+- **Family consent:** adding someone never grants access; only the owner approves, changes permissions or revokes; revoked/denied/pending → 403; responses filtered by permission; every access audited and shown to the owner.
+- **Operations:** CORS allow-list (`ALLOWED_ORIGINS`), file type + magic-byte checks, rate limits on AI endpoints, uniform `{error, detail}` errors, structured logs without PHI, `/health`, timeouts + retries with friendly errors, `.env.example` (no secrets in code).
+- **Clinical safety:** never diagnoses or prescribes; "may / can indicate / worth discussing"; disclaimer on every AI response; urgent code rules (critical labs, BP ≥180/120, sugar <54 or >400, SpO₂ <90, chest pain/stroke/self-harm words) force a "see a doctor now / call 112" banner; demo data flagged `is_demo`.
 
 More: [docs/SAFETY.md](docs/SAFETY.md)
 
 ## 10. Run it
 ```bash
 # Windows, one command (installs, builds, opens the browser)
-.\start.ps1                 # add -Lan to open it from a phone on the same Wi-Fi
-.\share.ps1                 # temporary public link via Cloudflare Tunnel
+.\start.ps1
 ```
 **Manual:**
 ```bash
 cd backend && python -m venv .venv && .venv/Scripts/activate && pip install -r requirements.txt
-cp .env.example .env        # add GEMINI_API_KEY and/or ANTHROPIC_API_KEY (optional)
+cp .env.example .env        # everything optional for local use
 cd ../frontend && npm install && npm run build
 cd ../backend && uvicorn app.main:app --port 8000      # open http://127.0.0.1:8000
 ```
+Without any keys DOC runs fully offline: SQLite, local encrypted files, local sign-in, own models. Add Firebase, Supabase and (optionally) Gemini keys from [.env.example](backend/.env.example) for production. Tesseract OCR is installed in the Docker image; on Windows install it from UB-Mannheim to read photos locally.
 
-**Deploy:**
-- **Docker:** `docker build -t doc . && docker run -p 8000:8000 -e GEMINI_API_KEY=... doc`
-- **Render:** New → Blueprint → this repo (uses [render.yaml](render.yaml))
+**Deploy:** Docker (`docker build -t doc .`) or Render Blueprint ([render.yaml](render.yaml)). Set `DOC_ENCRYPTION_KEY` to a fixed Fernet key so stored files stay readable across restarts.
 
-| Env var | Purpose |
-|---|---|
-| `GEMINI_API_KEY` / `ANTHROPIC_API_KEY` | Turn on AI (either or both) |
-| `AI_PROVIDER` | `auto` (default) · `gemini` · `claude` |
-| `GEMINI_MODEL` | Comma-separated fallback list |
-| `JWT_SECRET`, `DOC_ENCRYPTION_KEY` | Secrets (auto-generated locally) |
-| `DATABASE_URL` | SQLAlchemy URL (default SQLite) |
-
-**Demo:** "Try the live demo", the `/demo` link, or `demo@doconcall.app` / `Demo@12345`.
-
-**Test it yourself:** download the test kit in the app (Guide page) and compare with [ANSWER_KEY.md](datasets/test_kit/ANSWER_KEY.md).
+**Demo:** `/demo` (no sign-up). The demo family has care plans, a linked daughter-in-law (Sujitha, HbA1c 5.8 → 6.0 → 6.2) shared with consent, a pre-approved father, and a pending request to try approving. Everything is `is_demo`.
 
 ## 11. Project structure
 ```
-backend/app/services/  engine.py ★ · formulas.py · wellness.py · extraction.py · normalizer.py · units.py
-                       ai.py (Gemini+Claude) · assistant.py · summary.py · pii.py · records.py
-backend/app/routers/   auth · profiles · reports · insights · wellness · doctor · assistant · account
-backend/data/          lab_tests · formulas · panels · medicines · rules · wellness · symptoms (JSON)
-backend/tests/         47 tests          backend/scripts/  verify · evaluate · eval_ai · make_test_kit
-frontend/src/pages/    Landing · About · Contact · Legal · Auth · Dashboard · Upload · Review · Records
-                       Timeline · Risks · Wellness · Medicines · Chat · Doctor · Settings · Guide
-datasets/              demo_family.json · test_kit/ (+ANSWER_KEY) · sample_reports/
-docs/                  ARCHITECTURE · EVALUATION · SAFETY · JUDGES_QA · screenshots/
+backend/app/services/  engine ★ · formulas · flags · fhir · family · rag · embed · risk · ocr · extraction · normalizer · units
+                       medsafety · nutrition · wound · care · safety · templates · storage · firebase_auth · ai · assistant · summary
+backend/app/routers/   auth · records_api · reports · profiles · insights · wellness · family · care · features · doctor · assistant · account
+backend/data/          lab_tests · formulas · panels · medicines · med_safety · nutrition_in.csv · remedies · tamil · wellness · models/ (XGBoost)
+backend/tests/         92 tests          backend/scripts/  verify · evaluate · eval_ai · train_risk · make_schema · make_test_kit
+frontend/src/pages/    Dashboard · Upload · Review · Records · Timeline · Risks · Screening · Wellness · Medicines · Meals · WoundCheck
+                       Remedies · CarePlan · Family · Chat · Doctor · Emergency · Settings · Guide · Landing · About · Contact · Legal
+datasets/              demo_family · demo_extras · abha_mock · test_kit/ (+ANSWER_KEY) · public/ (Pima, Cleveland + README)
+docs/                  API · ARCHITECTURE · EVALUATION · SAFETY · JUDGES_QA · screenshots/
 ```
 
 ## 12. How DOC is different
 | Capability | Generic AI chat (upload a PDF) | Record-storage apps | **DOC** |
 |---|---|---|---|
 | Joins values across reports, labs and years | ✗ | ✗ | **✓ time-window pairing** |
-| One scale for every lab's units | ✗ | rarely | **✓ + lab-change markers** |
-| Validated formulas computed in code | ✗ (LLM arithmetic) | ✗ | **✓ 8, unit-tested** |
-| Source line for every number + fact-checking pass | ✗ | ✗ | **✓** |
-| Prescribing cascades, kidney dose checks | ✗ | ✗ | **✓** |
-| Wellness readings linked to medicines | ✗ | partial | **✓** |
-| Hindi/Tamil, family profiles, Indian brands→generics | partial | partial | **✓** |
+| Works without any external AI | ✗ | ✓ (no insight) | **✓ own OCR, parser, ML, RAG** |
+| Validated formulas + flags computed in code | ✗ (LLM arithmetic) | ✗ | **✓ unit-tested** |
+| Explainable ML screening | ✗ | ✗ | **✓ XGBoost + SHAP** |
+| Consent-based family sharing | ✗ | password sharing | **✓ per-permission, revocable, audited** |
+| FHIR R4 + ABHA | ✗ | rarely | **✓** |
+| Tamil/Hindi, Indian foods & brands | partial | partial | **✓** |
 
 ## 13. Limitations & roadmap
-**Limitations:**
-- Cut-offs come from published (often non-Indian) cohorts.
-- Real photo accuracy depends on image quality, which is why the confirm step exists.
-- Prices are illustrative.
-- Not a certified medical device; clinical validation is needed before real-world use (CDSCO SaMD pathway).
+**What is mocked / simulated:** ABHA linking and import (format check + demo record), connected devices (simulated readings), demo family data. **Limitations:** cut-offs and ML training data come from non-Indian cohorts (Pima women; 1988 Cleveland clinic); OCR quality depends on the photo, which is why the confirm/review step exists; nutrition values are approximate; not a certified medical device (CDSCO SaMD pathway needed).
 
-**Roadmap:** ABHA/ABDM + FHIR export · Bluetooth BP/glucose meters · WhatsApp reminders · clinician-labelled evaluation set · HOMA-IR & WHO CVD risk.
+**Roadmap:** real ABDM sandbox (HIP/HIU consent flows) · Bluetooth meters · WhatsApp reminders · Indian-cohort recalibration of risk models · clinician-labelled evaluation set.
 
 ## 14. Disclaimer
 DOC is a **decision-support and education tool**. It **does not diagnose, treat or replace a doctor**. All demo data is synthetic (fictional people and labs). In an emergency call **112 / 108**.

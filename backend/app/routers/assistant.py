@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from .. import security
 from ..database import get_db
 from ..models import LabResult, User
-from ..services import assistant, catalog, records
+from ..services import assistant, catalog, family, rag, records, safety, templates
 
 router = APIRouter(prefix="/api", tags=["assistant"])
 
@@ -19,6 +19,7 @@ class ChatIn(BaseModel):
     message: str = Field(min_length=1, max_length=2000)
     history: list[ChatTurn] = []
     language: str = Field(default="en", pattern="^(en|hi|ta)$")
+    scope: str = Field(default="me", pattern=r"^(me|family:\d{1,9})$")
 
 
 class ExplainIn(BaseModel):
@@ -27,10 +28,46 @@ class ExplainIn(BaseModel):
     language: str = Field(default="en", pattern="^(en|hi|ta)$")
 
 
+def _answer(db: Session, u: User, p, body: ChatIn, request: Request) -> dict:
+    """Grounded answer for the person's own profile, or (scope=family:<link>) for a family member who
+    approved 'chat': only the sections they shared are retrieved or shown to the AI."""
+    history = [h.model_dump() for h in body.history]
+    if body.scope.startswith("family:"):
+        link, owner_p = family.require_access(db, int(body.scope.split(":", 1)[1]), u, "chat")
+        perms = family.clean_permissions(link.permissions)
+        rag.ensure_index(db, owner_p, records.analyze(owner_p))
+        hits = rag.search(db, owner_p, body.message, sections=family.sections_for(perms))
+        view = family.scoped_view(owner_p, perms)
+        res = assistant.chat(view, records.analyze(view), body.message, history, body.language, hits)
+        security.audit(db, u.id, "family_access", f"link {link.id}: chat", request, subject_user_id=link.owner_id)
+        db.commit()
+        res["scope"] = {"type": "family", "link_id": link.id, "name": owner_p.name, "sections": sorted(family.sections_for(perms))}
+        urgent = safety.urgent_banner(view, body.message, body.language)
+    else:
+        a = records.analyze(p)
+        rag.ensure_index(db, p, a)
+        hits = rag.search(db, p, body.message)
+        res = assistant.chat(p, a, body.message, history, body.language, hits)
+        res["scope"] = {"type": "me", "profile_id": p.id, "name": p.name}
+        urgent = safety.urgent_banner(p, body.message, body.language)
+    res["retrieved"] = [{"id": h["id"], "score": h["score"]} for h in hits]
+    res["urgent"] = urgent
+    if urgent:
+        res["see_doctor"] = True
+    res["disclaimer"] = templates.disclaimer(body.language)
+    return res
+
+
 @router.post("/profiles/{pid}/chat")
-def chat(pid: int, body: ChatIn, u: User = Depends(security.current_user), db: Session = Depends(get_db)):
+def chat(pid: int, body: ChatIn, request: Request, u: User = Depends(security.ai_rate_limit), db: Session = Depends(get_db)):
     p = security.owned_profile(pid, u, db)
-    return assistant.chat(p, records.analyze(p), body.message, [h.model_dump() for h in body.history], body.language)
+    return _answer(db, u, p, body, request)
+
+
+@router.post("/chat")
+def chat_spec(body: ChatIn, request: Request, profile_id: int | None = None, u: User = Depends(security.ai_rate_limit), db: Session = Depends(get_db)):
+    p = security.primary_profile(u, profile_id, db)
+    return _answer(db, u, p, body, request)
 
 
 @router.post("/profiles/{pid}/explain")

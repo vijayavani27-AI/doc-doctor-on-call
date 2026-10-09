@@ -1,0 +1,192 @@
+{
+  "kind": "diabetes",
+  "model_name": "XGBoost",
+  "features": [
+    "pregnancies",
+    "glucose",
+    "diastolic_bp",
+    "skin_thickness",
+    "insulin",
+    "bmi",
+    "pedigree",
+    "age"
+  ],
+  "labels": {
+    "pregnancies": "Number of pregnancies",
+    "glucose": "Blood sugar 2 hours after a glucose drink (OGTT)",
+    "diastolic_bp": "Diastolic blood pressure (lower number)",
+    "skin_thickness": "Triceps skin-fold thickness",
+    "insulin": "Insulin 2 hours after a glucose drink",
+    "bmi": "Body mass index (BMI)",
+    "pedigree": "Family history score (diabetes pedigree function)",
+    "age": "Age"
+  },
+  "units": {
+    "pregnancies": "count",
+    "glucose": "mg/dL",
+    "diastolic_bp": "mmHg",
+    "skin_thickness": "mm",
+    "insulin": "µU/mL",
+    "bmi": "kg/m²",
+    "pedigree": "score",
+    "age": "years"
+  },
+  "medians": {
+    "pregnancies": 3.0,
+    "glucose": 117.0,
+    "diastolic_bp": 72.0,
+    "skin_thickness": 29.0,
+    "insulin": 125.0,
+    "bmi": 32.3,
+    "pedigree": 0.372,
+    "age": 29.0
+  },
+  "missing_in_training": {
+    "pregnancies": 0,
+    "glucose": 5,
+    "diastolic_bp": 35,
+    "skin_thickness": 227,
+    "insulin": 374,
+    "bmi": 11,
+    "pedigree": 0,
+    "age": 0
+  },
+  "ranges": {
+    "pregnancies": [
+      0,
+      20
+    ],
+    "glucose": [
+      40,
+      400
+    ],
+    "diastolic_bp": [
+      30,
+      140
+    ],
+    "skin_thickness": [
+      3,
+      100
+    ],
+    "insulin": [
+      5,
+      900
+    ],
+    "bmi": [
+      12,
+      70
+    ],
+    "pedigree": [
+      0.05,
+      2.5
+    ],
+    "age": [
+      18,
+      100
+    ]
+  },
+  "n_rows": 768,
+  "positives": 268,
+  "prevalence": 0.349,
+  "cv_auc_mean": 0.834,
+  "cv_auc_sd": 0.039,
+  "cv_auc_folds": [
+    0.868,
+    0.767,
+    0.838,
+    0.838,
+    0.858
+  ],
+  "brier": 0.157,
+  "brier_baseline": 0.227,
+  "oof_auc": 0.834,
+  "calibration": {
+    "intercept": 0.007,
+    "slope": 0.998,
+    "note": "Logistic recalibration of out-of-fold predictions; ideal intercept 0 and slope 1.",
+    "quintiles": [
+      {
+        "n": 154,
+        "mean_predicted": 0.047,
+        "observed_rate": 0.026
+      },
+      {
+        "n": 154,
+        "mean_predicted": 0.134,
+        "observed_rate": 0.123
+      },
+      {
+        "n": 154,
+        "mean_predicted": 0.286,
+        "observed_rate": 0.338
+      },
+      {
+        "n": 153,
+        "mean_predicted": 0.507,
+        "observed_rate": 0.484
+      },
+      {
+        "n": 153,
+        "mean_predicted": 0.769,
+        "observed_rate": 0.778
+      }
+    ],
+    "bands": [
+      {
+        "band": "low",
+        "n": 315,
+        "mean_predicted": 0.093,
+        "observed_rate": 0.079
+      },
+      {
+        "band": "moderate",
+        "n": 224,
+        "mean_predicted": 0.342,
+        "observed_rate": 0.393
+      },
+      {
+        "band": "high",
+        "n": 229,
+        "mean_predicted": 0.704,
+        "observed_rate": 0.677
+      }
+    ]
+  },
+  "bands": {
+    "low_below": 0.2,
+    "high_from": 0.5,
+    "rationale": "low < 0.2 <= moderate < 0.5 <= high: fixed, round cut-offs chosen before training so they are easy to explain. Checked against out-of-fold predictions ('calibration.bands'): the observed rate in every band falls within (±0.05 of) that band's range, so the defaults were kept."
+  },
+  "hyperparameters": {
+    "objective": "binary:logistic",
+    "eval_metric": "logloss",
+    "tree_method": "exact",
+    "seed": 42,
+    "nthread": 1,
+    "max_depth": 3,
+    "eta": 0.03,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "min_child_weight": 5,
+    "lambda": 2.0,
+    "gamma": 0.0,
+    "num_boost_round": 150,
+    "selection_note": "Hyperparameters chosen from an 18-setting grid on the same 5-fold CV (target: calibration slope close to 1 at near-best AUC); reported CV metrics are therefore slightly optimistic."
+  },
+  "dataset": {
+    "name": "Pima Indians Diabetes Database",
+    "source": "UCI Machine Learning Repository / National Institute of Diabetes and Digestive and Kidney Diseases (NIDDK)",
+    "url": "https://raw.githubusercontent.com/jbrownlee/Datasets/master/pima-indians-diabetes.data.csv",
+    "citation": "Smith JW, Everhart JE, Dickson WC, Knowler WC, Johannes RS. Using the ADAP learning algorithm to forecast the onset of diabetes mellitus. Proc Annu Symp Comput Appl Med Care. 1988:261-265.",
+    "licence": "Public research dataset distributed via the UCI ML Repository (NIDDK); cite Smith et al. 1988."
+  },
+  "trained_at": "2026-10-09",
+  "xgboost_version": "3.4.1",
+  "limitations": [
+    "Trained only on Pima Indian women aged 21 or older (Arizona, USA); it may not fit men, other ethnicities or younger people.",
+    "Glucose and insulin are 2-hour oral glucose tolerance test values, not fasting values or HbA1c.",
+    "Outcome is diabetes diagnosed within 5 years of the exam, from a 1980s study.",
+    "Only 768 people; many insulin and skin-fold values were missing in the original data.",
+    "A screening estimate, not a diagnosis."
+  ]
+}

@@ -62,6 +62,9 @@ class Draft:
     method: str = "text-parser"
     warnings: list[str] = field(default_factory=list)
     redactions: int = 0
+    pages: int | None = None
+    reader: str | None = None  # pdf-text / ocr / text / none
+    text: str | None = None
 
 
 # ---------------------------------------------------------------- helpers
@@ -383,19 +386,39 @@ def pdf_text(data: bytes) -> str:
         return ""
 
 
+def _quality(d: Draft | None) -> tuple[int, float]:
+    if d is None:
+        return 0, 0.0
+    items = [t.confidence for t in d.tests] + [m.confidence for m in d.medicines]
+    return len(items), (sum(items) / len(items) if items else 0.0)
+
+
 def extract(data: bytes, mime: str, sex: str | None = None, kind_hint: str | None = None) -> Draft:
-    text = ""
-    if mime == "application/pdf":
-        text = pdf_text(data)
-    elif mime.startswith("text/"):
-        text = data.decode("utf-8", errors="ignore")
+    """Own models first (PDF text layer / Tesseract OCR -> dictionary NER parser). The AI is only an
+    optional boost when our own reading is weak (scanned photo, very few or low-confidence items)."""
+    from . import ocr
+
+    doc = ocr.read_document(data, mime)
+    text = doc["text"]
     has_text = len(text.strip()) > 40
+
+    own: Draft | None = None
+    if has_text:
+        own = parse_text(text, kind_hint)
+        if doc["method"] == "ocr":  # OCR can misread digits: lower confidence so these go to the review list
+            own.method = "ocr+parser"
+            for t in own.tests:
+                t.confidence = round(min(t.confidence, 0.9) * max(0.6, min(1.0, doc["confidence"] + 0.1)), 2)
+            for m in own.medicines:
+                m.confidence = round(min(m.confidence, 0.85) * max(0.6, min(1.0, doc["confidence"] + 0.1)), 2)
+    n_own, conf_own = _quality(own)
+    weak = n_own < (1 if own is not None and own.kind == "prescription" else 2) or conf_own < 0.75 or doc["method"] in ("ocr", "none")
 
     draft: Draft | None = None
     redactions = 0
-    if ai.enabled():
+    if ai.enabled() and weak:
         content: list[dict] | None = None
-        if has_text:
+        if has_text and doc["method"] != "ocr":
             red, redactions = pii.redact(text)
             content = [{"type": "text", "text": f"Medical document text (personal identifiers removed):\n\n{red}"},
                        {"type": "text", "text": "Transcribe this document into the JSON schema."}]
@@ -411,22 +434,27 @@ def extract(data: bytes, mime: str, sex: str | None = None, kind_hint: str | Non
         if content:
             result = ai.structured(_SYSTEM, content, _SCHEMA, effort="medium")
             if result:
-                draft = _from_ai(result)
-                draft.method = ai.last_engine or "ai"
+                boosted = _from_ai(result)
+                if _quality(boosted)[0] >= n_own:
+                    draft = boosted
+                    draft.method = ai.last_engine or "ai"
     if draft is None:
-        if has_text:
-            draft = parse_text(text, kind_hint)
+        if own is not None:
+            draft = own
         else:
             draft = Draft(method="manual")
-            draft.warnings.append("This file has no readable text and AI reading is not configured. Please type the values in the review table.")
+            draft.warnings.append("We couldn't read text from this file. Please type the values in the review table.")
     draft.redactions = redactions
+    draft.pages = doc["pages"]
+    draft.reader = doc["method"]
+    draft.text = text[:20000] if text else None
     if kind_hint in ("lab", "prescription") and not (draft.tests and draft.medicines):
         draft.kind = kind_hint if not (kind_hint == "lab" and draft.medicines and not draft.tests) else draft.kind
     draft.tests = [finalize_test(t, sex) for t in draft.tests]
     draft.medicines = [finalize_med(m) for m in draft.medicines]
     if not draft.report_date:
         draft.warnings.append("Report date not found. Please set it before saving.")
-    low = sum(1 for t in draft.tests if t.confidence < 0.8) + sum(1 for m in draft.medicines if m.confidence < 0.8)
+    low = sum(1 for t in draft.tests if t.confidence < 0.75) + sum(1 for m in draft.medicines if m.confidence < 0.75)
     if low:
         draft.warnings.append(f"{low} item(s) need your confirmation (highlighted).")
     return draft

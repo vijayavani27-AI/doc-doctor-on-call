@@ -53,7 +53,7 @@ export default function ReviewPage() {
   }, [rep]);
 
   const tests = useMemo(() => meta?.tests ?? [], [meta]);
-  const lowConf = rows.filter((r) => r.confidence < 0.8).length + meds.filter((m) => m.confidence < 0.8).length;
+  const lowConf = rows.filter((r) => r.confidence < 0.75).length + meds.filter((m) => m.confidence < 0.75).length;
 
   if (error) return <ErrorBox msg={error} />;
   if (!rep) return <Spinner />;
@@ -136,7 +136,7 @@ export default function ReviewPage() {
               )}
               <div className="space-y-2">
                 {rows.map((r) => (
-                  <div key={r.key} className={`rounded-xl border p-3 ${r.confidence < 0.8 ? "border-amber-300 bg-amber-50/70 dark:border-amber-500/40 dark:bg-amber-500/10" : "border-slate-200 dark:border-white/10"}`}>
+                  <div key={r.key} className={`rounded-xl border p-3 ${r.confidence < 0.75 ? "border-amber-300 bg-amber-50/70 dark:border-amber-500/40 dark:bg-amber-500/10" : "border-slate-200 dark:border-white/10"}`}>
                     {editing ? (
                       <div className="grid grid-cols-2 gap-2 sm:grid-cols-[2fr_1fr_1fr_0.8fr_0.8fr_auto]">
                         <select className="input col-span-2 sm:col-span-1" value={r.test_code ?? ""} onChange={(e) => upd(r.key, { test_code: e.target.value || null })}>
@@ -180,7 +180,7 @@ export default function ReviewPage() {
               <h2 className="mb-3 flex items-center gap-2 font-bold"><Pill className="h-5 w-5 text-violet-500" /> Medicines ({meds.length})</h2>
               <div className="space-y-2">
                 {meds.map((m) => (
-                  <div key={m.key} className={`rounded-xl border p-3 ${m.confidence < 0.8 ? "border-amber-300 bg-amber-50/70 dark:bg-amber-500/10" : "border-slate-200 dark:border-white/10"}`}>
+                  <div key={m.key} className={`rounded-xl border p-3 ${m.confidence < 0.75 ? "border-amber-300 bg-amber-50/70 dark:bg-amber-500/10" : "border-slate-200 dark:border-white/10"}`}>
                     {editing ? (
                       <div className="grid grid-cols-2 gap-2 sm:grid-cols-[1.5fr_1fr_1fr_1fr_auto]">
                         <input className="input col-span-2 sm:col-span-1" placeholder="Medicine name" value={m.brand} onChange={(e) => updMed(m.key, { brand: e.target.value })} />

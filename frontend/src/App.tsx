@@ -23,6 +23,13 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Legal from "./pages/Legal";
 import NotFound from "./pages/NotFound";
+import Family from "./pages/Family";
+import CarePlan from "./pages/CarePlan";
+import Screening from "./pages/Screening";
+import Emergency from "./pages/Emergency";
+import Meals from "./pages/Meals";
+import WoundCheck from "./pages/WoundCheck";
+import Remedies from "./pages/Remedies";
 
 function Protected({ children }: { children: ReactNode }) {
   const { user, loading } = useApp();
@@ -56,6 +63,13 @@ export default function App() {
         <Route path="settings" element={<SettingsPage />} />
         <Route path="guide" element={<Guide />} />
         <Route path="wellness" element={<Wellness />} />
+        <Route path="family" element={<Family />} />
+        <Route path="care" element={<CarePlan />} />
+        <Route path="screening" element={<Screening />} />
+        <Route path="emergency" element={<Emergency />} />
+        <Route path="meals" element={<Meals />} />
+        <Route path="wound" element={<WoundCheck />} />
+        <Route path="remedies" element={<Remedies />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

@@ -34,6 +34,10 @@ class ProfilePatch(BaseModel):
     weight_kg: float | None = None
     conditions: list[str] | None = None
     color: str | None = None
+    blood_group: str | None = Field(default=None, pattern="^(A|B|AB|O)[+-]$")
+    allergies: list[str] | None = Field(default=None, max_length=20)
+    emergency_name: str | None = Field(default=None, max_length=120)
+    emergency_phone: str | None = Field(default=None, pattern=r"^\+?[0-9 -]{6,18}$")
 
 
 class SymptomIn(BaseModel):
@@ -43,12 +47,25 @@ class SymptomIn(BaseModel):
     notes: str | None = None
 
 
+def bmi_info(height_cm: float | None, weight_kg: float | None) -> tuple[float | None, str | None]:
+    """BMI with WHO Asia-Pacific cut-offs (used for Indian adults)."""
+    if not height_cm or not weight_kg:
+        return None, None
+    bmi = round(weight_kg / ((height_cm / 100) ** 2), 1)
+    cat = "underweight" if bmi < 18.5 else "normal" if bmi < 23 else "overweight" if bmi < 25 else "obese"
+    return bmi, cat
+
+
 def profile_out(p: Profile) -> dict:
     age = (date.today() - p.dob).days // 365 if p.dob else None
-    bmi = round(p.weight_kg / ((p.height_cm / 100) ** 2), 1) if p.height_cm and p.weight_kg else None
+    bmi, bmi_cat = bmi_info(p.height_cm, p.weight_kg)
     return {"id": p.id, "name": p.name, "relation": p.relation, "sex": p.sex, "dob": p.dob.isoformat() if p.dob else None,
-            "age": age, "height_cm": p.height_cm, "weight_kg": p.weight_kg, "bmi": bmi, "conditions": p.conditions or [],
-            "is_primary": p.is_primary, "color": p.color,
+            "age": age, "height_cm": p.height_cm, "weight_kg": p.weight_kg, "bmi": bmi, "bmi_category": bmi_cat, "conditions": p.conditions or [],
+            "is_primary": p.is_primary, "color": p.color, "blood_group": p.blood_group, "allergies": p.allergies or [],
+            "emergency_name": p.emergency_name, "emergency_phone": p.emergency_phone,
+            "abha": {"number": p.abha_number, "address": p.abha_address, "linked_at": p.abha_linked_at.isoformat() if p.abha_linked_at else None,
+                     "mock": True} if (p.abha_number or p.abha_address) else None,
+            "profile_incomplete": bool(p.profile_incomplete), "is_demo": bool(p.is_demo),
             "counts": {"reports": len(p.reports), "results": sum(1 for r in p.results if r.confirmed), "medicines": sum(1 for m in p.medications if m.active)}}
 
 
@@ -76,8 +93,11 @@ def get_profile(pid: int, u: User = Depends(security.current_user), db: Session 
 @router.patch("/profiles/{pid}")
 def update_profile(pid: int, body: ProfilePatch, u: User = Depends(security.current_user), db: Session = Depends(get_db)):
     p = security.owned_profile(pid, u, db)
-    for k, v in body.model_dump(exclude_unset=True).items():
+    data = body.model_dump(exclude_unset=True)
+    for k, v in data.items():
         setattr(p, k, v)
+    if "sex" in data or "dob" in data:
+        p.profile_incomplete = False
     db.commit()
     return profile_out(p)
 

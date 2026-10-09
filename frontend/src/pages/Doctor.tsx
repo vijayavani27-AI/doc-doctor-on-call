@@ -38,6 +38,7 @@ export default function Doctor() {
           right={
             <div className="flex flex-wrap gap-2">
               <button className="btn-primary" disabled={dl} onClick={async () => { setDl(true); try { await openAuthed(`/profiles/${profile.id}/doctor-summary.pdf`, `DOC-${profile.name.split(" ")[0]}.pdf`); } finally { setDl(false); } }}><Download className="h-4 w-4" /> PDF</button>
+              <button className="btn-outline" disabled={dl} title="Doctor brief + a Tamil summary page for the family" onClick={async () => { setDl(true); try { await openAuthed(`/profiles/${profile.id}/doctor-summary.pdf?lang=ta`, `DOC-${profile.name.split(" ")[0]}-tamil.pdf`); } finally { setDl(false); } }}><Download className="h-4 w-4" /> PDF + தமிழ்</button>
               <button className="btn-outline" onClick={() => { setMade(null); setOpen(true); }}><Link2 className="h-4 w-4" /> Share link</button>
               <button className="btn-outline" onClick={() => window.print()}><Printer className="h-4 w-4" /> Print</button>
             </div>

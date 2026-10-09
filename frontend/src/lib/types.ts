@@ -6,8 +6,9 @@ export interface User {
   email: string;
   name: string;
   language: Lang;
-  totp_enabled: boolean;
-  backup_codes_left: number;
+  auth_provider: string;
+  email_verified: boolean;
+  profile_incomplete: boolean;
   is_demo: boolean;
   ai_enabled: boolean;
   ai_engine: string | null;
@@ -28,6 +29,21 @@ export interface Profile {
   is_primary: boolean;
   color: string;
   counts: { reports: number; results: number; medicines: number };
+  bmi_category?: string | null;
+  blood_group?: string | null;
+  allergies?: string[];
+  emergency_name?: string | null;
+  emergency_phone?: string | null;
+  abha?: { number: string | null; address: string | null; linked_at: string | null; mock: boolean } | null;
+  profile_incomplete?: boolean;
+  is_demo?: boolean;
+}
+
+export interface Urgent {
+  level: string;
+  message: string;
+  reasons: string[];
+  call: { label: string; number: string }[];
 }
 
 export interface InputView {
@@ -144,6 +160,9 @@ export interface LabResult {
   source_text: string | null;
   confirmed: boolean;
   loinc: string | null;
+  flag_computed?: "normal" | "low" | "high" | "critical_low" | "critical_high" | null;
+  needs_review?: boolean;
+  user_verified?: boolean;
 }
 
 export interface DraftMed {
@@ -177,6 +196,20 @@ export interface Report {
   draft_medicines?: DraftMed[];
   warnings?: string[];
   redactions?: number;
+  pages?: number | null;
+  user_verified?: boolean;
+  is_demo?: boolean;
+  n_critical?: number;
+  n_needs_review?: number;
+  needs_review?: number[];
+  reader?: string | null;
+}
+
+export interface PlainSummary {
+  language: string;
+  headline: string;
+  lines: { result_id: number; flag: string; text: string }[];
+  disclaimer: string;
 }
 
 export interface Meta {

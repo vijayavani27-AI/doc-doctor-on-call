@@ -7,7 +7,7 @@ import type { Status } from "../lib/types";
 import { Empty, ErrorBox, PageHeader, Spinner } from "../components/ui";
 
 interface Series {
-  code: string; name: string; unit: string; category: string; ref_low: number | null; ref_high: number | null; simple: string; latest_flag: string | null;
+  code: string; name: string; unit: string; category: string; ref_low: number | null; ref_high: number | null; simple: string; latest_flag: string | null; trend_sentence?: string | null; direction?: string | null; change_percent?: number | null;
   points: { date: string; value: number; lab: string | null; result_id: number; flag: string | null; value_raw: string | null; unit_raw: string | null }[];
   lab_changes: { date: string; from: string | null; to: string | null }[];
 }
@@ -56,15 +56,16 @@ function TrendCard({ s }: { s: Series }) {
         </ResponsiveContainer>
       </div>
       {s.lab_changes.length > 0 && <p className="mt-1 flex items-center gap-1 text-[11px] text-violet-600 dark:text-violet-300"><GitBranch className="h-3 w-3" /> {s.lab_changes.length} lab change(s), all converted to {s.unit}</p>}
+      {s.trend_sentence && <p className="mt-1 text-[11.5px] muted">{s.trend_sentence}</p>}
     </div>
   );
 }
 
 export default function Timeline() {
-  const { profile } = useApp();
+  const { profile, lang } = useApp();
   const [tab, setTab] = useState<"trends" | "timeline">("trends");
   const [cat, setCat] = useState("All");
-  const trends = useFetch<Trends>(profile ? `/profiles/${profile.id}/trends` : null);
+  const trends = useFetch<Trends>(profile ? `/profiles/${profile.id}/trends?lang=${lang}` : null);
   const events = useFetch<Event[]>(profile && tab === "timeline" ? `/profiles/${profile.id}/timeline` : null);
   const cats = useMemo(() => ["All", ...new Set((trends.data?.series ?? []).map((s) => s.category))], [trends.data]);
 

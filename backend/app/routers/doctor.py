@@ -2,7 +2,7 @@
 import secrets
 from datetime import UTC, datetime, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
@@ -30,9 +30,12 @@ def doctor_summary(pid: int, u: User = Depends(security.current_user), db: Sessi
 
 
 @router.get("/profiles/{pid}/doctor-summary.pdf")
-def doctor_summary_pdf(pid: int, request: Request, u: User = Depends(security.current_user), db: Session = Depends(get_db)):
+def doctor_summary_pdf(pid: int, request: Request, lang: str = Query("en", pattern="^(en|hi|ta)$"),
+                       u: User = Depends(security.current_user), db: Session = Depends(get_db)):
+    """Doctor brief in English; with lang=ta a Tamil page for the family is added (curated templates, no AI)."""
     p = security.owned_profile(pid, u, db)
-    data = summary.pdf_bytes(summary.build(p, records.analyze(p)))
+    s = summary.build(p, records.analyze(p))
+    data = summary.pdf_bytes(s, summary.local_summary(s, lang))
     security.audit(db, u.id, "summary_exported", f"PDF for profile {p.id}", request)
     db.commit()
     fname = f"DOC-summary-{p.name.split(' ')[0]}.pdf"

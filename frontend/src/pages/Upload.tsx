@@ -73,7 +73,7 @@ export default function UploadPage() {
               </li>
             ))}
           </ul>
-          <p className="mt-6 text-center text-xs muted">{user?.ai_enabled ? `${user.ai_engine ?? "AI"} is reading the document. Photos can take up to a minute.` : "Offline reader: works for text PDFs. Add an API key to read photos and handwriting."}</p>
+          <p className="mt-6 text-center text-xs muted">{user?.ai_enabled ? `DOC's own reader (OCR + parser) goes first; ${(user.ai_engine ?? "AI").split(" ")[0]} helps with messy photos. Photos can take up to a minute.` : "DOC's own reader: PDF text and OCR for photos (English + Tamil). Unsure values are marked for you to check."}</p>
         </div>
       ) : (
         <div
